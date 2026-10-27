@@ -1,0 +1,35 @@
+{
+  "source_revision": "5c0d1bc",
+  "scope": "collect-only, not full execution",
+  "count": 14462,
+  "files": 692,
+  "pytest_collection_seconds": 13.33,
+  "process_seconds": 29.042,
+  "backend_sources_stable": true,
+  "baseline_comparison": {
+    "before_count": 14080,
+    "net_added": 382
+  },
+  "baseline_normalized_changes": {
+    "added": 383,
+    "removed": 1,
+    "common": 14079
+  },
+  "previous_collection": {
+    "count": 14447,
+    "files": 691,
+    "normalized_added": 15,
+    "normalized_removed": 0,
+    "archive": "/tmp/hoim-validation-20261027/backend/final-backend-collection-14447-bd75512"
+  },
+  "ruff_app_tests": "passed",
+  "rbac_check": "passed1087routes",
+  "full_summary": "/tmp/hoim-validation-20261027/backend/final-backend-collection-5c0d1bc/final-backend-collection-summary.json",
+  "raw_manifest": "/tmp/hoim-validation-20261027/backend/final-backend-collection-5c0d1bc/final-backend-collection-collection.json",
+  "normalized_identity_manifest_gzip": "/tmp/hoim-validation-20261027/backend/final-backend-collection-5c0d1bc/final-backend-collection-identities.json.gz",
+  "source_before": "/tmp/hoim-validation-20261027/backend/final-backend-collection-5c0d1bc/final-backend-collection-source-before.json",
+  "source_after": "/tmp/hoim-validation-20261027/backend/final-backend-collection-5c0d1bc/final-backend-collection-source-after.json",
+  "source_diff": "/tmp/hoim-validation-20261027/backend/final-backend-collection-5c0d1bc/final-backend-collection-source-diff.json",
+  "original_native39_proof": "/tmp/hoim-validation-20261027/backend/retry-native-final-matrix.json",
+  "original_pg7_proof": "/tmp/hoim-validation-20261027/backend/retry-pg-upgrade.json"
+}

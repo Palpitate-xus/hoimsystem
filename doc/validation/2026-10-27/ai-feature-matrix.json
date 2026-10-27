@@ -31,7 +31,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 2,
@@ -63,7 +76,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 3,
@@ -94,7 +120,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 4,
@@ -126,7 +165,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 5,
@@ -156,7 +208,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 6,
@@ -188,7 +253,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 7,
@@ -220,7 +298,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 8,
@@ -250,7 +341,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 9,
@@ -280,7 +384,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 10,
@@ -311,7 +428,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 11,
@@ -343,7 +473,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 12,
@@ -374,7 +517,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 13,
@@ -405,7 +561,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 14,
@@ -436,7 +605,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 15,
@@ -468,7 +650,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 16,
@@ -500,7 +695,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 17,
@@ -532,7 +740,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 18,
@@ -563,7 +784,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 19,
@@ -615,7 +849,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 21,
@@ -672,7 +919,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 23,
@@ -703,7 +963,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 24,
@@ -734,7 +1007,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 25,
@@ -765,7 +1051,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 26,
@@ -795,7 +1094,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 27,
@@ -825,7 +1137,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 28,
@@ -855,7 +1180,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 29,
@@ -886,7 +1224,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 30,
@@ -918,7 +1269,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 31,
@@ -948,7 +1312,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 32,
@@ -980,7 +1357,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 33,
@@ -1012,7 +1402,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 34,
@@ -1065,7 +1468,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 36,
@@ -1173,7 +1589,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 40,
@@ -1205,7 +1634,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 41,
@@ -1323,7 +1765,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 45,
@@ -1353,7 +1808,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 46,
@@ -1384,7 +1852,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 47,
@@ -1414,7 +1895,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 48,
@@ -1445,7 +1939,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 49,
@@ -1475,7 +1982,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 50,
@@ -1507,7 +2027,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 51,
@@ -1537,7 +2070,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 52,
@@ -1568,7 +2114,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 53,
@@ -1599,7 +2158,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 54,
@@ -1631,7 +2203,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 55,
@@ -1662,7 +2247,20 @@
         "No literal feature-key reference in a top-level browser spec was found; shared/indirect fixture coverage may exist and must be verified by the executing browser suite.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 56,
@@ -1694,7 +2292,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 57,
@@ -1726,7 +2337,20 @@
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "No independent clinical validation or real-patient applicability assessment is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 58,
@@ -1756,7 +2380,20 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No literal feature-key reference in a backend test file was found; shared catalog/gateway coverage is not a per-feature positive execution test.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 59,
@@ -1785,7 +2422,20 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 60,
@@ -1835,7 +2485,20 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      }
     },
     {
       "number": 62,
@@ -2026,7 +2689,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 69,
@@ -2055,7 +2745,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 70,
@@ -2084,7 +2801,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 71,
@@ -2113,7 +2857,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 72,
@@ -2142,7 +2913,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 73,
@@ -2171,7 +2969,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 74,
@@ -2200,7 +3025,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 75,
@@ -2229,7 +3081,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 76,
@@ -2258,7 +3137,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 77,
@@ -2287,7 +3193,34 @@
       "coverage_gaps": [
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 78,
@@ -2337,7 +3270,34 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No real operational/teaching effectiveness validation is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     },
     {
       "number": 80,
@@ -2367,7 +3327,41 @@
         "No real model inference for this feature has been executed or accepted by this inventory. Test transports/fixtures and catalog checks do not establish inference availability or medical writing quality.",
         "No real operational/teaching effectiveness validation is established here.",
         "This current catalog LLM feature has no accepted real-model result in this audit. Three shared feature keys were queued/claimed through actual hospital HTTP and failed;63-item gateway batch was deliberately gated off after model readiness failure. Formal target-model correctness remains unverified."
-      ]
+      ],
+      "simulated_retry_gateway_validation": {
+        "simulated": true,
+        "model_inference": false,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "recover_after_two_503": true,
+        "persistent_503_stops_after_three": true,
+        "ambiguous_total_usage_remains_unknown": true,
+        "campaign_evidence": "llm-retry-http-campaign.json",
+        "campaign_source_boundary": "llm-retry-http-source-followup.json"
+      },
+      "native_worker_retry_recovery": {
+        "passed": true,
+        "protocols": [
+          "chat",
+          "responses"
+        ],
+        "transport": "controlled503503200; original worker/source/reader/receipts",
+        "attempts": 3,
+        "authoritative_token_usage": "unknown, not zero",
+        "evidence": "retry-twelve-native-workers.json",
+        "real_model_inference": false,
+        "source_receipt_integrity_verified": true,
+        "business_row_comparison_scope": "Full non-AI business-row fingerprints are explicit in the seven newly added domains; see per-case evidence."
+      }
     }
-  ]
+  ],
+  "additional_validation_boundaries": {
+    "gateway_campaign_final_live_authority_guard": "Followup source changes are recorded separately; see llm-retry-http-source-followup.json and retry-native-regression.json",
+    "native_worker_recovery_domains": 12,
+    "native_worker_recovery_cases": 24,
+    "simulation_does_not_activate_real_hospital_configuration": true,
+    "four_generic_specialist_gaps_preserved": true
+  }
 }

@@ -7,10 +7,11 @@ interrupted unknown receipts do not acquire a successful result by implication.
 
 from itertools import combinations
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Text, UniqueConstraint, cast, func
+from sqlalchemy import Column, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Text, UniqueConstraint, cast, func
 
 from app.ai.rca_evidence_models import utc6, whole_json
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ARTIFACT_SCHEMA = "rca_evidence_run_artifact_v1"
 RESULT_SCHEMA = "rca_evidence_run_result_v1"

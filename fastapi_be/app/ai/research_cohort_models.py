@@ -5,11 +5,12 @@ review and Super technical governance remain separate. None of these tables
 writes a clinical record, exports a dataset or grants unrestricted patient data.
 """
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text, cast, column, func
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declared_attr
 
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 SOURCE_BYTES = 262144
 PARENT_BYTES = 32768

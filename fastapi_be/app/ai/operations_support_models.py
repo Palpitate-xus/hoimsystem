@@ -4,10 +4,11 @@ Actual current authority, immutable content and concrete audit validation remain
 service responsibilities. The database also rejects impossible state/byte bounds.
 """
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, Text, UniqueConstraint, and_, cast, func
+from sqlalchemy import Column, DateTime, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, Text, UniqueConstraint, and_, cast, func
 from sqlalchemy.dialects import mysql
 
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 
 def utc6():

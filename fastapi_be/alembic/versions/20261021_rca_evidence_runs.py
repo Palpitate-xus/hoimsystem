@@ -11,6 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_rca_evidence_runs"
 down_revision = "20261021_rca_evidence"
@@ -49,12 +50,12 @@ def uuid_sql(name):
 
 def artifact_constraints(columns):
     return (
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             f"HEX(schema_version)=HEX('{ARTIFACT_SCHEMA}') AND requested_by>0 AND event_id>0 AND (patient_id_at_capture IS NULL OR patient_id_at_capture>0)", name="ck_rca_task_scope_schema"
         ),
-        sa.CheckConstraint(uuid_sql("run_id") + " AND " + uuid_sql("case_id") + " AND " + uuid_sql("event_grant_id"), name="ck_rca_task_uuids"),
-        sa.CheckConstraint("patient_grant_id IS NULL OR (" + uuid_sql("patient_grant_id") + ")", name="ck_rca_task_patient_grant_uuid"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(uuid_sql("run_id") + " AND " + uuid_sql("case_id") + " AND " + uuid_sql("event_grant_id"), name="ck_rca_task_uuids"),
+        PortableCheckConstraint("patient_grant_id IS NULL OR (" + uuid_sql("patient_grant_id") + ")", name="ck_rca_task_patient_grant_uuid"),
+        PortableCheckConstraint(
             "(patient_id_at_capture IS NULL AND patient_grant_id IS NULL) OR (patient_id_at_capture IS NOT NULL AND patient_grant_id IS NOT NULL AND patient_grant_id<>event_grant_id)",
             name="ck_rca_task_independent_purposes",
         ),
@@ -68,22 +69,22 @@ def artifact_constraints(columns):
             ["hoimsystem_ai_rca_purpose_grant.grant_id", "hoimsystem_ai_rca_purpose_grant.event_id", "hoimsystem_ai_rca_purpose_grant.grantee_id"],
             name="fk_rca_task_patient_grantee",
         ),
-        *(sa.CheckConstraint(hex_sql(name), name="ck_rca_task_" + name) for name in ANCHOR_FIELDS),
-        sa.CheckConstraint(
+        *(PortableCheckConstraint(hex_sql(name), name="ck_rca_task_" + name) for name in ANCHOR_FIELDS),
+        PortableCheckConstraint(
             (columns.source_bytes >= 1) & (columns.source_bytes <= 8388608) & (sa.func.length(sa.cast(columns.source_json, sa.LargeBinary)) == columns.source_bytes), name="ck_rca_task_source_bytes"
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             (columns.binding_bytes >= 1) & (columns.binding_bytes <= 65535) & (sa.func.length(sa.cast(columns.binding_json, sa.LargeBinary)) == columns.binding_bytes), name="ck_rca_task_binding_bytes"
         ),
-        sa.CheckConstraint(" AND ".join(f"({name} IS NULL OR {name}>0)" for name in AUDIT_FIELDS), name="ck_rca_task_audit_ids"),
-        sa.CheckConstraint(" AND ".join((f"({a} IS NULL OR {b} IS NULL OR {a}<>{b})" for a, b in combinations(AUDIT_FIELDS, 2))), name="ck_rca_task_distinct_audits"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(" AND ".join(f"({name} IS NULL OR {name}>0)" for name in AUDIT_FIELDS), name="ck_rca_task_audit_ids"),
+        PortableCheckConstraint(" AND ".join((f"({a} IS NULL OR {b} IS NULL OR {a}<>{b})" for a, b in combinations(AUDIT_FIELDS, 2))), name="ck_rca_task_distinct_audits"),
+        PortableCheckConstraint(
             "(claim_event_id IS NULL AND claim_lease IS NULL AND claimed_at IS NULL) OR (claim_event_id IS NOT NULL AND claim_lease IS NOT NULL AND claimed_at IS NOT NULL AND claimed_at>=recorded_at)",
             name="ck_rca_task_claim_tuple",
         ),
-        sa.CheckConstraint("actor_token_invalid_before IS NULL OR actor_token_invalid_before<=recorded_at", name="ck_rca_task_original_epoch"),
-        sa.CheckConstraint("claim_lease IS NULL OR (" + uuid_sql("claim_lease") + ")", name="ck_rca_task_claim_lease"),
-        sa.CheckConstraint(
+        PortableCheckConstraint("actor_token_invalid_before IS NULL OR actor_token_invalid_before<=recorded_at", name="ck_rca_task_original_epoch"),
+        PortableCheckConstraint("claim_lease IS NULL OR (" + uuid_sql("claim_lease") + ")", name="ck_rca_task_claim_lease"),
+        PortableCheckConstraint(
             "(dispatch_event_id IS NULL AND dispatched_at IS NULL) OR (dispatch_event_id IS NOT NULL AND dispatched_at IS NOT NULL AND claim_event_id IS NOT NULL AND dispatched_at>=claimed_at)",
             name="ck_rca_task_dispatch_tuple",
         ),
@@ -94,13 +95,13 @@ def artifact_constraints(columns):
 
 def result_constraints(columns):
     return (
-        sa.CheckConstraint(f"HEX(schema_version)=HEX('{RESULT_SCHEMA}')", name="ck_rca_result_schema"),
-        sa.CheckConstraint(uuid_sql("run_id") + " AND " + uuid_sql("accepted_lease"), name="ck_rca_result_uuids"),
-        *(sa.CheckConstraint(hex_sql(name), name="ck_rca_result_" + name) for name in ("source_hash", "instructions_digest", "result_hash")),
-        sa.CheckConstraint(
+        PortableCheckConstraint(f"HEX(schema_version)=HEX('{RESULT_SCHEMA}')", name="ck_rca_result_schema"),
+        PortableCheckConstraint(uuid_sql("run_id") + " AND " + uuid_sql("accepted_lease"), name="ck_rca_result_uuids"),
+        *(PortableCheckConstraint(hex_sql(name), name="ck_rca_result_" + name) for name in ("source_hash", "instructions_digest", "result_hash")),
+        PortableCheckConstraint(
             (columns.result_bytes >= 1) & (columns.result_bytes <= 8388608) & (sa.func.length(sa.cast(columns.result_json, sa.LargeBinary)) == columns.result_bytes), name="ck_rca_result_exact_bytes"
         ),
-        sa.CheckConstraint("accept_audit_event_id>0", name="ck_rca_result_audit_id"),
+        PortableCheckConstraint("accept_audit_event_id>0", name="ck_rca_result_audit_id"),
     )
 
 

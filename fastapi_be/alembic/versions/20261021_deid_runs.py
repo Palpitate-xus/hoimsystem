@@ -6,10 +6,11 @@ Revises: 20261021_deidentification
 DDL is frozen here and does not import live application models or helpers.
 """
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, LargeBinary, String, Text, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, String, Text, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 revision = "20261021_deid_runs"
 down_revision = "20261021_deidentification"

@@ -6,10 +6,11 @@ it does not certify the source, a Prompt's content, an audit action or authority
 No credentials, clinical edits, manual Review or export permission are created.
 """
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Index, Integer, String, UniqueConstraint, column, func
+from sqlalchemy import Column, ForeignKey, Index, Integer, String, UniqueConstraint, column, func
 
 from app.ai.deidentification_models import BODY_BYTES, body, byte_length, hash_check, json_check, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 SOURCE_SCHEMA = "deidentification_run_source_v1"
 RESULT_SCHEMA = "deidentification_run_result_v1"

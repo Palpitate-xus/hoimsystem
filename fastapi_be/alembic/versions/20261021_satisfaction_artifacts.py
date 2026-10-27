@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_satisfaction_artifacts"
 down_revision = "20261021_satisfaction_sources"
@@ -38,19 +39,19 @@ def upgrade():
         sa.Column("receipt_event_id", sa.Integer(), sa.ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True, unique=True),
         sa.Column("accepted_lease", sa.String(36), nullable=True),
         sa.Column("accepted_at", utc, nullable=True),
-        sa.CheckConstraint("HEX(schema_version)=HEX('satisfaction_run_artifact_v1') AND requested_by>0", name="ck_satisfaction_artifact_schema"),
-        *(sa.CheckConstraint(_hex(name), name="ck_satisfaction_artifact_" + name) for name in anchors),
-        sa.CheckConstraint("result_hash IS NULL OR (" + _hex("result_hash") + ")", name="ck_satisfaction_artifact_result_hash"),
-        sa.CheckConstraint(
+        PortableCheckConstraint("HEX(schema_version)=HEX('satisfaction_run_artifact_v1') AND requested_by>0", name="ck_satisfaction_artifact_schema"),
+        *(PortableCheckConstraint(_hex(name), name="ck_satisfaction_artifact_" + name) for name in anchors),
+        PortableCheckConstraint("result_hash IS NULL OR (" + _hex("result_hash") + ")", name="ck_satisfaction_artifact_result_hash"),
+        PortableCheckConstraint(
             "(result_json IS NULL AND result_hash IS NULL AND result_bytes IS NULL AND receipt_event_id IS NULL AND accepted_lease IS NULL AND accepted_at IS NULL) OR (result_json IS NOT NULL AND result_hash IS NOT NULL AND result_bytes IS NOT NULL AND receipt_event_id IS NOT NULL AND accepted_lease IS NOT NULL AND accepted_at IS NOT NULL)",
             name="ck_satisfaction_artifact_complete_result",
         ),
-        sa.CheckConstraint(body.is_(None) | ((size >= 1) & (size <= 8388608) & (sa.func.length(sa.cast(body, sa.LargeBinary())) == size)), name="ck_satisfaction_artifact_exact_bytes"),
-        sa.CheckConstraint("receipt_event_id IS NULL OR receipt_event_id>0", name="ck_satisfaction_artifact_receipt"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(body.is_(None) | ((size >= 1) & (size <= 8388608) & (sa.func.length(sa.cast(body, sa.LargeBinary())) == size)), name="ck_satisfaction_artifact_exact_bytes"),
+        PortableCheckConstraint("receipt_event_id IS NULL OR receipt_event_id>0", name="ck_satisfaction_artifact_receipt"),
+        PortableCheckConstraint(
             "accepted_lease IS NULL OR (length(accepted_lease)=36 AND " + lease_positions + " AND " + _hex("replace(accepted_lease,'-','')", 32) + ")", name="ck_satisfaction_artifact_lease"
         ),
-        sa.CheckConstraint("accepted_at IS NULL OR accepted_at>=created_at", name="ck_satisfaction_artifact_clock"),
+        PortableCheckConstraint("accepted_at IS NULL OR accepted_at>=created_at", name="ck_satisfaction_artifact_clock"),
     )
 
 

@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_infection_profiles"
 down_revision = "20261021_infection_scenarios"
@@ -39,23 +40,23 @@ def upgrade():
         sa.Column("create_event_id", sa.Integer(), nullable=False),
         sa.Column("review_event_id", sa.Integer(), nullable=True),
         sa.Column("revoke_event_id", sa.Integer(), nullable=True),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(status='draft' AND revision=1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_event_id IS NULL AND review_basis='' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status IN ('published','rejected') AND revision=2 AND reviewed_by IS NOT NULL AND reviewed_by<>created_by AND reviewed_at IS NOT NULL AND review_event_id IS NOT NULL AND review_basis<>'' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status='revoked' AND revoked_by IS NOT NULL AND revoked_at IS NOT NULL AND revoke_event_id IS NOT NULL AND revoke_basis<>'' AND ((revision=2 AND reviewed_by IS NULL AND review_event_id IS NULL) OR (revision=3 AND reviewed_by IS NOT NULL AND review_event_id IS NOT NULL)))",
             name="ck_inf_local_profile_governance",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "parameters_review IN ('unknown','confirmed','not_confirmed') AND privacy_review IN ('unknown','confirmed','not_confirmed') AND faithfulness_review IN ('unknown','confirmed','not_confirmed') AND ((reviewed_by IS NULL AND parameters_review='unknown' AND privacy_review='unknown' AND faithfulness_review='unknown' AND reviewer_epoch_hash IS NULL) OR (reviewed_by IS NOT NULL AND parameters_review<>'unknown' AND privacy_review<>'unknown' AND faithfulness_review<>'unknown' AND length(reviewer_epoch_hash)=64)) AND (status<>'published' OR (parameters_review='confirmed' AND privacy_review='confirmed' AND faithfulness_review='confirmed')) AND (status<>'rejected' OR parameters_review='not_confirmed' OR privacy_review='not_confirmed' OR faithfulness_review='not_confirmed')",
             name="ck_inf_local_profile_parameters",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "schema_version='infection_local_profile_v1' AND length(implementation_hash)=64 AND length(directory_hash)=64 AND length(author_epoch_hash)=64", name="ck_inf_local_profile_identity"
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(reviewed_at IS NULL OR reviewed_at>=recorded_at) AND (revoked_at IS NULL OR revoked_at>=recorded_at) AND (reviewed_at IS NULL OR revoked_at IS NULL OR revoked_at>=reviewed_at)",
             name="ck_inf_local_profile_clock",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_local_profile_utf8"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_local_profile_utf8"),
+        PortableCheckConstraint(
             "length(payload_json)>0 AND length(payload_json)<=8388608 AND length(content_hash)=64 AND length(review_basis)<=4000 AND length(revoke_basis)<=4000", name="ck_inf_local_profile_bounds"
         ),
         sa.ForeignKeyConstraint(
@@ -96,7 +97,7 @@ def upgrade():
         sa.Column("updated_by", sa.Integer(), nullable=False),
         sa.Column("updated_at", sa.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=False),
         sa.Column("change_event_id", sa.Integer(), nullable=False),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "feature_key='infection_cluster' AND revision>=1 AND feature_revision>=1 AND length(config_hash)=64 AND length(writer_epoch_hash)=64", name="ck_inf_local_selection_identity"
         ),
         sa.ForeignKeyConstraint(

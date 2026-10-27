@@ -1,9 +1,10 @@
 """Private seed-bound leaflet task artifacts; no source or business mutation API."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, LargeBinary, String, cast, func
+from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String, cast, func
 
 from app.ai.document_evidence_models import medium_text, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ARTIFACT_SCHEMA = "drug_label_run_artifact_v1"
 MAX_RESULT_BYTES = 8 * 1024 * 1024

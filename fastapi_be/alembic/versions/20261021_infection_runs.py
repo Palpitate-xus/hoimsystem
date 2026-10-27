@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_infection_runs"
 down_revision = "20261021_infection_profiles"
@@ -46,18 +47,18 @@ def upgrade():
         sa.Column("accept_event_id", sa.Integer(), nullable=True),
         sa.Column("accepted_lease", sa.String(length=36), nullable=True),
         sa.Column("accepted_at", sa.DateTime().with_variant(mysql.DATETIME(fsp=6), "mysql"), nullable=True),
-        sa.CheckConstraint("schema_version='infection_local_run_artifact_v1' AND preview IN (0,1) AND source_bytes BETWEEN 1 AND 8388608", name="ck_inf_run_identity"),
-        sa.CheckConstraint(
+        PortableCheckConstraint("schema_version='infection_local_run_artifact_v1' AND preview IN (0,1) AND source_bytes BETWEEN 1 AND 8388608", name="ck_inf_run_identity"),
+        PortableCheckConstraint(
             "(result_json IS NULL AND result_hash IS NULL AND result_bytes IS NULL AND accept_event_id IS NULL AND accepted_lease IS NULL AND accepted_at IS NULL) OR (result_json IS NOT NULL AND length(result_hash)=64 AND result_bytes BETWEEN 1 AND 8388608 AND accept_event_id IS NOT NULL AND length(accepted_lease)=36 AND accepted_at IS NOT NULL AND usage_event_id IS NOT NULL)",
             name="ck_inf_run_result_state",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(usage_event_id IS NULL OR usage_event_id<>create_event_id) AND (accept_event_id IS NULL OR (accept_event_id<>create_event_id AND accept_event_id<>usage_event_id))",
             name="ck_inf_run_specific_audits",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("result_json"), sa.LargeBinary())) == sa.column("result_bytes"), name="ck_inf_run_result_utf8"),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("source_json"), sa.LargeBinary())) == sa.column("source_bytes"), name="ck_inf_run_source_utf8"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("result_json"), sa.LargeBinary())) == sa.column("result_bytes"), name="ck_inf_run_result_utf8"),
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("source_json"), sa.LargeBinary())) == sa.column("source_bytes"), name="ck_inf_run_source_utf8"),
+        PortableCheckConstraint(
             "length(source_hash)=64 AND length(input_hash)=64 AND length(evidence_hash)=64 AND length(metadata_hash)=64 AND length(source_binding_hash)=64 AND length(requester_epoch_hash)=64 AND length(configuration_hash)=64 AND length(scenario_content_hash)=64 AND length(scenario_governance_hash)=64 AND length(profile_content_hash)=64 AND length(profile_governance_hash)=64 AND length(recipe_hash)=64 AND length(implementation_hash)=64",
             name="ck_inf_run_hashes",
         ),

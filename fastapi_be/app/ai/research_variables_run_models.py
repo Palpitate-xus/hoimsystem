@@ -7,10 +7,11 @@ second private Batch copy. Five audit phases exist from the first migration.
 
 from itertools import combinations
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Table, Text, UniqueConstraint, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Table, Text, UniqueConstraint, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ARTIFACT_SCHEMA = "research_variable_run_artifact_v1"
 RESULT_SCHEMA = "research_variable_run_result_v1"

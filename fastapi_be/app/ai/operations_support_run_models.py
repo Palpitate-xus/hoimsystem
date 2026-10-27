@@ -1,9 +1,10 @@
 """Additive operations task artifacts; actual authority and receipts are runtime proofs."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, UniqueConstraint, cast, column, func
+from sqlalchemy import Column, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, UniqueConstraint, cast, column, func
 
 from app.ai.operations_support_models import byte_bounds, medium_text, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ARTIFACT_SCHEMA = "operations_support_artifact_v1"
 RESULT_SCHEMA = "operations_support_result_v1"

@@ -6,10 +6,11 @@ permission binding is separate MEDIUMTEXT capped262144 bytes, not Run TEXT.
 
 from itertools import combinations
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Text, UniqueConstraint, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Text, UniqueConstraint, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 revision = "20261021_research_variable_runs"
 down_revision = "20261021_research_variables"

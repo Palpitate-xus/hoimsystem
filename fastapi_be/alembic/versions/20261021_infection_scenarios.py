@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_infection_scenarios"
 down_revision = "20261021_infection_sources"
@@ -47,24 +48,24 @@ def upgrade():
         sa.Column("create_event_id", sa.Integer(), nullable=False),
         sa.Column("review_event_id", sa.Integer(), nullable=True),
         sa.Column("revoke_event_id", sa.Integer(), nullable=True),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(status='draft' AND revision=1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_event_id IS NULL AND review_basis='' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status IN ('published','rejected') AND revision=2 AND reviewed_by IS NOT NULL AND reviewed_by<>created_by AND reviewed_at IS NOT NULL AND review_event_id IS NOT NULL AND review_basis<>'' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status='revoked' AND revoked_by IS NOT NULL AND revoked_at IS NOT NULL AND revoke_event_id IS NOT NULL AND revoke_basis<>'' AND ((revision=2 AND reviewed_by IS NULL AND review_event_id IS NULL) OR (revision=3 AND reviewed_by IS NOT NULL AND review_event_id IS NOT NULL)))",
             name="ck_inf_scenario_governance",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "parameters_review IN ('unknown','confirmed','not_confirmed') AND privacy_review IN ('unknown','confirmed','not_confirmed') AND faithfulness_review IN ('unknown','confirmed','not_confirmed') AND ((reviewed_by IS NULL AND parameters_review='unknown' AND privacy_review='unknown' AND faithfulness_review='unknown' AND reviewer_epoch_hash IS NULL) OR (reviewed_by IS NOT NULL AND parameters_review<>'unknown' AND privacy_review<>'unknown' AND faithfulness_review<>'unknown' AND length(reviewer_epoch_hash)=64)) AND (status<>'published' OR (parameters_review='confirmed' AND privacy_review='confirmed' AND faithfulness_review='confirmed')) AND (status<>'rejected' OR parameters_review='not_confirmed' OR privacy_review='not_confirmed' OR faithfulness_review='not_confirmed')",
             name="ck_inf_scenario_parameters",
         ),
-        sa.CheckConstraint("schema_version='infection_comparison_scenario_v1'", name="ck_inf_scenario_schema"),
-        sa.CheckConstraint(
+        PortableCheckConstraint("schema_version='infection_comparison_scenario_v1'", name="ck_inf_scenario_schema"),
+        PortableCheckConstraint(
             "(reviewed_at IS NULL OR reviewed_at>=recorded_at) AND (revoked_at IS NULL OR revoked_at>=recorded_at) AND (reviewed_at IS NULL OR revoked_at IS NULL OR revoked_at>=reviewed_at)",
             name="ck_inf_scenario_clock",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_scenario_utf8"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_scenario_utf8"),
+        PortableCheckConstraint(
             "length(payload_json)>0 AND length(payload_json)<=8388608 AND length(content_hash)=64 AND length(review_basis)<=4000 AND length(revoke_basis)<=4000", name="ck_inf_scenario_bounds"
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "length(source_private_hash)=64 AND length(source_public_hash)=64 AND length(source_witness_hash)=64 AND length(directory_hash)=64 AND length(author_epoch_hash)=64 AND length(plan_hash)=64 AND length(recipe_hash)=64 AND length(implementation_hash)=64 AND length(department_ids_json)<=4096",
             name="ck_inf_scenario_anchors",
         ),

@@ -1,9 +1,10 @@
 """One durable task anchor and optional complete, audited satisfaction result."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, LargeBinary, String, UniqueConstraint, cast, func
+from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String, UniqueConstraint, cast, func
 
 from app.ai.satisfaction_models import MAX_BYTES, original_json, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ANCHOR_FIELDS = ("input_hash", "evidence_hash", "metadata_hash", "prompt_hash", "context_digest", "source_binding_hash")
 

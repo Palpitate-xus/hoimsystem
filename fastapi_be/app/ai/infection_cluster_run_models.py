@@ -1,9 +1,10 @@
 """Split local Source/result storage and durable native Task classification."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Index, Integer, LargeBinary, String, cast, column, func
+from sqlalchemy import Column, ForeignKey, Index, Integer, LargeBinary, String, cast, column, func
 
 from app.ai.infection_cluster_models import medium_text, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 
 class AIInfectionRunArtifact(Base):

@@ -1,9 +1,10 @@
 """Immutable actual practice submissions; no model-run or competency authority."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, cast, func
+from sqlalchemy import Column, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, cast, func
 
 from app.ai.clinical_training_models import byte_bounds, medium_text, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 
 class AITrainingSubmission(Base):

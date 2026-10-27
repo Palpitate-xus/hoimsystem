@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_infection_sources"
 down_revision = "20261021_native_expanded_merge"
@@ -16,7 +17,7 @@ def upgrade():
         "hoimsystem_ai_infection_write_gate",
         sa.Column("gate_id", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("revision", sa.Integer(), nullable=False),
-        sa.CheckConstraint("gate_id=1 AND revision=1", name="ck_inf_gate_singleton"),
+        PortableCheckConstraint("gate_id=1 AND revision=1", name="ck_inf_gate_singleton"),
         sa.PrimaryKeyConstraint("gate_id"),
     )
     op.create_table(
@@ -44,21 +45,21 @@ def upgrade():
         sa.Column("create_event_id", sa.Integer(), nullable=False),
         sa.Column("review_event_id", sa.Integer(), nullable=True),
         sa.Column("revoke_event_id", sa.Integer(), nullable=True),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(status='draft' AND revision=1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_event_id IS NULL AND review_basis='' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status IN ('published','rejected') AND revision=2 AND reviewed_by IS NOT NULL AND reviewed_by<>created_by AND reviewed_at IS NOT NULL AND review_event_id IS NOT NULL AND review_basis<>'' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status='revoked' AND revoked_by IS NOT NULL AND revoked_at IS NOT NULL AND revoke_event_id IS NOT NULL AND revoke_basis<>'' AND ((revision=2 AND reviewed_by IS NULL AND review_event_id IS NULL) OR (revision=3 AND reviewed_by IS NOT NULL AND review_event_id IS NOT NULL)))",
             name="ck_inf_grant_governance",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "privacy_review IN ('unknown','confirmed','not_confirmed') AND faithfulness_review IN ('unknown','confirmed','not_confirmed') AND ((reviewed_by IS NULL AND privacy_review='unknown' AND faithfulness_review='unknown') OR (reviewed_by IS NOT NULL AND privacy_review<>'unknown' AND faithfulness_review<>'unknown')) AND (status<>'published' OR (privacy_review='confirmed' AND faithfulness_review='confirmed')) AND (status<>'rejected' OR privacy_review='not_confirmed' OR faithfulness_review='not_confirmed')",
             name="ck_inf_grant_review_flags",
         ),
-        sa.CheckConstraint("purpose IN ('infection_surveillance_processing','external_model_transfer') AND valid_to>valid_from", name="ck_inf_grant_purpose"),
-        sa.CheckConstraint(
+        PortableCheckConstraint("purpose IN ('infection_surveillance_processing','external_model_transfer') AND valid_to>valid_from", name="ck_inf_grant_purpose"),
+        PortableCheckConstraint(
             "(reviewed_at IS NULL OR reviewed_at>=recorded_at) AND (revoked_at IS NULL OR revoked_at>=recorded_at) AND (reviewed_at IS NULL OR revoked_at IS NULL OR revoked_at>=reviewed_at)",
             name="ck_inf_grant_clock",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_grant_utf8"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_grant_utf8"),
+        PortableCheckConstraint(
             "length(payload_json)>0 AND length(payload_json)<=8388608 AND length(content_hash)=64 AND length(review_basis)<=4000 AND length(revoke_basis)<=4000", name="ck_inf_grant_bounds"
         ),
         sa.ForeignKeyConstraint(
@@ -116,20 +117,20 @@ def upgrade():
         sa.Column("create_event_id", sa.Integer(), nullable=False),
         sa.Column("review_event_id", sa.Integer(), nullable=True),
         sa.Column("revoke_event_id", sa.Integer(), nullable=True),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(status='draft' AND revision=1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_event_id IS NULL AND review_basis='' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status IN ('published','rejected') AND revision=2 AND reviewed_by IS NOT NULL AND reviewed_by<>created_by AND reviewed_at IS NOT NULL AND review_event_id IS NOT NULL AND review_basis<>'' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status='revoked' AND revoked_by IS NOT NULL AND revoked_at IS NOT NULL AND revoke_event_id IS NOT NULL AND revoke_basis<>'' AND ((revision=2 AND reviewed_by IS NULL AND review_event_id IS NULL) OR (revision=3 AND reviewed_by IS NOT NULL AND review_event_id IS NOT NULL)))",
             name="ck_inf_definition_governance",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "privacy_review IN ('unknown','confirmed','not_confirmed') AND faithfulness_review IN ('unknown','confirmed','not_confirmed') AND ((reviewed_by IS NULL AND privacy_review='unknown' AND faithfulness_review='unknown') OR (reviewed_by IS NOT NULL AND privacy_review<>'unknown' AND faithfulness_review<>'unknown')) AND (status<>'published' OR (privacy_review='confirmed' AND faithfulness_review='confirmed')) AND (status<>'rejected' OR privacy_review='not_confirmed' OR faithfulness_review='not_confirmed')",
             name="ck_inf_definition_review_flags",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(reviewed_at IS NULL OR reviewed_at>=recorded_at) AND (revoked_at IS NULL OR revoked_at>=recorded_at) AND (reviewed_at IS NULL OR revoked_at IS NULL OR revoked_at>=reviewed_at)",
             name="ck_inf_definition_clock",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_definition_utf8"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_definition_utf8"),
+        PortableCheckConstraint(
             "length(payload_json)>0 AND length(payload_json)<=8388608 AND length(content_hash)=64 AND length(review_basis)<=4000 AND length(revoke_basis)<=4000", name="ck_inf_definition_bounds"
         ),
         sa.ForeignKeyConstraint(
@@ -184,20 +185,20 @@ def upgrade():
         sa.Column("create_event_id", sa.Integer(), nullable=False),
         sa.Column("review_event_id", sa.Integer(), nullable=True),
         sa.Column("revoke_event_id", sa.Integer(), nullable=True),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(status='draft' AND revision=1 AND reviewed_by IS NULL AND reviewed_at IS NULL AND review_event_id IS NULL AND review_basis='' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status IN ('published','rejected') AND revision=2 AND reviewed_by IS NOT NULL AND reviewed_by<>created_by AND reviewed_at IS NOT NULL AND review_event_id IS NOT NULL AND review_basis<>'' AND revoked_by IS NULL AND revoked_at IS NULL AND revoke_event_id IS NULL AND revoke_basis='') OR (status='revoked' AND revoked_by IS NOT NULL AND revoked_at IS NOT NULL AND revoke_event_id IS NOT NULL AND revoke_basis<>'' AND ((revision=2 AND reviewed_by IS NULL AND review_event_id IS NULL) OR (revision=3 AND reviewed_by IS NOT NULL AND review_event_id IS NOT NULL)))",
             name="ck_inf_review_governance",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "privacy_review IN ('unknown','confirmed','not_confirmed') AND faithfulness_review IN ('unknown','confirmed','not_confirmed') AND ((reviewed_by IS NULL AND privacy_review='unknown' AND faithfulness_review='unknown') OR (reviewed_by IS NOT NULL AND privacy_review<>'unknown' AND faithfulness_review<>'unknown')) AND (status<>'published' OR (privacy_review='confirmed' AND faithfulness_review='confirmed')) AND (status<>'rejected' OR privacy_review='not_confirmed' OR faithfulness_review='not_confirmed')",
             name="ck_inf_review_review_flags",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "(reviewed_at IS NULL OR reviewed_at>=recorded_at) AND (revoked_at IS NULL OR revoked_at>=recorded_at) AND (reviewed_at IS NULL OR revoked_at IS NULL OR revoked_at>=reviewed_at)",
             name="ck_inf_review_clock",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_review_utf8"),
-        sa.CheckConstraint(
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("payload_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_review_utf8"),
+        PortableCheckConstraint(
             "length(payload_json)>0 AND length(payload_json)<=8388608 AND length(content_hash)=64 AND length(review_basis)<=4000 AND length(revoke_basis)<=4000", name="ck_inf_review_bounds"
         ),
         sa.ForeignKeyConstraint(
@@ -256,14 +257,14 @@ def upgrade():
         sa.Column("witness_json", sa.Text().with_variant(mysql.MEDIUMTEXT(), "mysql"), nullable=False),
         sa.Column("witness_hash", sa.String(length=64), nullable=False),
         sa.Column("mapping_key", sa.LargeBinary(length=32), nullable=False),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             "schema_version='infection_cluster_snapshot_v1' AND length(private_json)>0 AND length(private_json)<=8388608 AND length(public_json)>0 AND length(public_json)<=8388608 AND length(witness_json)>0 AND length(witness_json)<=8388608 AND length(mapping_key)=32",
             name="ck_inf_snapshot_storage",
         ),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("private_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_snapshot_private_json_utf8"),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("public_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_snapshot_public_json_utf8"),
-        sa.CheckConstraint(sa.func.length(sa.cast(sa.column("witness_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_snapshot_witness_json_utf8"),
-        sa.CheckConstraint("length(private_hash)=64 AND length(public_hash)=64 AND length(witness_hash)=64", name="ck_inf_snapshot_hashes"),
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("private_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_snapshot_private_json_utf8"),
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("public_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_snapshot_public_json_utf8"),
+        PortableCheckConstraint(sa.func.length(sa.cast(sa.column("witness_json"), sa.LargeBinary())) <= 8388608, name="ck_inf_snapshot_witness_json_utf8"),
+        PortableCheckConstraint("length(private_hash)=64 AND length(public_hash)=64 AND length(witness_hash)=64", name="ck_inf_snapshot_hashes"),
         sa.ForeignKeyConstraint(
             ["create_event_id"],
             ["hoimsystem_ai_audit_event.event_id"],

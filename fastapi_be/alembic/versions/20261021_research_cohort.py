@@ -4,10 +4,11 @@ Revision ID: 20261021_research_cohort
 Revises: 20261021_doc_extraction_runs
 """
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, LargeBinary, String, Text, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, String, Text, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 revision = "20261021_research_cohort"
 down_revision = "20261021_doc_extraction_runs"

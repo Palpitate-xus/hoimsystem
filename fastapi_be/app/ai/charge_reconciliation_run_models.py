@@ -1,10 +1,11 @@
 """Complete private AI task anchors and optional bounded result artifacts."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, LargeBinary, String, cast, func
+from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String, cast, func
 
 from app.ai.charge_reconciliation_models import original_json
 from app.ai.supply_source_models import utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 MAX_RESULT_BYTES = 8 * 1024 * 1024
 SHA_FIELDS = ("input_hash", "evidence_hash", "metadata_hash", "prompt_hash", "context_digest", "source_binding_hash")

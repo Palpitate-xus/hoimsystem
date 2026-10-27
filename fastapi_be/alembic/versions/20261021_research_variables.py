@@ -1,9 +1,10 @@
 """76 immutable dictionary/batch storage; these tables grant no research rights."""
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Integer, LargeBinary, String, Text, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, LargeBinary, String, Text, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 revision = "20261021_research_variables"
 down_revision = "20261021_research_prompt_origin"

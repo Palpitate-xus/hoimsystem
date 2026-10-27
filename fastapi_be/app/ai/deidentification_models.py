@@ -4,11 +4,12 @@ No clinical record is changed. Technical governance alone grants no clinical
 purpose, model transfer or export authority. All bodies have real UTF8 caps.
 """
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text, cast, column, func
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declared_attr
 
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 BODY_BYTES = 8 * 1024 * 1024
 NOTE_BYTES = 4000

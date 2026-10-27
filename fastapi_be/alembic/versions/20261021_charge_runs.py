@@ -4,6 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint
 
 revision = "20261021_charge_runs"
 down_revision = "20261021_charge_cases"
@@ -40,19 +41,19 @@ def upgrade():
         result_bytes,
         sa.Column("receipt_event_id", sa.Integer(), sa.ForeignKey("hoimsystem_ai_audit_event.event_id"), nullable=True),
         sa.Column("accepted_lease", sa.String(36), nullable=True),
-        sa.CheckConstraint("HEX(schema_version)=HEX('charge_run_artifact_v1') AND requested_by>0", name="ck_charge_artifact_schema_actor"),
-        *(sa.CheckConstraint(lower_hex_sql(name), name="ck_charge_artifact_" + name) for name in hash_fields),
-        sa.CheckConstraint("result_hash IS NULL OR (" + lower_hex_sql("result_hash") + ")", name="ck_charge_artifact_result_hash"),
-        sa.CheckConstraint(
+        PortableCheckConstraint("HEX(schema_version)=HEX('charge_run_artifact_v1') AND requested_by>0", name="ck_charge_artifact_schema_actor"),
+        *(PortableCheckConstraint(lower_hex_sql(name), name="ck_charge_artifact_" + name) for name in hash_fields),
+        PortableCheckConstraint("result_hash IS NULL OR (" + lower_hex_sql("result_hash") + ")", name="ck_charge_artifact_result_hash"),
+        PortableCheckConstraint(
             "(result_json IS NULL AND result_hash IS NULL AND result_bytes IS NULL) OR (result_json IS NOT NULL AND result_hash IS NOT NULL AND result_bytes IS NOT NULL)",
             name="ck_charge_artifact_result_tuple",
         ),
-        sa.CheckConstraint(
+        PortableCheckConstraint(
             result_json.is_(None) | ((result_bytes >= 1) & (result_bytes <= 8388608) & (sa.func.length(sa.cast(result_json, sa.LargeBinary)) == result_bytes)),
             name="ck_charge_artifact_exact_bytes",
         ),
-        sa.CheckConstraint("receipt_event_id IS NULL OR receipt_event_id>0", name="ck_charge_artifact_receipt"),
-        sa.CheckConstraint(lease_sql(), name="ck_charge_artifact_lease"),
+        PortableCheckConstraint("receipt_event_id IS NULL OR receipt_event_id>0", name="ck_charge_artifact_receipt"),
+        PortableCheckConstraint(lease_sql(), name="ck_charge_artifact_lease"),
     )
 
 

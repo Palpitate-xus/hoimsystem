@@ -4,10 +4,11 @@ Specific creation, usage and acceptance audit keys have different meanings.
 These tables grant no research, model, archival or export permission.
 """
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Index, Integer, String, Text, UniqueConstraint, column
+from sqlalchemy import Column, ForeignKey, Index, Integer, String, Text, UniqueConstraint, column
 
 from app.ai.research_cohort_models import SNAPSHOT_BYTES, _bytes, _hash_constraint, _json_constraint, original_json, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ARTIFACT_SCHEMA = "research_cohort_run_artifact_v1"
 RESULT_SCHEMA = "research_cohort_run_result_v1"

@@ -1,9 +1,10 @@
 """Additive training Task frames and accepted drafts; runtime proves authority."""
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, UniqueConstraint, cast, column, func
+from sqlalchemy import Column, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, String, UniqueConstraint, cast, column, func
 
 from app.ai.clinical_training_models import byte_bounds, medium_text, utc6
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 ARTIFACT_SCHEMA = "clinical_training_run_artifact_v1"
 RESULT_SCHEMA = "clinical_training_run_result_v1"

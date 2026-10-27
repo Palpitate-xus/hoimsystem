@@ -1,9 +1,10 @@
 """Reviewed operational originals and finite snapshots; four additive tables."""
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Text, UniqueConstraint, and_, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, String, Text, UniqueConstraint, and_, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from alembic import op
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 revision = "20261021_ops_sources"
 down_revision = "20261021_native_research_merge"

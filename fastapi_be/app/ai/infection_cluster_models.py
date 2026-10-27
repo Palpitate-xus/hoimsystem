@@ -1,11 +1,12 @@
 """Additive governed finite-report sources; no surveillance model or clinical result."""
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text, UniqueConstraint, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Text, UniqueConstraint, cast, column, func
 from sqlalchemy import LargeBinary as Binary
 from sqlalchemy.dialects import mysql
 from sqlalchemy.orm import declared_attr
 
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 
 def utc6():

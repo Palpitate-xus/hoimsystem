@@ -1,9 +1,10 @@
 """76 immutable dictionary/batch storage; these tables grant no research rights."""
 
-from sqlalchemy import CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Table, Text, cast, column, func
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, LargeBinary, String, Table, Text, cast, column, func
 from sqlalchemy.dialects import mysql
 
 from app.database import Base
+from app.sql_constraints import PortableCheckConstraint as CheckConstraint
 
 MAX_BYTES = 8388608
 

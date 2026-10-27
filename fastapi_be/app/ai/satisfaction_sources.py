@@ -11,7 +11,7 @@ import uuid
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import LargeBinary, String, cast, func
+from sqlalchemy import String, cast
 
 from app.ai.governance import audit, digest
 from app.ai.models import AIReviewExcerpt
@@ -19,6 +19,7 @@ from app.ai.satisfaction_contract import POLICY, SOURCE_ROLES, CaptureRequest, C
 from app.ai.satisfaction_models import MAX_BYTES, MAX_ROOTS, AISatisfactionCase
 from app.ai.satisfaction_write_guard import current_actor, current_satisfaction_rows, lock_satisfaction_write
 from app.models import Department, Doctor, MedicalRecord, Patient, Registration, Review, User
+from app.sql_text import UTF8Bytes
 
 GOVERNANCE = ("status", "revision", "reviewed_at", "reviewed_by", "review_basis_note", "revoked_at", "revoked_by", "revoke_reason")
 EXCERPT_BODY = ("excerpt_id", "review_id", "version", "source_hash", "department_id", "redacted_text", "text_hash", "change_note", "created_by", "create_time")
@@ -144,7 +145,7 @@ def capture_sources(db, user, request, *, creating=False, locking=False):
         last = rows[-1].review_id
     reviews = []
     for key in review_ids:
-        size = current_satisfaction_rows(db.query(func.length(cast(Review.comment, LargeBinary))).filter(Review.review_id == key), shared=True).scalar()
+        size = current_satisfaction_rows(db.query(UTF8Bytes(Review.comment)).filter(Review.review_id == key), shared=True).scalar()
         if size is not None and size > MAX_BYTES - spent:
             raise HTTPException(409, "原评价正文超过剩余完整捕获容量")
         columns = [cast(c, String).label(c.name) if c.name == "review_time" else c for c in Review.__table__.columns]
@@ -169,7 +170,7 @@ def capture_sources(db, user, request, *, creating=False, locking=False):
             raise HTTPException(409, "相关评价与所有摘录版本合计超过8192，拒绝截断")
         for (key,) in locator:
             # Refuse a huge legacy TEXT before loading its full contents into Python.
-            length = sum(func.length(cast(c, LargeBinary)) for c in (AIReviewExcerpt.redacted_text, AIReviewExcerpt.change_note, AIReviewExcerpt.review_note))
+            length = sum(UTF8Bytes(c) for c in (AIReviewExcerpt.redacted_text, AIReviewExcerpt.change_note, AIReviewExcerpt.review_note))
             size = current_satisfaction_rows(db.query(length).filter(AIReviewExcerpt.excerpt_id == key), shared=True).scalar()
             if size is None or size > MAX_BYTES - spent:
                 raise HTTPException(409, "完整摘录原件超过剩余捕获容量")

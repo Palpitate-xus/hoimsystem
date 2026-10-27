@@ -9,7 +9,7 @@ import uuid
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import LargeBinary, cast, func, select
+from sqlalchemy import func, select
 
 from app.ai import rca_evidence_contract as c
 from app.ai import rca_evidence_current as current_keys
@@ -20,6 +20,7 @@ from app.ai.models import AIAuditEvent
 from app.ai.rca_evidence_models import AIRcaEvidenceOriginal
 from app.ai.rca_evidence_write_guard import current_rows
 from app.models import AdverseEvent, AdverseEventRca
+from app.sql_text import UTF8Bytes
 
 REVIEW_FIELDS = tuple(s.SourceGovernance.model_fields)
 
@@ -33,7 +34,7 @@ def _naive_clock(value):
 
 
 def _bytes_expression(db, column):
-    return func.octet_length(column) if db.get_bind().dialect.name in {"mysql", "mariadb"} else func.length(cast(column, LargeBinary))
+    return func.octet_length(column) if db.get_bind().dialect.name in {"mysql", "mariadb"} else UTF8Bytes(column)
 
 
 def _legacy_snapshot(db, kind, identifier, event_id):

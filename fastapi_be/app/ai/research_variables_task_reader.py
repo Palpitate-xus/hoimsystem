@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from fastapi import HTTPException
 from pydantic import TypeAdapter
-from sqlalchemy import LargeBinary, cast, func, inspect, select
+from sqlalchemy import func, inspect, select
 
 from app.ai import research_variables_storage as storage
 from app.ai import research_variables_storage_contract as types
@@ -26,6 +26,7 @@ from app.ai.research_variables_snapshot import project_variable_snapshot
 from app.ai.research_variables_task_binding import VariableTaskBinding, evidence_for_binding
 from app.ai.research_variables_task_context import authorize_request, prepare_context, wire_parts
 from app.ai.research_variables_task_contract import FEATURE_KEY, MAX_BINDING_BYTES, MAX_RUN_TEXT_BYTES, MAX_WIRE_BYTES, canonical, digest, validate_frozen_source
+from app.sql_text import UTF8Bytes
 
 
 @dataclass(frozen=True)
@@ -74,7 +75,7 @@ def _current_opaque_identity(db, identifier):
 
 
 def _bytes(db, value):
-    return func.octet_length(value) if db.get_bind().dialect.name in {"mysql", "mariadb"} else func.length(cast(value, LargeBinary))
+    return func.octet_length(value) if db.get_bind().dialect.name in {"mysql", "mariadb"} else UTF8Bytes(value)
 
 
 def _technical_authority(db, identity):

@@ -1,11 +1,12 @@
 """Two explicit operational target adapters; free rule text remains private."""
 
-from sqlalchemy import LargeBinary, cast, func
+from sqlalchemy import func
 
 from app.ai import document_change_contract as c
 from app.ai import risk_rule_profiles
 from app.ai.models import AIRiskRuleProfile
 from app.models import ClinicalPathway
+from app.sql_text import UTF8Bytes
 
 
 class CaseBudget:
@@ -38,7 +39,7 @@ class CaseBudget:
 def sql_octets(column):
     # CAST(... AS BLOB/BINARY) makes SQLite length count UTF8 bytes as MySQL
     # octet_length does, without loading a TEXT/MEDIUMTEXT value into Python.
-    return func.coalesce(func.length(cast(column, LargeBinary)), 0)
+    return func.coalesce(UTF8Bytes(column), 0)
 
 
 def _preflight(db, model, field, identifier, names, budget):

@@ -10,7 +10,6 @@ import hashlib
 
 from fastapi import HTTPException
 from pydantic import TypeAdapter, ValidationError
-from sqlalchemy import LargeBinary, cast, func
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.ai import clinical_training_contract as c
@@ -19,6 +18,7 @@ from app.ai.clinical_training_write_guard import lock_training_write
 from app.ai.document_evidence_models import AIDocumentKnowledgePublication
 from app.ai.models import AIKnowledgeDocument
 from app.models import User
+from app.sql_text import UTF8Bytes
 
 METADATA_COLUMNS = tuple(rc.KnowledgeMetadata.model_fields)
 
@@ -48,7 +48,7 @@ def _capture_current(db, actor_id, lesson_id, identifiers, *, now=None, expected
         clock = utc_text(now if now is not None else dt.datetime.now(dt.UTC).replace(tzinfo=None))
         # CAST counts NUL and supplementary UTF8 bytes without returning content.
         with db.no_autoflush:
-            rows = db.query(*(getattr(AIKnowledgeDocument, key) for key in METADATA_COLUMNS), func.length(cast(AIKnowledgeDocument.content, LargeBinary)).label("content_size")).filter(AIKnowledgeDocument.document_id.in_(identifiers)).order_by(AIKnowledgeDocument.document_id).populate_existing().with_for_update(read=True, nowait=True).all()
+            rows = db.query(*(getattr(AIKnowledgeDocument, key) for key in METADATA_COLUMNS), UTF8Bytes(AIKnowledgeDocument.content).label("content_size")).filter(AIKnowledgeDocument.document_id.in_(identifiers)).order_by(AIKnowledgeDocument.document_id).populate_existing().with_for_update(read=True, nowait=True).all()
             if [row.document_id for row in rows] != identifiers:
                 raise HTTPException(404, "明确选择的培训参考版本不存在")
             # The immutable FK remains authoritative after URI/kind are erased.

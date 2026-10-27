@@ -11,7 +11,7 @@ import uuid
 from dataclasses import dataclass
 
 from fastapi import HTTPException
-from sqlalchemy import LargeBinary, cast, func, inspect
+from sqlalchemy import func, inspect
 
 from app.ai import research_variables_storage_contract as types
 from app.ai.catalog import CATALOG_VERSION
@@ -23,6 +23,7 @@ from app.ai.research_variables_run_models import ARTIFACT_SCHEMA, AIResearchVari
 from app.ai.research_variables_task_binding import VariableTaskBinding
 from app.ai.research_variables_task_context import VariablePreparedContext, prepare_context, wire_parts
 from app.ai.research_variables_task_contract import FEATURE_KEY, MAX_BINDING_BYTES, MAX_RUN_TEXT_BYTES, canonical, digest, strict_json
+from app.sql_text import UTF8Bytes
 
 RUN_TEXT = ("input_json", "result_json", "evidence_json", "context_metadata_json")
 RUN_HEADER = tuple(str(column.name) for column in AIRun.__table__.columns if column.name not in RUN_TEXT)
@@ -147,7 +148,7 @@ def _readback(db, user, run, expected_run, expected_artifact, snapshot, prepared
         raise HTTPException(409, "实际新任务头不存在或混入其他患者、就诊或功能")
 
     def length(value):
-        return func.octet_length(value) if db.get_bind().dialect.name in {"mysql", "mariadb"} else func.length(cast(value, LargeBinary))
+        return func.octet_length(value) if db.get_bind().dialect.name in {"mysql", "mariadb"} else UTF8Bytes(value)
 
     columns = [getattr(AIResearchVariableRunArtifact, key) for key in (*ART_IMMUTABLE, *ART_PHASE)]
     columns += [

@@ -38,6 +38,8 @@ class Budget:
 def _sql_hash(db, field):
     if db.get_bind().dialect.name == "mysql":
         return func.sha2(field, 256)
+    if db.get_bind().dialect.name == "postgresql":
+        return func.encode(func.sha256(func.convert_to(field, "UTF8")), "hex")
     if db.get_bind().dialect.name == "sqlite":
         raw = db.connection().connection.driver_connection
         raw.create_function("deid_sha256_utf8", 1, lambda v: hashlib.sha256(v.encode("utf-8", errors="strict")).hexdigest() if type(v) is str else None, deterministic=True)

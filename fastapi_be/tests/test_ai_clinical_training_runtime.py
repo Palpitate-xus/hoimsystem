@@ -174,7 +174,7 @@ async def test_current_source_loss_and_transport_failure_never_accept_results_or
     receipt = r.read_receipt(db, actual)
     assert actual.header["status"] == "failed" and receipt.usage.model_call_attempted is True
     assert (receipt.usage.input_tokens, receipt.usage.output_tokens) == ((11, None) if mode == "withdraw_during_call" else (None, None))
-    assert len(calls) == 1 and db.query(AITrainingRunResult).filter_by(run_id=key).count() == 0
+    assert len(calls) == (3 if mode == "http503" else 1) and db.query(AITrainingRunResult).filter_by(run_id=key).count() == 0
 
 
 @pytest.mark.parametrize("dispatched", [False, True])

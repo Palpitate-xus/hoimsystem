@@ -309,7 +309,7 @@ async def test_claimed_before_call_current_failure_has_true_zero_without_any_htt
 
 
 @pytest.mark.asyncio
-async def test_provider_http_failure_keeps_attempted_unknown_usage_without_model_body_or_retry(runtime_case):
+async def test_provider_http_failure_exhausts_bounded_attempts_and_retains_unknown_usage_without_model_body(runtime_case):
     from app.ai.models import AIRun
     from app.ai.research_cohort_receipts import read_usage_event, usage
 
@@ -323,5 +323,5 @@ async def test_provider_http_failure_keeps_attempted_unknown_usage_without_model
 
     assert await execute_research_claimed(run_id, claim.lease_token, claim_event_id=claim.claim_event_id, transport=httpx.MockTransport(handler), session_factory=case["factory"])
     row = case["db"].get(AIRun, run_id)
-    assert row.status == "failed" and row.error_code == "PROVIDER_HTTP_ERROR" and len(calls) == 1
+    assert row.status == "failed" and row.error_code == "PROVIDER_HTTP_ERROR" and len(calls) == 3
     assert "PRIVATE_PROVIDER" not in row.error_message and read_usage_event(case["db"], run_id)["usage"] == usage(None, None, True)

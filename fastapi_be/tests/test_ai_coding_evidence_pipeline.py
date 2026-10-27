@@ -261,6 +261,10 @@ async def test_every_original_provider_and_validation_field_is_required_for_comp
     count = 0
     for container in ("provider_snapshot", "feature_validation"):
         for key in snapshot[container]:
+            # Retry policy was added later: its absence is the preserved legacy
+            # single-attempt frame, while all original fields remain required.
+            if container == "provider_snapshot" and key == "max_attempts":
+                continue
             changed = json.loads(original)
             del changed[container][key]
             row.input_json = canonical_json(changed)
@@ -285,3 +289,23 @@ def test_unsaved_legacy_run_default_absence_preserves_strict_coding_markers(db_s
     legacy.input_json = '{"payload":{"input":{},"context":{}}}'
     legacy.feature_key = "drg_evidence_review"
     assert is_coding_run(db_session, legacy) is True
+
+
+@pytest.mark.asyncio
+async def test_legacy_missing_retry_policy_preserves_frozen_audit_but_cannot_execute_current_three_attempt_provider(async_client, auth_headers, db_session, pipeline_case):
+    db, case = db_session, pipeline_case
+    headers = auth_headers(case["doctor_user"].username)
+    claim, _ = await queue(async_client, headers, db, case)
+    row = db.get(AIRun, claim[0])
+    snapshot = json.loads(row.input_json)
+    assert snapshot["provider_snapshot"].pop("max_attempts") == 3
+    legacy_raw = canonical_json(snapshot)
+    row.input_json = legacy_raw
+    db.commit()
+    response = await async_client.get(f"/api/ai/runs/{claim[0]}", headers=headers)
+    assert response.status_code == 200
+    transport, packets = draft_transport(case)
+    await execute_claimed(*claim, transport=transport)
+    db.expire_all()
+    actual = db.get(AIRun, claim[0])
+    assert not packets and actual.status == "failed" and actual.input_json == legacy_raw

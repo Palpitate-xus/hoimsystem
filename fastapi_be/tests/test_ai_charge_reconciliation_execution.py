@@ -121,7 +121,7 @@ async def test_paid_errors_keep_reported_companion_or_unknown_counts_without_res
     await execution.execute_charge_claimed(item["run_id"], item["lease"], transport=httpx.MockTransport(handle))
     run, result, receipt = saved(case, item)
     expected = (13, None) if fault == "partial_usage" else (13, 7) if fault == "invalid_draft" else (None, None)
-    assert len(calls) == 1 and run.status == "failed" and result is None
+    assert len(calls) == (3 if fault == "http_error" else 1) and run.status == "failed" and result is None
     assert (receipt["input_tokens"], receipt["output_tokens"]) == expected and receipt["model_call_attempted"] is True
     assert case["db"].get(AIChargeRunArtifact, run.run_id).result_json is None
 

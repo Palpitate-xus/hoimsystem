@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy import inspect
 from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlalchemy.exc import OperationalError
 
 from app.ai.inventory_native_source_models import AIInventoryWriteGate
 from app.sql_locks import postgresql_gate_statement
@@ -32,9 +33,18 @@ def lock_inventory_gate(db):
         statement = sqlite_insert(AIInventoryWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:
         raise RuntimeError("Inventory gate requires an explicitly supported SQL dialect")
-    with db.no_autoflush:
-        db.execute(statement)
-        return current_inventory_rows(db.query(AIInventoryWriteGate).filter_by(gate_id=1)).one()
+    try:
+        with db.no_autoflush:
+            db.execute(statement)
+            return current_inventory_rows(db.query(AIInventoryWriteGate).filter_by(gate_id=1)).one()
+    except OperationalError as exc:
+        # PostgreSQL aborts the whole transaction on a lock/statement deadline
+        # or deadlock. Release all earlier work before reporting backpressure;
+        # callers must explicitly start a new request rather than replay writes.
+        if dialect != "postgresql" or getattr(exc.orig, "pgcode", None) not in {"57014", "55P03", "40P01"}:
+            raise
+        db.rollback()
+        raise HTTPException(503, "库存写入繁忙，本次操作未完成，请稍后重试", headers={"Retry-After": "1"}) from exc
 
 
 def lock_inventory_write(db, current_user, *, allowed_roles, skus=(), require_active=False, allow_missing=False):

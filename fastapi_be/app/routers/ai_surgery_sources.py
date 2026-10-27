@@ -17,6 +17,28 @@ from app.routers.inpatient_support import QueryPositiveInteger
 router = APIRouter(tags=["AI手术受控来源与全局物理身份"], default_response_class=JSONResponse)
 
 
+def _source_request_schema(schema):
+    """Keep nested oneOf rules without invalid inline discriminator mappings."""
+    def visit(node):
+        if isinstance(node, dict):
+            discriminator = node.get("discriminator")
+            if isinstance(discriminator, dict) and any(not isinstance(value, str) for value in discriminator.get("mapping", {}).values()):
+                node.pop("discriminator")
+            for value in node.values():
+                visit(value)
+        elif isinstance(node, list):
+            for value in node:
+                visit(value)
+
+    visit(schema)
+
+
+class SourceCreateRequest(facts.SourceCreate):
+    # OpenAPI permits only string references in discriminator mappings. Keep
+    # the core source validators and all nested alternatives unchanged.
+    model_config = {"json_schema_extra": _source_request_schema}
+
+
 def write(db, user, operation, view):
     try:
         row = operation()
@@ -194,7 +216,7 @@ def protected_capsule(req: facts.ProtectedCapsuleCreate, db: Session = Depends(g
 
 
 @router.post("/ai/surgery-sources/{kind}")
-def source_create(kind: FactKind, req: facts.SourceCreate, db: Session = Depends(get_db), user: User = Depends(require_roles(*facts.SOURCE_ROLES))):
+def source_create(kind: FactKind, req: SourceCreateRequest, db: Session = Depends(get_db), user: User = Depends(require_roles(*facts.SOURCE_ROLES))):
     return write(db, user, lambda: facts.create_source(db, user, kind, req), lambda row: source_view(db, user, row))
 
 

@@ -42,6 +42,11 @@ def exact_float_promotion(element, compiler, **kwargs):
     return "CAST(" + compiler.process(list(element.clauses)[0], **kwargs) + " AS DOUBLE)"
 
 
+@compiles(SQLFloatPromotion, "postgresql")
+def exact_postgresql_float_promotion(element, compiler, **kwargs):
+    return "CAST(" + compiler.process(list(element.clauses)[0], **kwargs) + " AS DOUBLE PRECISION)"
+
+
 def utcnow():
     return dt.datetime.now(dt.UTC).replace(tzinfo=None)
 
@@ -75,7 +80,7 @@ def parse_json(value):
     return bounded(parsed)
 
 
-def row_value(row, sql_witnesses=None):
+def row_value(row, sql_witnesses=None, *, sql_witness_method="mysql_CAST_AS_DOUBLE_in_same_current_statement"):
     result = {}
     for column in inspect(type(row)).columns:
         value = getattr(row, column.name)
@@ -83,7 +88,7 @@ def row_value(row, sql_witnesses=None):
         if sql_witnesses is not None and column.name in sql_witnesses:
             promoted = sql_witnesses[column.name]
             witness = {
-                "method": "mysql_CAST_AS_DOUBLE_in_same_current_statement",
+                "method": sql_witness_method,
                 "value_text": repr(promoted) if promoted is not None else None,
                 "binary_hex": promoted.hex() if promoted is not None else None,
             }
@@ -178,10 +183,17 @@ def verify_capture(value):
         executions = {row["execution_id"]: row for row in value["executions"]}
         if any((row["patient_id"], row["admission_id"]) != (request["patient_id"], request["admission_id"]) for row in [*value["charges"], *value["orders"]]):
             return False
+        witness_method = {
+            "mysql_same_statement_double_promotion": "mysql_CAST_AS_DOUBLE_in_same_current_statement",
+            "postgresql_same_statement_float8": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+        }.get(value["float_capture_basis"])
         if any(
-            (row["quantity"]["storage_witness"] is not None) != (value["float_capture_basis"] == "mysql_same_statement_double_promotion")
+            (row["quantity"]["storage_witness"] is not None) != (witness_method is not None)
             or row["quantity"]["storage_witness"] is not None
-            and (row["quantity"]["state"] == "null") != (row["quantity"]["storage_witness"]["value_text"] is None)
+            and (
+                row["quantity"]["storage_witness"]["method"] != witness_method
+                or (row["quantity"]["state"] == "null") != (row["quantity"]["storage_witness"]["value_text"] is None)
+            )
             for row in value["charges"]
         ):
             return False
@@ -204,13 +216,13 @@ def capture_case(db, user, values):
     request = typed(c.CaptureRequest, values)
     _, patient, admission = authorize_scope(db, user, request)
     dialect = db.get_bind().dialect.name
-    if dialect not in {"mysql", "sqlite"}:
+    if dialect not in {"mysql", "sqlite", "postgresql"}:
         raise HTTPException(409, "该数据库Float原值捕获方式尚未独立验证")
     result = {
         "schema_version": "charge_ledger_collection_v1",
         "request": request.model_dump(mode="json"),
         "captured_at": c.utc_text(utcnow()),
-        "float_capture_basis": "mysql_same_statement_double_promotion" if dialect == "mysql" else "sqlite_orm_float_only",
+        "float_capture_basis": {"mysql": "mysql_same_statement_double_promotion", "sqlite": "sqlite_orm_float_only", "postgresql": "postgresql_same_statement_float8"}[dialect],
         "patient_binding": {"patient_id": patient.patient_id, **{key: getattr(patient, key) for key in ("name", "identity", "phone", "address")}},
         "admission": row_value(admission),
     }
@@ -220,7 +232,7 @@ def capture_case(db, user, values):
     def collect(model, query, primary):
         nonlocal rows_used, bytes_used
         rows, last = [], None
-        float_columns = [column for column in model.__table__.columns if isinstance(column.type, Float)] if dialect == "mysql" else []
+        float_columns = [column for column in model.__table__.columns if isinstance(column.type, Float)] if dialect in {"mysql", "postgresql"} else []
         if float_columns:
             query = query.add_columns(*(SQLFloatPromotion(getattr(model, column.name)).label("exact_float_" + column.name) for column in float_columns))
         while True:
@@ -229,7 +241,11 @@ def capture_case(db, user, values):
             for item in batch:
                 row = item[0] if float_columns else item
                 rows_used += 1
-                raw = row_value(row, {column.name: item[index + 1] for index, column in enumerate(float_columns)} if float_columns else None)
+                raw = row_value(
+                    row,
+                    {column.name: item[index + 1] for index, column in enumerate(float_columns)} if float_columns else None,
+                    sql_witness_method="postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement" if dialect == "postgresql" else "mysql_CAST_AS_DOUBLE_in_same_current_statement",
+                )
                 bytes_used += len(c.utf8(c.canonical_json(raw)))
                 if rows_used > c.MAX_ROWS or bytes_used > c.MAX_BYTES:
                     raise HTTPException(409, "完整账目成员超过8192行或8MiB，拒绝截断")

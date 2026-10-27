@@ -78,7 +78,7 @@ class StrictModel(BaseModel):
 
 
 class SQLFloatWitness(StrictModel):
-    method: Literal["mysql_CAST_AS_DOUBLE_in_same_current_statement"]
+    method: Literal["mysql_CAST_AS_DOUBLE_in_same_current_statement", "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement"]
     value_text: str | None
     binary_hex: str | None
 
@@ -221,7 +221,7 @@ class Collection(StrictModel):
     schema_version: Literal["charge_ledger_collection_v1"]
     request: CaptureRequest
     captured_at: UtcText
-    float_capture_basis: Literal["mysql_same_statement_double_promotion", "sqlite_orm_float_only"]
+    float_capture_basis: Literal["mysql_same_statement_double_promotion", "sqlite_orm_float_only", "postgresql_same_statement_float8"]
     patient_binding: PatientBinding
     admission: AdmissionOriginal
     charges: list[ChargeOriginal]

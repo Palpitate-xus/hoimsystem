@@ -28,7 +28,7 @@ class ChargeContextBinding(StrictModel):
     manifest_hash: SHA
     policy_hash: SHA
     captured_at: UtcText
-    float_capture_basis: Literal["mysql_same_statement_double_promotion", "sqlite_orm_float_only"]
+    float_capture_basis: Literal["mysql_same_statement_double_promotion", "sqlite_orm_float_only", "postgresql_same_statement_float8"]
     department_ids: list[Positive] = Field(max_length=1)
 
     @model_validator(mode="after")

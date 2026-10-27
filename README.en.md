@@ -4,7 +4,7 @@
 
 A comprehensive hospital information management system for small and medium-sized hospitals, built with **Vue 3 + FastAPI**, covering core business flows including **outpatient, inpatient, pharmacy, lab, physical examination, and billing**.
 
-The AI platform includes [80 capabilities](doc/ai-capabilities.md): 63 text LLM tasks, plus speech, imaging, ECG, risk assessment, forecasting, optimization and fixed local statistics. It provides a business workbench, individual task prompts, versioned source governance and a super-administrator management center. See the AI platform section below and the [usage guide](doc/ai-guide.md) for setup and delivery scope.
+The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM tasks, plus speech, imaging, ECG, risk assessment, forecasting, optimization and fixed local statistics. Staff can submit tasks from business pages or the AI workbench. Super administrators manage models, prompts, knowledge, sources, permissions and usage in one place. See the [AI usage guide](doc/ai-guide.md) for configuration and workflows.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
@@ -24,13 +24,13 @@ The AI platform includes [80 capabilities](doc/ai-capabilities.md): 63 text LLM 
 | User Roles | **11**, including super admin, lab technician, and registrar |
 | AI Capability Catalog | **80** capabilities, including **63** text LLM tasks |
 
-These counts describe repository source, not a deployed database or enabled AI features. Routes are checked against the statically generated RBAC inventory; pages are counted under `src/views/**/*.vue`.
+Source inventory: routes are checked against the RBAC matrix, tables are counted from ORM definitions, and pages under `vue3-new-ui/src/views/**/*.vue`.
 
 ---
 
 ## 🌟 Features
 
-### Implemented Core Business (9 Domains / 40+ Modules)
+### Core Business (9 Domains / 40+ Modules)
 
 - **Outpatient Management** — Smart Triage, Appointment, Walk-in Registration, Check-in, Queue Management, Triage Desk, Patrol Records, Breach Records, Billing, Invoice, Daily Settlement
 - **Doctor Workstation** — Scheduling, EMR, Prescription, context-aware CDSS, Lab Orders, Attendance, MDT Consultation, Clinical Pathway
@@ -42,7 +42,7 @@ These counts describe repository source, not a deployed database or enabled AI f
 - **Patient Services** — Health Records, EMR Query, Prescription Query, Prepaid Account, Two-way Referral, Follow-up, Satisfaction Survey
 - **System Platform** — User & Permissions, Operation Logs (auto-recorded by middleware), Dictionary, Parameters, Messages, Notices, Backup, Adverse Events (with RCA root-cause analysis), Slot Pool, Reports, Department Performance
 
-### HIS Completion Modules (4 batches delivered 2026-08, zero seed data — all user-entered)
+### Specialized Workflows and Management
 
 - **Prescription Review Rule Engine** — 5 rule types (interaction / contraindication / dose / duplicate / allergy-keyword); severity-3 rules **block both prescribing and dispensing**
 - **Insurance Catalog Mapping** — local items ↔ insurance codes with category/self-pay ratio/price limit; template download + batch import
@@ -57,16 +57,16 @@ These counts describe repository source, not a deployed database or enabled AI f
 - **Perioperative Antibiotic Compliance / Green-channel Billing Closure / Pay-date Settlement / Scrap Batch Ledger**
 - **Versioned DRG/DIP Auto-grouping / Daily Operational Aggregates / Durable Integration Outbox**
 
-### Planned Modules
+### Clinical Knowledge, Imaging and Integration
 
 | Module | Description |
 |:------:|:------------|
-| National Insurance Adapter | Catalogs, callbacks, and versioned DRG/DIP rules are delivered; platform signatures, e-credentials, and official grouper releases require local integration |
-| DICOM Archive | Orders, reports, an external viewer, PACS callbacks and private single-frame DICOM registration/preview are delivered; complete archive, routing and worklist integration remain planned |
-| Clinical Knowledge and Deployment Validation | Knowledge version review, pathway import, laboratory/observation sources and independent risk checks are delivered; applicable content, model evaluation and local clinical validation remain deployment work |
-| Internet Hospital | Online consultation, follow-up prescription |
+| Insurance and integration | Catalog mapping and batch import, settlement requests and callbacks, versioned DRG/DIP auto-grouping; integration outbox with retries, dead-letter handling and manual replay |
+| Clinical knowledge and CDSS | Structured patient context, prescription and dose rules, reviewed knowledge retrieval and clinical pathway imports; rule evidence and data sources accompany results |
+| Imaging services | Examination orders, report submission and review, PACS callbacks, external viewers, private single-frame DICOM registration and pixel previews |
+| Patient and follow-up services | Appointments, personal encounter and prescription records, clinician follow-up plans, revisit booking and follow-up feedback |
 
-> See [doc/todos.md](doc/todos.md) for the full roadmap and [doc/his-feature-gap-analysis.md](doc/his-feature-gap-analysis.md) for the HIS gap analysis and delivery record.
+See the [integration guide](doc/integration-guide.md) for configuration and the [user manual](doc/user-manual.md) for role-based workflows.
 
 ---
 
@@ -74,7 +74,7 @@ These counts describe repository source, not a deployed database or enabled AI f
 
 The business workbench is at `/#/ai/workbench`; super-administrator management is at `/#/ai/manage`. Medical records, prescriptions, inpatient, pharmacy, laboratory and operational pages also provide entries bound to the current business record.
 
-| Area | Current Implementation |
+| Area | Features |
 | --- | --- |
 | Clinical assistance and documents | Patient summaries, differential diagnosis and treatment-pathway candidates, prescription review and record/report drafts; patient relationships, encounters, original records and applicable reviewed knowledge are checked per task |
 | Speech, ECG and imaging | Private recordings with listening review, original WFDB files and waveforms, single-frame DICOM images and specialist adapters; optional local research services have separate preparation and verification workflows |
@@ -82,22 +82,25 @@ The business workbench is at `/#/ai/workbench`; super-administrator management i
 | Sources and dedicated tasks | Complete billing records, feedback, guideline versions, drug labels, research cohorts/variables, deidentification candidates, incident RCA, finite-case statistics, operational materials and synthetic teaching |
 | Document and teaching review | Document body is separate from summary, warnings and missing data; users select sections and review them before copying. Exercises and AI explanations are submitted separately; fixed scores and model feedback remain separate |
 
-Management retains 41 entries with a search across four groups:
+Super-administrator management provides 41 entries with search across four groups:
 
 | Group | Main Controls |
 | --- | --- |
 | Features and models | Feature switches, allowed roles, providers, limits, validation status and task-prompt versions |
 | Knowledge and data | Knowledge review, source registration, professional review and independent publication |
-| Tasks and usage | Global technical tasks, task results and feedback, known usage and unknown values |
+| Tasks and usage | Task tracking, results, feedback and usage statistics |
 | Permissions and audit | Patient-access grants, configuration audits and management history |
 
-AI configuration management requires `super_admin`; ordinary administrators do not inherit that permission. Private source content also requires the relevant purpose authorization. Task prompts are versioned for 79 capabilities; capability 78 uses a reviewed fixed local statistical recipe. Catalog `2026.10.26.1` improves writing instructions for all 63 LLM tasks without replacing stored custom prompts, active versions or configuration states.
+**Prompt management:** 79 capabilities support individual task prompts, immutable revisions, historical version activation and task snapshots. Fixed local statistics use reviewed recipes. Clinical documents, pharmacy, operations and teaching tasks each define their content and writing requirements. Document text, evidence, missing data and review items have dedicated sections.
 
-For features using default v0, new tasks read the updated default text; older tasks retain their frozen versions.
+**Configuration and use:**
 
-New feature configurations start disabled. Providers, credentials, sources, knowledge and validation records are required as appropriate. Treatment candidates, documents and analyses require human review; they do not automatically prescribe, sign or change business records. Actual model quality and clinical effects need separate evaluation.
+1. Sign in as `super_admin` to configure providers, credentials and feature limits.
+2. Set allowed roles, task prompts, knowledge and sources; source content uses purpose-based access authorization.
+3. Complete the required professional reviews, service checks and validation records, then enable the feature.
+4. Submit tasks from the workbench or business pages and review sources, results and review items. Select document sections and confirm review before copying; clinicians confirm diagnosis and treatment decisions.
 
-The 2026-10-26 experience update passed 576 backend cases, 232 Node checks and 90 final production-page cases using synthetic engineering boundaries, without real model calls. See the [experience verification record](doc/ai-experience-verification.json) for exact scope and reruns, and the [final integration record](doc/ai-final-integration-verification.json) for the earlier all80 engineering acceptance.
+See the [capability catalog](doc/ai-capabilities.md) for inputs, outputs and default roles, the [usage guide](doc/ai-guide.md) for configuration, and the [integration](doc/ai-final-integration-verification.json) and [experience](doc/ai-experience-verification.json) records for tests and builds.
 
 ---
 
@@ -150,7 +153,7 @@ cd hoimsystem
 
 ### 2. Start Backend
 
-Prepare database settings and `SECRET_KEY` using `fastapi_be/.env.example` as a template. The API and AI worker must use the same configuration.
+The API and AI worker use the same database, `SECRET_KEY` and AI configuration.
 
 ```bash
 cd fastapi_be
@@ -162,6 +165,9 @@ source venv/bin/activate    # Linux/Mac
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Create the configuration file; configure the database and SECRET_KEY in .env
+cp -n .env.example .env
 
 # Initialize an empty database or upgrade an Alembic-managed database
 python -m app.db_migrate
@@ -180,7 +186,7 @@ source venv/bin/activate
 python -m app.ai.worker
 ```
 
-An existing database without Alembic tracking requires backup and schema review before controlled adoption under the [migration entry's requirements](fastapi_be/app/db_migrate.py). That check is not bypassed automatically. See the [deployment manual](doc/installation-guide.md) for environment preparation and the [AI usage guide](doc/ai-guide.md) for provider and feature configuration.
+See the [deployment manual](doc/installation-guide.md#34-数据库初始化) for backup, schema review, migration and adoption of existing databases, and the [AI usage guide](doc/ai-guide.md) for provider and feature configuration.
 
 
 ### 3. Start Frontend
@@ -189,7 +195,7 @@ An existing database without Alembic tracking requires backup and schema review 
 cd vue3-new-ui
 
 # Install dependencies
-npm install --legacy-peer-deps
+npm ci --legacy-peer-deps
 
 # Dev mode (port 8091)
 npm run serve:rspack
@@ -220,13 +226,17 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 
 ---
 
-## 🔑 Default Accounts
+## 🔑 Local Demo Accounts
 
-These accounts are written only when the development initializer `fastapi_be/init_database.py` is run. Normal application startup and production migrations do not create them.
+After migrating a fresh local development database, run the [demo account script](fastapi_be/seed_default_accounts.py) from `fastapi_be/` to create these accounts and the required doctor and patient profiles:
+
+```bash
+python seed_default_accounts.py
+```
 
 | Role | Username | Password | Note |
 |:----:|:--------:|:--------:|:----:|
-| Admin | `admin` | `admin123` | General administration; no AI configuration permission |
+| Admin | `admin` | `admin123` | General administration |
 | Super Admin | `super01` | `123456` | AI platform management; source purpose authorization checked separately |
 | Director | `director01` | `123456` | Department management |
 | Doctor | `doctor1` | `doctor123` | Regular doctor |
@@ -238,7 +248,7 @@ These accounts are written only when the development initializer `fastapi_be/ini
 | Registrar | `registrar01` | `123456` | Registration service |
 | Patient | `patient1` | `123456` | Patient self-service |
 
-> ⚠️ Never run the demo initializer against production. Provision production users through a controlled process and use an independent strong random `SECRET_KEY`.
+For production, create the first super administrator interactively with a strong password. See the [deployment manual](doc/installation-guide.md#34-数据库初始化).
 
 ---
 
@@ -246,7 +256,7 @@ These accounts are written only when the development initializer `fastapi_be/ini
 
 | Role | Permissions |
 |:----:|:------------|
-| **Admin** | General system administration; excludes AI configuration |
+| **Admin** | Users, staff, patients, departments, pharmacy, billing, notifications and system settings |
 | **Super Admin** | AI configuration, prompts, knowledge, source governance, grants and audit; private source access still requires purpose authorization |
 | **Director** | Department management, scheduling, prescription review |
 | **Doctor** | EMR writing, prescription, lab orders |
@@ -266,16 +276,17 @@ These accounts are written only when the development initializer `fastapi_be/ini
 |:--------:|:------------|
 | [Doc Index](doc/README.md) | Navigation for all docs |
 | [Architecture](doc/architecture.md) | System architecture & design decisions |
+| [Frontend Development](vue3-new-ui/README.en.md) | Frontend setup, API configuration, business entries and build checks |
 | [Requirements](doc/demandDoc.md) | Functional & non-functional requirements |
 | [API Doc](doc/apiDoc.md) | Core definitions; [access matrix](doc/api-rbac-matrix.md) covers 1,087 RBAC route methods |
 | [Database Doc](doc/databaseDoc.md) | Core definitions; 266 ORM table definitions are maintained in model source |
 | [AI Usage Guide](doc/ai-guide.md) | Workbench, super-admin configuration, sources and activation |
 | [AI Capability Catalog](doc/ai-capabilities.md) | All 80 capabilities, inputs, outputs and default roles |
 | [Default Prompts](doc/ai-prompts.json) | Task instructions, catalog version and fixed system contracts |
-| [AI Experience Verification](doc/ai-experience-verification.json) | Scope and reruns for prompt and interface improvements |
+| [AI Experience Verification](doc/ai-experience-verification.json) | Prompt, document, management navigation and business interface tests |
 | [Deployment](doc/deployDoc.md) | Dev/prod/Docker deployment guide |
 | [User Manual](doc/user-manual.md) | Role-based operation guide |
-| [Roadmap](doc/todos.md) | Completed & planned modules |
+| [Roadmap](doc/todos.md) | Feature inventory and project planning |
 | [Security](SECURITY.md) | Security policy |
 | [Contributing](CONTRIBUTING.md) | Code style & PR workflow |
 | [Changelog](CHANGELOG.md) | Version history |
@@ -304,15 +315,15 @@ locust -f locust_final.py --headless -u 50 -r 10 -t 5m \
 docker compose down -v
 ```
 
-Every Locust request validates both the HTTP status and response-body `code == 200`. Run metadata records the commit, data profile, load parameters, and redacted database target. Historical CSV files came from an older harness and are not a capacity or SLA baseline; rerun the workload on target hardware and record P95/P99, errors, pool waits, and PostgreSQL slow queries.
+Every Locust request validates both the HTTP status and response-body `code == 200`. Run metadata records the commit, data profile, load parameters and redacted database target. Run the workload on target hardware with the desired data profile to record P95/P99, errors, pool waits and PostgreSQL slow queries for capacity planning. See the [performance guide](doc/performance.md).
 
 ---
 
 ## ✨ Highlights
 
 - **Broad coverage**: Outpatient + Inpatient + Pharmacy + Lab + Exam + Surgery, 9 domains 40+ modules
-- **Engineering checks**: Static RBAC drift detection, lint, tests, dependency audits and bundle budgets, with verification records limited to their actual execution scope
-- **Great DX**: FastAPI auto docs, hot reload, zero-config SQLite startup
+- **Engineering checks**: Static RBAC drift detection, lint, automated tests, dependency audits and bundle budgets
+- **Great DX**: FastAPI auto docs, hot reload and local SQLite development
 - **Observable**: Liveness/readiness probes, Prometheus metrics, request IDs, operation auditing, and daily operational aggregates
 - **Secure**: JWT auth, bcrypt passwords, ID masking, operation auditing
 - **Good UX**: Element Plus components, unified style utilities, full empty/loading states

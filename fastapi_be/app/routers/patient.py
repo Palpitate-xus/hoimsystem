@@ -141,6 +141,12 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
         return {"code": 500, "msg": "病人信息不存在"}
     if not patient_obj:
         return {"code": 403, "msg": "无权为该家庭成员预约"}
+    # A patient row exists even before their first appointment. Lock it before
+    # checking duplicates so concurrent requests cannot both observe an empty
+    # appointment set, including requests for different schedule rows.
+    patient_obj = db.query(Patient).filter(Patient.patient_id == patient_obj.patient_id).populate_existing().with_for_update().one_or_none()
+    if patient_obj is None:
+        return {"code": 500, "msg": "病人信息不存在"}
     # 检查是否处于暂停预约状态
     from app.models import BreachRecord
 
@@ -170,7 +176,7 @@ def patient_appointment(req: AppointmentCreateRequest, current_user: User = Depe
         Appointment.specialist == req.specialist,
         Appointment.time == appt_date,
         Appointment.status == 0,
-    ).first():
+    ).populate_existing().with_for_update().first():
         return {"code": 500, "msg": "同一患者不能重复预约同一医生同一日期"}
     if reg_obj.number <= 0:
         return {"code": 500, "msg": "该时段号源已满"}

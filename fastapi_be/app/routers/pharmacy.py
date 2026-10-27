@@ -294,7 +294,7 @@ def dispense_prescription(req: PharmacyDispenseRequest, current_user: User = Dep
     # 缴费校验：处方关联收费未结清禁止发药（原缺陷：未缴费即可发药形成漏费通道）
     from app.models import Charge
 
-    unpaid = current_inventory_rows(db.query(Charge)).filter(Charge.prescription_id == str(req.prescription_id), Charge.status == 0).count()
+    unpaid = current_inventory_rows(db.query(Charge)).filter(Charge.prescription_id == str(req.prescription_id), Charge.status == 0).first()
     if unpaid:
         return {"code": 400, "msg": "该处方存在未缴费收费记录，请先缴费再发药"}
 

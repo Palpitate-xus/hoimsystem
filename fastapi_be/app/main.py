@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from sqlalchemy.exc import TimeoutError as DatabasePoolTimeout
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
@@ -373,6 +374,16 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="HOIM System FastAPI", default_response_class=APIJSONResponse, lifespan=lifespan)
+
+
+@app.exception_handler(DatabasePoolTimeout)
+async def database_pool_timeout_handler(_request, _exception):
+    return JSONResponse(
+        status_code=503,
+        content={"code": 503, "msg": "数据库连接繁忙，请稍后重试"},
+        headers={"Retry-After": "1"},
+    )
+
 
 from app.routers import (
     admin,

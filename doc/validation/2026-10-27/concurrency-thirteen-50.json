@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-27T07:41:17.792571+00:00",
+  "finished_at": "2026-10-27T07:41:31.180368+00:00",
+  "elapsed_seconds": 13.387804293073714,
+  "host": "http://127.0.0.1:18127",
+  "database": "postgresql+psycopg2://benchmark:***@127.0.0.1:18427/hoimsystem_benchmark",
+  "concurrency": 50,
+  "all_passed": true,
+  "scenarios": [
+    {
+      "name": "last_slot_not_oversold",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "appointments": 1,
+        "remaining_slots": 0
+      },
+      "observed": {
+        "successful_requests": 1,
+        "appointments": 1,
+        "remaining_slots": 0
+      }
+    },
+    {
+      "name": "duplicate_booking_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "appointments": 1,
+        "remaining_slots": 49
+      },
+      "observed": {
+        "successful_requests": 1,
+        "appointments": 1,
+        "remaining_slots": 49
+      }
+    },
+    {
+      "name": "parallel_cancellations_restore_every_slot",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "200": 50
+      },
+      "expected": {
+        "successful_requests": 50,
+        "cancelled": 50,
+        "remaining_slots": 50
+      },
+      "observed": {
+        "successful_requests": 50,
+        "cancelled": 50,
+        "remaining_slots": 50
+      }
+    },
+    {
+      "name": "patient_registration_duplicate_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "registrations": 1,
+        "remaining_slots": 49
+      },
+      "observed": {
+        "successful_requests": 1,
+        "registrations": 1,
+        "remaining_slots": 49
+      }
+    },
+    {
+      "name": "window_registration_duplicate_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "registrations": 1,
+        "remaining_slots": 49
+      },
+      "observed": {
+        "successful_requests": 1,
+        "registrations": 1,
+        "remaining_slots": 49
+      }
+    },
+    {
+      "name": "one_pending_payment_per_charge",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "pending_payments": 1
+      },
+      "observed": {
+        "successful_requests": 1,
+        "pending_payments": 1
+      }
+    },
+    {
+      "name": "cash_charge_paid_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "payments": 1,
+        "charge_status": 1
+      },
+      "observed": {
+        "successful_requests": 1,
+        "payments": 1,
+        "charge_status": 1
+      }
+    },
+    {
+      "name": "cash_charge_refunded_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "refunded_payments": 1,
+        "charge_status": 2
+      },
+      "observed": {
+        "successful_requests": 1,
+        "refunded_payments": 1,
+        "charge_status": 2
+      }
+    },
+    {
+      "name": "one_active_admission_per_bed",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "active_admissions": 1,
+        "bed_status": 1
+      },
+      "observed": {
+        "successful_requests": 1,
+        "active_admissions": 1,
+        "bed_status": 1
+      }
+    },
+    {
+      "name": "independent_admissions_have_unique_numbers",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "200": 50
+      },
+      "expected": {
+        "successful_requests": 50,
+        "active_admissions": 50,
+        "unique_admission_numbers": 50
+      },
+      "observed": {
+        "successful_requests": 50,
+        "active_admissions": 50,
+        "unique_admission_numbers": 50
+      }
+    },
+    {
+      "name": "one_active_admission_per_patient",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "active_admissions": 1,
+        "occupied_beds": 1
+      },
+      "observed": {
+        "successful_requests": 1,
+        "active_admissions": 1,
+        "occupied_beds": 1
+      }
+    },
+    {
+      "name": "prescription_dispensed_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "400": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "stock": 9,
+        "batch_stock": 9,
+        "outbound_ledger_rows": 1,
+        "verification_rows": 1
+      },
+      "observed": {
+        "successful_requests": 1,
+        "stock": 9,
+        "batch_stock": 9,
+        "outbound_ledger_rows": 1,
+        "verification_rows": 1
+      }
+    },
+    {
+      "name": "medication_administered_once",
+      "passed": true,
+      "requests": 50,
+      "http_statuses": {
+        "409": 49,
+        "200": 1
+      },
+      "expected": {
+        "successful_requests": 1,
+        "completed_administrations": 1,
+        "completed_executions": 1
+      },
+      "observed": {
+        "successful_requests": 1,
+        "completed_administrations": 1,
+        "completed_executions": 1
+      }
+    }
+  ]
+}

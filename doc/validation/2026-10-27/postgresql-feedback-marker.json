@@ -1,0 +1,61 @@
+{
+  "pg-native-marker-before": {
+    "counts": {
+      "tests": "15",
+      "failures": "15",
+      "errors": "0",
+      "skipped": "0",
+      "time": "10.304"
+    },
+    "result": {
+      "started_at": "2026-10-27T07:52:55.646327+00:00",
+      "elapsed_seconds": 25.72766472119838,
+      "exit_code": 1,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/pg-native-marker-before/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_postgresql_native_marker_guard.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/pg-native-marker-before.xml"
+      ]
+    },
+    "junit_sha256": "7e0eec6a6477b868e856adbfcd4aea0eae3091b2d848494348f9750a1f8bd735"
+  },
+  "pg-native-marker-after": {
+    "counts": {
+      "tests": "58",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "67.979"
+    },
+    "result": {
+      "started_at": "2026-10-27T07:54:18.675768+00:00",
+      "elapsed_seconds": 83.76803531032056,
+      "exit_code": 0,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/pg-native-marker-after/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_postgresql_native_marker_guard.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_infection_cluster_task_storage.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_infection_cluster_task_runtime.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_infection_cluster_task_views.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_infection_cluster_task_http.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/pg-native-marker-after.xml"
+      ]
+    },
+    "junit_sha256": "89d94497149c3160e8396d84a710e2b68ebfda9c7007ace7300d3c60b382d4e3"
+  },
+  "interpretation": "Actual private PostgreSQL schema exercises15 scalar locator cases. Generic tasks remain generic; original feature and all12 orphan markers across4TEXTfields remain rejected409; projections never load raw Task fields. PostgreSQL strpos replaces unavailable instr only on that dialect. Four entire prior infection task files pass unchanged.",
+  "source_sha256": {
+    "fastapi_be/app/ai/infection_cluster_task_storage.py": "1fcf0770676b732dcc34a3d4a4a1480a988dc30e607be81efa1d7a2182d18d05",
+    "fastapi_be/tests/test_postgresql_native_marker_guard.py": "ba8200e26475fe33d07e0007051be71696a5dfcd409bca02e5d1961b60f35701"
+  }
+}

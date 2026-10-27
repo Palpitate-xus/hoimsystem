@@ -1,0 +1,38 @@
+{
+  "started_at": "2026-10-27T07:41:32.370618+00:00",
+  "synthetic_only": true,
+  "api": "http://127.0.0.1:18127",
+  "database": "hoimsystem_benchmark",
+  "scenario": "Actual HTTP valid doctor prescription while another PG transaction holds inventory singleton",
+  "http_status": 503,
+  "retry_after": "1",
+  "elapsed_seconds": 15.023854490369558,
+  "response": {
+    "detail": "库存写入繁忙，本次操作未完成，请稍后重试"
+  },
+  "before": {
+    "prescription": 0,
+    "charge": 0,
+    "pre_pha": 0
+  },
+  "after_blocked": {
+    "prescription": 0,
+    "charge": 0,
+    "pre_pha": 0
+  },
+  "stock_after_blocked": 10,
+  "session_usable_after_release": true,
+  "no_partial_business_writes": true,
+  "separate_explicit_request_after_release": {
+    "http_status": 200,
+    "body_code": 200,
+    "elapsed_seconds": 0.06664942856878042,
+    "counts": {
+      "prescription": 1,
+      "charge": 1,
+      "pre_pha": 1
+    }
+  },
+  "passed": true,
+  "clinical_validation": false
+}

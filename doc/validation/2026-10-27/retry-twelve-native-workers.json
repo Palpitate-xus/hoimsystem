@@ -1,0 +1,252 @@
+{
+  "scope": "Actual shared SQLite worker and original source services; controlled503503200 transport, no real clinical model validation. Full24-native recovery matrix plus complete variable configuration file; no repeated test counts added to original1092 or418followups.",
+  "production_ai_commit": "3cce378",
+  "test_commit": "bd75512",
+  "collected": 39,
+  "passed": 39,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 0,
+  "native_domains": 12,
+  "protocols": [
+    "chat",
+    "responses"
+  ],
+  "native_recovery_cases": 24,
+  "configuration_file_cases": 15,
+  "retry_attempts_per_native_case": 3,
+  "accepted_usage": "All accepted actual receipts preserve unknown total input/output token counters and actual model_call_attempted=true after earlierHTTP503. Distinct immutable result/source/lease/acceptance proofs and exact accounting readers verified.",
+  "business_source_integrity": "Seven additional domains compare all non-AI SQL business rows and current full Source. Append-only request audit is deliberately excluded from business fingerprint. AI proposals are not applied to source/business rows.",
+  "records": [
+    {
+      "domain": "document_extraction",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_usage::test_document_retry_success_has_exact_nullable_usage_event_and_valid_source_result[chat]",
+      "passed": true,
+      "duration_seconds": 6.609,
+      "feature_key": "guideline_ingestion"
+    },
+    {
+      "domain": "document_extraction",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_usage::test_document_retry_success_has_exact_nullable_usage_event_and_valid_source_result[responses]",
+      "passed": true,
+      "duration_seconds": 1.005,
+      "feature_key": "guideline_ingestion"
+    },
+    {
+      "domain": "satisfaction",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_usage::test_satisfaction_retry_success_preserves_independent_usage_and_acceptance_audits[chat]",
+      "passed": true,
+      "duration_seconds": 1.602,
+      "feature_key": "feedback_analysis"
+    },
+    {
+      "domain": "satisfaction",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_usage::test_satisfaction_retry_success_preserves_independent_usage_and_acceptance_audits[responses]",
+      "passed": true,
+      "duration_seconds": 1.533,
+      "feature_key": "feedback_analysis"
+    },
+    {
+      "domain": "charge_reconciliation",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_usage::test_charge_retry_success_retains_unknown_usage_and_exact_acceptance_receipt[chat]",
+      "passed": true,
+      "duration_seconds": 3.48,
+      "feature_key": "charge_reconciliation"
+    },
+    {
+      "domain": "charge_reconciliation",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_usage::test_charge_retry_success_retains_unknown_usage_and_exact_acceptance_receipt[responses]",
+      "passed": true,
+      "duration_seconds": 2.893,
+      "feature_key": "charge_reconciliation"
+    },
+    {
+      "domain": "document_change",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_usage::test_document_change_retry_success_retains_unknown_usage_and_source_bound_result[chat]",
+      "passed": true,
+      "duration_seconds": 2.0,
+      "feature_key": "guideline_change_review"
+    },
+    {
+      "domain": "document_change",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_usage::test_document_change_retry_success_retains_unknown_usage_and_source_bound_result[responses]",
+      "passed": true,
+      "duration_seconds": 1.868,
+      "feature_key": "guideline_change_review"
+    },
+    {
+      "domain": "drug_label",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_usage::test_drug_label_retry_success_retains_unknown_usage_and_three_original_audits[chat]",
+      "passed": true,
+      "duration_seconds": 1.609,
+      "feature_key": "drug_label_extraction"
+    },
+    {
+      "domain": "drug_label",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_usage::test_drug_label_retry_success_retains_unknown_usage_and_three_original_audits[responses]",
+      "passed": true,
+      "duration_seconds": 1.589,
+      "feature_key": "drug_label_extraction"
+    },
+    {
+      "domain": "coding_evidence",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_coding::test_coding_shared_worker_recovers_three_attempts_with_original_source_and_usage_audit[chat]",
+      "passed": true,
+      "duration_seconds": 2.439,
+      "feature_key": "drg_evidence_review"
+    },
+    {
+      "domain": "coding_evidence",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_coding::test_coding_shared_worker_recovers_three_attempts_with_original_source_and_usage_audit[responses]",
+      "passed": true,
+      "duration_seconds": 1.854,
+      "feature_key": "drg_evidence_review"
+    },
+    {
+      "domain": "clinical_training",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_training::test_training_shared_worker_recovers_three_attempts_without_changing_source_or_grade[chat]",
+      "passed": true,
+      "duration_seconds": 2.528,
+      "feature_key": "clinical_training"
+    },
+    {
+      "domain": "clinical_training",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_training::test_training_shared_worker_recovers_three_attempts_without_changing_source_or_grade[responses]",
+      "passed": true,
+      "duration_seconds": 2.063,
+      "feature_key": "clinical_training"
+    },
+    {
+      "domain": "operations_support",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_operations::test_operations_shared_worker_recovers_three_attempts_and_reads_original_draft[chat]",
+      "passed": true,
+      "duration_seconds": 2.184,
+      "feature_key": "operations_support"
+    },
+    {
+      "domain": "operations_support",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_operations::test_operations_shared_worker_recovers_three_attempts_and_reads_original_draft[responses]",
+      "passed": true,
+      "duration_seconds": 1.703,
+      "feature_key": "operations_support"
+    },
+    {
+      "domain": "research_cohort",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_research::test_research_shared_worker_recovers_three_attempts_and_reads_bound_evaluation[chat]",
+      "passed": true,
+      "duration_seconds": 13.67,
+      "feature_key": "research_cohort"
+    },
+    {
+      "domain": "research_cohort",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_research::test_research_shared_worker_recovers_three_attempts_and_reads_bound_evaluation[responses]",
+      "passed": true,
+      "duration_seconds": 13.011,
+      "feature_key": "research_cohort"
+    },
+    {
+      "domain": "deidentification",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_deidentification::test_deidentification_shared_worker_recovers_three_attempts_without_applying_or_exporting[chat]",
+      "passed": true,
+      "duration_seconds": 12.585,
+      "feature_key": "deidentification"
+    },
+    {
+      "domain": "deidentification",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_deidentification::test_deidentification_shared_worker_recovers_three_attempts_without_applying_or_exporting[responses]",
+      "passed": true,
+      "duration_seconds": 12.665,
+      "feature_key": "deidentification"
+    },
+    {
+      "domain": "research_variables",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_variables::test_variables_shared_worker_recovers_three_attempts_and_reads_exact_nullable_result[chat]",
+      "passed": true,
+      "duration_seconds": 52.47,
+      "feature_key": "research_extraction"
+    },
+    {
+      "domain": "research_variables",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_variables::test_variables_shared_worker_recovers_three_attempts_and_reads_exact_nullable_result[responses]",
+      "passed": true,
+      "duration_seconds": 47.972,
+      "feature_key": "research_extraction"
+    },
+    {
+      "domain": "rca_evidence",
+      "protocol": "chat",
+      "test": "tests.test_ai_text_retry_native_rca::test_rca_shared_worker_recovers_three_attempts_and_reads_original_literal_hypotheses[chat]",
+      "passed": true,
+      "duration_seconds": 3.874,
+      "feature_key": "incident_rca"
+    },
+    {
+      "domain": "rca_evidence",
+      "protocol": "responses",
+      "test": "tests.test_ai_text_retry_native_rca::test_rca_shared_worker_recovers_three_attempts_and_reads_original_literal_hypotheses[responses]",
+      "passed": true,
+      "duration_seconds": 3.479,
+      "feature_key": "incident_rca"
+    }
+  ],
+  "pytest_seconds": 201.79,
+  "state": {
+    "suite": "retry-native-final-matrix",
+    "command": [
+      "/home/xusheng/miniconda3/bin/python",
+      "-m",
+      "pytest",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_usage.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_coding.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_training.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_operations.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_research.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_deidentification.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_variables.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_text_retry_native_rca.py",
+      "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_research_variables_configuration.py",
+      "-p",
+      "pytest_asyncio.plugin",
+      "-p",
+      "validation_capture",
+      "-v",
+      "-ra",
+      "--tb=short",
+      "--durations=30",
+      "--junitxml=/tmp/hoim-validation-20261027/backend/retry-native-final-matrix.xml",
+      "--basetemp=/tmp/hoim-validation-20261027/backend/retry-native-final-matrix-pytest",
+      "-o",
+      "cache_dir=/tmp/hoim-validation-20261027/backend/retry-native-final-matrix-cache/pytest"
+    ],
+    "cwd": "/tmp/hoim-validation-20261027/backend/retry-native-final-matrix-work",
+    "started_utc": "2026-10-27T07:42:12Z",
+    "pid": 2233821,
+    "returncode": 0,
+    "elapsed_seconds": 218.82,
+    "ended_utc": "2026-10-27T07:45:51Z"
+  },
+  "junit": "/tmp/hoim-validation-20261027/backend/retry-native-final-matrix.xml",
+  "source_manifest": "/tmp/hoim-validation-20261027/backend/retry-native-final-matrix-source.json"
+}

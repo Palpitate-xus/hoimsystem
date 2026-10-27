@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 BENCHMARK_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BENCHMARK_DIR))
 
-import benchmark_setup
+import benchmark_setup  # noqa: E402
 
 
 class FakeResponse:
@@ -56,6 +56,7 @@ def test_discover_write_targets_uses_consistent_schedules_and_live_ids():
     )
 
     assert targets.patient_ids == (1, 2, 3)
+    assert targets.appointment_tokens == {1: "patient-token", 2: "patient-token", 3: "patient-token"}
     assert targets.pharmaceutical_ids == (20,)
     assert len(targets.appointment_payloads) == 6
     unique_business_keys = {(item["patient_id"], item["doctor_id"], item["date"], item["specialist"]) for item in targets.appointment_payloads}
@@ -72,3 +73,24 @@ def test_discover_write_targets_uses_consistent_schedules_and_live_ids():
     request_headers = {path: kwargs["headers"] for path, kwargs in session.requests}
     assert request_headers["/api/familyMember/list"] == {"accesstoken": "patient-token"}
     assert request_headers["/api/pharmaceuticalManagement/getList"] == {"accesstoken": "doctor-token"}
+
+
+def test_discovery_keeps_each_households_authorized_token():
+    class HouseholdSession(FakeSession):
+        def get(self, url, **kwargs):
+            path = urlsplit(url).path
+            token = kwargs["headers"]["accesstoken"]
+            if path == "/api/patientManagement/getList":
+                return FakeResponse([{"id": 1 if token == "first" else 10}])
+            if path == "/api/familyMember/list":
+                return FakeResponse([{"patient_id": 2 if token == "first" else 11}])
+            return super().get(url, **kwargs)
+
+    session = HouseholdSession({
+        "/api/appointmentManagement/appointmentList": [{"id": 1, "date": "2026-10-28", "doctor_id": 1, "department_id": 1, "specialist": 1, "time": "01", "stock": 100}],
+        "/api/pharmaceuticalManagement/getList": [{"id": 20, "status": 0, "stock": 100, "expireddate": (date.today() + timedelta(days=1)).isoformat()}],
+    })
+    targets = benchmark_setup.discover_write_targets("http://benchmark.test", {"patient": ("first", "second"), "doctor": ("doctor",)}, session=session)
+    assert targets.patient_ids == (1, 2, 10, 11)
+    assert targets.appointment_tokens == {1: "first", 2: "first", 10: "second", 11: "second"}
+    assert {item["patient_id"] for item in targets.appointment_payloads} == set(targets.appointment_tokens)

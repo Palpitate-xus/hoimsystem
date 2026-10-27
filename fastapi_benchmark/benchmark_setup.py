@@ -21,6 +21,7 @@ class WriteTargets:
     appointment_payloads: tuple[dict, ...]
     patient_ids: tuple[int, ...]
     pharmaceutical_ids: tuple[int, ...]
+    appointment_tokens: Mapping[int, str]
 
 
 def _request_list(client, base_url: str, path: str, token: str) -> list:
@@ -51,7 +52,8 @@ def discover_write_targets(
 ) -> WriteTargets:
     """Load IDs and build valid, non-duplicated appointment payloads."""
     try:
-        patient_token = token_pools["patient"][0]
+        patient_tokens = token_pools["patient"]
+        patient_token = patient_tokens[0]
         doctor_token = token_pools["doctor"][0]
     except (KeyError, IndexError, TypeError) as exc:
         raise BenchmarkSetupError("patient and doctor token pools are required") from exc
@@ -65,8 +67,15 @@ def discover_write_targets(
             "/api/appointmentManagement/appointmentList",
             patient_token,
         )
-        owners = _request_list(client, base_url, "/api/patientManagement/getList", patient_token)
-        family_members = _request_list(client, base_url, "/api/familyMember/list", patient_token)
+        appointment_tokens = {}
+        for token in patient_tokens:
+            owners = _request_list(client, base_url, "/api/patientManagement/getList", token)
+            family_members = _request_list(client, base_url, "/api/familyMember/list", token)
+            for item in [*owners, *family_members]:
+                if isinstance(item, dict):
+                    patient_id = item.get("patient_id", item.get("id"))
+                    if isinstance(patient_id, int):
+                        appointment_tokens.setdefault(patient_id, token)
         pharmaceuticals = _request_list(
             client,
             base_url,
@@ -77,9 +86,7 @@ def discover_write_targets(
         if owns_session:
             client.close()
 
-    patient_ids = tuple(
-        dict.fromkeys(item.get("patient_id", item.get("id")) for item in [*owners, *family_members] if isinstance(item, dict) and isinstance(item.get("patient_id", item.get("id")), int))
-    )
+    patient_ids = tuple(appointment_tokens)
     if not patient_ids:
         raise BenchmarkSetupError("benchmark patient target pool is empty")
 
@@ -135,6 +142,7 @@ def discover_write_targets(
         appointment_payloads=tuple(appointment_payloads),
         patient_ids=patient_ids,
         pharmaceutical_ids=tuple(pharmaceutical_ids),
+        appointment_tokens=appointment_tokens,
     )
 
 

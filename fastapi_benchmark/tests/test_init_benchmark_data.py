@@ -58,7 +58,7 @@ def test_initializer_rebuilds_a_stale_benchmark_schema(tmp_path):
     probe = """
 import json
 from pathlib import Path
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, func
 from sqlalchemy.orm import sessionmaker
 import benchmark_database
 import init_benchmark_data as target
@@ -81,10 +81,14 @@ columns = {column["name"] for column in inspect(replacement_engine).get_columns(
 with target.SessionLocal() as session:
     user_count = session.query(target.User).count()
     family_count = session.query(target.FamilyMember).count()
+    household_sizes = session.query(func.count(target.FamilyMember.member_patient_id)).group_by(target.FamilyMember.owner_patient_id).all()
+    patient_count = session.query(target.Patient).count()
 print("PROBE=" + json.dumps({
     "columns": sorted(columns),
     "family_count": family_count,
     "user_count": user_count,
+    "max_family_members": max(count for count, in household_sizes),
+    "patient_count": patient_count,
 }))
 """.replace("__DATABASE_PATH__", repr(benchmark_db.as_posix()))
 
@@ -102,5 +106,7 @@ print("PROBE=" + json.dumps({
     payload = json.loads(payload_line.removeprefix("PROBE="))
 
     assert "campus_id" in payload["columns"]
-    assert payload["family_count"] == 99
-    assert payload["user_count"] == 7
+    assert payload["family_count"] == 88
+    assert payload["user_count"] == 18
+    assert payload["max_family_members"] == 8
+    assert payload["patient_count"] == 100

@@ -4,11 +4,11 @@ import argparse
 import datetime
 import sys
 import uuid
-from dataclasses import dataclass
 
-from sqlalchemy import insert, literal, select
+from sqlalchemy import insert, select
 
 from benchmark_database import BACKEND_DIR, BENCHMARK_DB, configure_application_environment, validate_benchmark_url  # noqa: F401
+from benchmark_profiles import MAX_FAMILY_MEMBERS, PROFILES, patient_identity, portal_owner_offsets
 
 sys.path.insert(0, str(BACKEND_DIR))
 
@@ -34,19 +34,6 @@ from app.models import (  # noqa: E402
 from app.security import hash_password  # noqa: E402
 
 
-@dataclass(frozen=True)
-class BenchmarkProfile:
-    patients: int
-    history_rows: int
-    pharmaceuticals: int
-
-
-PROFILES = {
-    "smoke": BenchmarkProfile(patients=100, history_rows=200, pharmaceuticals=20),
-    "small": BenchmarkProfile(patients=1_000, history_rows=5_000, pharmaceuticals=100),
-    "medium": BenchmarkProfile(patients=10_000, history_rows=50_000, pharmaceuticals=1_000),
-    "large": BenchmarkProfile(patients=100_000, history_rows=500_000, pharmaceuticals=5_000),
-}
 BATCH_SIZE = 2_000
 
 
@@ -132,34 +119,37 @@ def init(profile_name: str = "smoke"):
         db.add(patient)
         db.flush()
 
-        # 一个患者账号可合法为多个家庭成员预约，用于构造
-        # 不重复的并发预约目标，无需为压测创建大量登录账号。
+        # Portal households stay bounded while unrelated clinical history grows.
+        owner_offsets = portal_owner_offsets(profile)
+        member_offsets = {
+            member
+            for owner in owner_offsets
+            for member in range(owner + 1, min(owner + MAX_FAMILY_MEMBERS + 1, profile.patients))
+        }
         family_rows = [
             {
                 "name": f"压测患者{index:06d}",
                 "sex": index % 2,
-                "identity": f"99000020000101{index:06d}",
+                "identity": patient_identity(index),
                 "birthday": datetime.date(2000, 1, 1),
                 "phone": f"139{index:08d}",
                 "address": "基准测试",
-                "permission": "family",
+                "permission": "family" if index in member_offsets else "allow",
             }
             for index in range(1, profile.patients)
         ]
         _batched_insert(db, Patient, family_rows)
         now = datetime.datetime.now()
-        db.execute(
-            insert(FamilyMember).from_select(
-                ["owner_patient_id", "member_patient_id", "relation", "create_time", "update_time"],
-                select(
-                    literal(patient.patient_id),
-                    Patient.patient_id,
-                    literal("其他"),
-                    literal(now),
-                    literal(now),
-                ).where(Patient.patient_id != patient.patient_id),
-            )
-        )
+        household_patient_ids = db.scalars(select(Patient.patient_id).order_by(Patient.patient_id)).all()
+        _batched_insert(db, FamilyMember, [
+            {"owner_patient_id": household_patient_ids[owner], "member_patient_id": household_patient_ids[member], "relation": "其他", "create_time": now, "update_time": now}
+            for owner in owner_offsets
+            for member in range(owner + 1, min(owner + MAX_FAMILY_MEMBERS + 1, profile.patients))
+        ])
+        db.add_all([
+            User(username=patient_identity(owner), password=users[-1].password, user_role="patient")
+            for owner in owner_offsets if owner != 0
+        ])
         db.flush()
 
         # 药品

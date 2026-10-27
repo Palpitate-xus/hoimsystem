@@ -7,21 +7,26 @@ from collections import deque
 from benchmark_auth import load_tokens_or_stop
 from benchmark_http import mark_business_result
 from benchmark_metadata import register_metadata_hooks
+from benchmark_profiles import PROFILES, patient_identity, portal_owner_offsets
 from benchmark_setup import load_write_targets_or_stop
 from locust import HttpUser, between, events, task
+
+def patient_credentials():
+    password = os.getenv("BENCHMARK_PATIENT_PASSWORD", "123456")
+    if os.getenv("BENCHMARK_PATIENT_USERNAME"):
+        return ((os.environ["BENCHMARK_PATIENT_USERNAME"], password),)
+    profile = PROFILES[os.getenv("BENCHMARK_PROFILE", "smoke")]
+    return tuple((patient_identity(offset), password) for offset in portal_owner_offsets(profile))
+
 
 BENCHMARK_CREDENTIALS = {
     "admin": ((os.getenv("BENCHMARK_ADMIN_USERNAME", "admin"), os.getenv("BENCHMARK_ADMIN_PASSWORD", "admin123")),),
     "doctor": ((os.getenv("BENCHMARK_DOCTOR_USERNAME", "doc01"), os.getenv("BENCHMARK_DOCTOR_PASSWORD", "123456")),),
-    "patient": (
-        (
-            os.getenv("BENCHMARK_PATIENT_USERNAME", "370101199001011234"),
-            os.getenv("BENCHMARK_PATIENT_PASSWORD", "123456"),
-        ),
-    ),
+    "patient": patient_credentials(),
 }
 TOKEN_POOLS: dict[str, tuple[str, ...]] = {}
 APPOINTMENT_TARGETS: deque[dict] = deque()
+APPOINTMENT_TOKENS: dict[int, str] = {}
 PRESCRIPTION_PATIENT_IDS: tuple[int, ...] = ()
 PRESCRIPTION_PHARMACEUTICAL_IDS: tuple[int, ...] = ()
 
@@ -36,6 +41,7 @@ def prepare_runtime_tokens(environment, **_kwargs):
     TOKEN_POOLS.clear()
     TOKEN_POOLS.update(load_tokens_or_stop(environment, BENCHMARK_CREDENTIALS))
     APPOINTMENT_TARGETS.clear()
+    APPOINTMENT_TOKENS.clear()
     PRESCRIPTION_PATIENT_IDS = ()
     PRESCRIPTION_PHARMACEUTICAL_IDS = ()
     if not TOKEN_POOLS:  # Distributed master; workers discover their own targets.
@@ -44,6 +50,7 @@ def prepare_runtime_tokens(environment, **_kwargs):
     appointment_payloads = list(targets.appointment_payloads)
     random.shuffle(appointment_payloads)
     APPOINTMENT_TARGETS.extend(appointment_payloads)
+    APPOINTMENT_TOKENS.update(targets.appointment_tokens)
     PRESCRIPTION_PATIENT_IDS = targets.patient_ids
     PRESCRIPTION_PHARMACEUTICAL_IDS = targets.pharmaceutical_ids
 
@@ -114,7 +121,7 @@ class HOIMUser(HttpUser):
             return
         with self.client.post(
             "/api/appointmentManagement/create",
-            headers=self._headers("patient"),
+            headers={"accesstoken": APPOINTMENT_TOKENS[payload["patient_id"]]},
             json=payload,
             catch_response=True,
         ) as response:

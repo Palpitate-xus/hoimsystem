@@ -7,7 +7,7 @@ import pytest
 BENCHMARK_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BENCHMARK_DIR))
 
-import locust_final
+import locust_final  # noqa: E402
 
 
 class FakeLocustResponse:
@@ -97,6 +97,7 @@ def test_write_tasks_use_role_valid_tokens(monkeypatch):
         "patient_id": 11,
     }
     monkeypatch.setattr(locust_final, "APPOINTMENT_TARGETS", deque([appointment_payload]))
+    monkeypatch.setattr(locust_final, "APPOINTMENT_TOKENS", {11: "patient-token"})
     monkeypatch.setattr(locust_final, "PRESCRIPTION_PATIENT_IDS", (11,))
     monkeypatch.setattr(locust_final, "PRESCRIPTION_PHARMACEUTICAL_IDS", (23,))
     appointment_response = FakeLocustResponse()
@@ -116,3 +117,23 @@ def test_write_tasks_use_role_valid_tokens(monkeypatch):
     assert prescription[1]["headers"] == {"accesstoken": "doctor-token"}
     assert prescription[1]["json"] == {"patient": 11, "phas": [{"id": 23, "number": 1}]}
     assert prescription[1]["catch_response"] is True
+
+
+def test_appointment_uses_the_target_household_token(monkeypatch):
+    monkeypatch.setattr(locust_final, "TOKEN_POOLS", {"patient": ("unrelated-household",)})
+    monkeypatch.setattr(locust_final, "APPOINTMENT_TARGETS", deque([{"patient_id": 27}]))
+    monkeypatch.setattr(locust_final, "APPOINTMENT_TOKENS", {27: "authorized-household"})
+    user = FakeUser([FakeLocustResponse()])
+    locust_final.HOIMUser.create_appointment(user)
+    assert user.client.posts[0][1]["headers"] == {"accesstoken": "authorized-household"}
+
+
+def test_credentials_follow_bounded_households_and_allow_explicit_account(monkeypatch):
+    monkeypatch.delenv("BENCHMARK_PATIENT_USERNAME", raising=False)
+    monkeypatch.setenv("BENCHMARK_PROFILE", "large")
+    credentials = locust_final.patient_credentials()
+    assert len(credentials) == 64
+    assert credentials[0][0] == "370101199001011234"
+    assert len(set(username for username, _ in credentials)) == 64
+    monkeypatch.setenv("BENCHMARK_PATIENT_USERNAME", "custom-patient")
+    assert locust_final.patient_credentials() == (("custom-patient", "123456"),)

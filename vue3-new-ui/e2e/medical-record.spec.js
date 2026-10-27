@@ -4,6 +4,16 @@ const BASE = process.env.E2E_BASE_URL || "http://localhost:8091";
 
 test("医生可以看到病历状态并完成签名", async ({ page }) => {
   let listRequestCount = 0;
+  // This signature UI uses synthetic responses and a fixture token. Its
+  // background patient picker and event stream must share that isolation.
+  await page.route("**/api/patientManagement/getList**", route => route.fulfill({
+    status: 200, contentType: "application/json",
+    body: JSON.stringify({ code: 200, msg: "success", data: [] }),
+  }));
+  await page.route("**/api/events/stream", route => route.fulfill({
+    status: 200, contentType: "text/event-stream",
+    body: ": isolated signature fixture heartbeat\n\n",
+  }));
   await page.route("**/api/medicalRecord/getList**", async (route) => {
     listRequestCount += 1;
     const signed = listRequestCount > 1;
@@ -42,7 +52,7 @@ test("医生可以看到病历状态并完成签名", async ({ page }) => {
   await expect(page.getByText("草稿").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "签名" })).toBeVisible();
   // 本地 dev server 的 overlay 可能残留上一轮编译提示，不属于业务页面。
-  await page.locator("#rspack-dev-server-client-overlay").evaluate((element) => element.remove()).catch(() => {});
+  await page.locator("#rspack-dev-server-client-overlay").evaluateAll((elements) => elements.forEach((element) => element.remove()));
   await page.getByRole("button", { name: "签名" }).click();
   await page.getByRole("button", { name: "确定" }).click();
   await expect(page.getByText("已签名").first()).toBeVisible();

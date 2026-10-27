@@ -1,3 +1,4 @@
+const {openNativeTextDetails}=require('./native-ui-details.cjs');
 const{expect}=require('@playwright/test'),{load,http}=require('./load-research-cohort-shared.cjs');
 async function openResearchRoot(page,harness,{kind='chat',mode='history',roles=['super_admin'],hold=null,deny=null,mutatePart=null,mutateTrace=null,mutateDirectory=null}={}){
  const packet=load(kind),state={packet,errors:[],unexpected:[],calls:[],release:null,hold,deny,reads:0};page.__researchRootState=state;page.on('pageerror',e=>state.errors.push(e.message));
@@ -14,5 +15,5 @@ async function openResearchRoot(page,harness,{kind='chat',mode='history',roles=[
  });await page.goto(harness.origin);await page.waitForFunction(()=>!!window.__researchRootProbe);return state;
 }
 async function inspect(page){await page.getByRole('button',{name:'执行溯源',exact:true}).first().click();}
-async function accepted(page){await expect(page.getByText('当前完整Source、私有Case、原始TEXT和冻结Prompt版本已核对；技术审核不代表研究入组、伦理批准、因果或匿名认证。',{exact:true})).toBeVisible({timeout:20000});}
+async function accepted(page){await openNativeTextDetails(page,'当前完整Source、私有Case、原始TEXT和冻结Prompt版本已核对；技术审核不代表研究入组、伦理批准、因果或匿名认证。',{timeout:20000});}
 module.exports={openResearchRoot,inspect,accepted};

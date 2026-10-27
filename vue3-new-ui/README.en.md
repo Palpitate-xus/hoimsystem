@@ -1,203 +1,145 @@
-[简体中文](./README.md) | English
+# HOIM Frontend
 
-<div align="center"><img width="200" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/logo/vab.png"/>
-<h1> vue-admin-better（element-ui） </h1>
-<p>The flying snow all over the sky is a flying note, playing out expectations with blessings. May the epidemic dissipate as soon as possible, may you no longer have regrets next year, may you be warm in winter, may you not be cold in spring, and may you have lights in the dark and an umbrella in the rain.
-</p>
-</div>
+[中文](README.md) | **English**
 
-[![stars](https://img.shields.io/github/stars/zxwk1998/vue-admin-better?style=flat-square&logo=GitHub)](https://github.com/zxwk1998/vue-admin-better)
-[![star](https://gitee.com/chu1204505056/vue-admin-better/badge/star.svg?theme=gray)](https://gitee.com/chu1204505056/vue-admin-better)
-[![license](https://img.shields.io/github/license/zxwk1998/vue-admin-better?style=flat-square)](https://en.wikipedia.org/wiki/MIT_License)
+The Web frontend for the HOIM hospital information management system. It lives in `vue3-new-ui/` in the [hoimsystem repository](https://github.com/Palpitate-xus/hoimsystem) and works with the FastAPI backend in `fastapi_be/`.
 
----
+The application covers outpatient registration and doctor workstations, inpatient and nursing workflows, pharmacy and inventory, laboratory and imaging, health examinations, billing, patient services, operational reports, and administration. Menus and actions follow the signed-in user's role and business permissions.
 
-# 🎉 Characteristic
+## Stack and structure
 
-- 💪 40 + high quality single page
-- 💅 RBAC model + JWT permission control
-- 🌍 100000 + practical application of the project
-- 👏 Good type definition
-- 🥳 The open source version supports free commercial use
-- 🚀 Cross platform PC, mobile terminal and tablet
-- 📦 Back end route dynamic rendering
+| Purpose | Technology |
+| --- | --- |
+| Pages and components | Vue 3.5, Element Plus 2, Sass |
+| Routing and state | Vue Router 5, Vuex 4 |
+| HTTP and charts | Axios, ECharts 6 |
+| Development and builds | Rspack 2, Vue Loader, Babel |
+| Tests | Node.js built-in test runner, Playwright |
 
-## 🌐 Address
+See [package.json](package.json) for dependency ranges and commands, and [package-lock.json](package-lock.json) for resolved versions.
 
-- [🎉 Vue2. X + element UI (free commercial, PC, tablet and mobile phone supported)](https://vuejs-core.cn/vue-admin-better/)
+```text
+vue3-new-ui/
+├── src/
+│   ├── views/          # Business pages, AI workbench and management center
+│   ├── components/     # Business components, shared assistant and domain AI panels
+│   ├── api/            # API clients and source/result contracts
+│   ├── router/         # Routes and role metadata
+│   ├── store/          # Session and application state
+│   ├── config/         # Title, port and network settings
+│   └── styles/         # Shared styles
+├── layouts/            # Application layouts
+├── public/             # HTML template and static files
+├── tests/              # Node.js tests
+├── scripts/            # Build checks, data generation and Node.js tests
+├── e2e/                # Playwright tests and isolated fixtures
+└── rspack.config.js    # Build, development server and proxy configuration
+```
 
-<!-- - [⚡️ Vue3. X + element plus (alpha version, free commercial, supporting PC, tablet and mobile phone)](https://vuejs-core.cn/vue-admin-better-plus/) -->
+## Run locally
 
-<!-- - [⚡️ Vue3. X + ant design Vue (beta version, free commercial, supporting PC, tablet and mobile phone)](https://vuejs-core.cn/vue-admin-better-antdv/) -->
-
-- [⚡️ vue3.x + vite + vue-admin-arco](https://vuejs-core.cn/vue-admin-arco/)
-
-- [🚀 Admin Pro demo address (vue2.x paid version, supporting PC, tablet and mobile phone)](https://vuejs-core.cn/admin-pro/)
-
-- [🚀 Admin plus demo address (vue3.x paid version, supporting PC, tablet and mobile phone)](https://vuejs-core.cn/admin-plus/)
-
-- [📌 Pro and plus purchase address authorization](https://vuejs-core.cn/authorization/)
-
-- [🌐 Github Warehouse address](https://github.com/zxwk1998/vue-admin-better/)
-
-- [🌐 Gitee Warehouse address](https://gitee.com/chu1204505056/vue-admin-better/)
-
-- Recently, the VAB official website has been frequently attacked by DDoS. We have taken relevant preventive measures.
-  If the website cannot be accessed, please visit the backup address
-
-## 📦️ Desktop applications
-
-- [Admin Pro](https://gitee.com/chu1204505056/microsoft-store/raw/master/AdminPlus.zip)
-- [Admin Plus](https://gitee.com/chu1204505056/microsoft-store/raw/master/AdminPlus.zip)
-
-<!-- ## 🌱 Vue3.x vue3.0-antdv [Click switch branch](https://github.com/zxwk1998/vue-admin-better/tree/vue3.0-antdv)
+Use Node.js matching `^20.19.0 || >=22.12.0` and npm 10 or later.
 
 ```bash
-git clone -b vue3.0-antdv https://github.com/zxwk1998/vue-admin-better.git
-npm i --registry=http://mirrors.cloud.tencent.com/npm/
-npm run serve
-``` -->
+git clone https://github.com/Palpitate-xus/hoimsystem.git
+cd hoimsystem/vue3-new-ui
+npm ci --legacy-peer-deps
+npm run serve:rspack
+```
 
-## 🌱 Vue2.xmain [Click switch branch](https://github.com/zxwk1998/vue-admin-better/tree/master)
+Open <http://localhost:8091>. Follow the [project README](../README.en.md) and [deployment guide](../doc/installation-guide.md) for backend configuration, database migrations and API startup. Asynchronous AI tasks use a separate backend worker; its startup steps are in the [AI usage guide](../doc/ai-guide.md).
+
+### Port and API settings
+
+| Setting | Current value and location |
+| --- | --- |
+| Development port | `devPort: "8091"` in [setting.config.js](src/config/setting.config.js), used by the Rspack development server |
+| Routing mode | `routerMode: "hash"` in the same file |
+| API prefix | `baseURL: "/api"` in [net.config.js](src/config/net.config.js), used in development and production |
+| Development proxy | `devServer.proxy` in [rspack.config.js](rspack.config.js) forwards `/api` to `http://localhost:8000`, preserving the request path |
+| Build output | `outputDir: "dist"` in `setting.config.js` |
+
+To use another backend, change the development proxy's `target`. Change `devPort` to use another local port. For production, serve `dist/` through a static Web server and proxy same-origin `/api` requests to the backend. See the [deployment guide](../doc/installation-guide.md) for examples.
+
+Enable development Mock explicitly from the command line:
 
 ```bash
-git clone -b master https://github.com/zxwk1998/vue-admin-better.git
-npm i --registry=http://mirrors.cloud.tencent.com/npm/
-npm run serve
+VUE_APP_MOCK_ENABLE=true npm run serve:rspack
 ```
 
-## 🍻 Front end discussion QQ group
+[rspack.js](rspack.js) and the development middleware read this flag; its default is `false`. The default startup command connects to FastAPI through the proxy.
 
-- Let's have a cup of coffee, and then contact QQ 783963206 to invite you to the discussion group. Because of the large
-  number of users, if you haven't passed a friend's request, please contact Alipay on the Alipay payment page, whether
-  you invite or not, you can enjoy the open source code, thank you for your support and trust, and provide the
-  vue-admin-better basic version in the group. Automatic configuration tutorial of development tools and project
-  development documents.
+## AI workbench and business entry points
 
-<table>
-<tr>
-<!-- <td>
-<img width="200px" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/qq_group/hbm.jpg">
-</td> -->
-<td>
-<img width="200px" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/zfb_kf.jpg">
-</td>
-<td>
-<img width="200px" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/qq_group/vab-2.jpg">
-</td>
-<td>
-<img width="200px" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/qq_group/vab-3.jpg">
-</td>
-</tr>
-</table>
+| Entry | Usage |
+| --- | --- |
+| `/#/ai/workbench` | AI business assistant: select an authorized capability and patient or business scope, review the inputs, submit a task, and inspect results, evidence and review feedback |
+| `/#/ai/manage` | AI management center: the `super_admin` role manages features, models, Prompts, knowledge, sources and access, and inspects tasks, usage and audit records |
+| Business record rows | Actions such as “检查病历” (review record), “核查处方” (review prescription), “核查用药” (review medication) and “术前评估” (preoperative assessment) carry the current record, patient and encounter scope |
+| Operational and source pages | Bed, inventory, operational reporting, drug label and research pages provide the relevant source selection, review and analysis entry points |
 
-## 🙈 We promise to sponsor open source projects regularly (thank giant)
+The [80-capability catalog](../doc/ai-capabilities.md) covers text summaries and clinical references, document drafts, medication checks, patient communication, speech, imaging, ECG, risk rules, operational forecasting, research and training. Available tasks follow role permissions, feature configuration and the intended use of the selected sources. Results present evidence, missing information and items for human review.
 
-<a title="vue" href="https://opencollective.com/vuejs" target="_blank">
-<img width="64px" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/vue.png"/>
-</a>
-<a title="element-plus" href="https://opencollective.com/element-plus" target="_blank">
-<img width="64px" src="https://gcore.jsdelivr.net/gh/zxwk1998/image/element-plus.png"/>
-</a>
-<a title="ant-design-vue" href="https://opencollective.com/ant-design-vue" target="_blank">
-<img width="64px" src="https://images.opencollective.com/ant-design-vue/2ec179b/logo/256.png"/>
-</a>
+### Super administrator management
 
-## 🎨 Acknowledge
+The management center contains 41 entries in four groups, with a searchable “查找管理入口” directory:
 
-| Project                                                          |
-| ---------------------------------------------------------------- |
-| [vue](https://github.com/vuejs/vue)                              |
-| [element-ui](https://github.com/ElemeFE/element)                 |
-| [element-plus](https://github.com/element-plus/element-plus)     |
-| [ant-design-vue](https://github.com/vueComponent/ant-design-vue) |
-| [mock](https://github.com/nuysoft/Mock)                          |
-| [axios](https://github.com/axios/axios)                          |
+| Group | Contents |
+| --- | --- |
+| 功能与模型 — Features and models | Feature activation, roles and quotas, Prompt versions, text models and specialist services |
+| 知识与数据 — Knowledge and data | Knowledge review and clinical, operational, drug label, research, operations support, training and other source management |
+| 任务与用量 — Tasks and usage | Global technical task directory, tasks and feedback, usage statistics |
+| 权限与审计 — Permissions and audit | Patient access grants, configuration audit and feedback de-identification review |
 
-## 👷 Outstanding contributors to the framework (in no order)
+Configure the actual model service and its permitted uses, prepare and review knowledge or domain sources, then select roles, model, Prompt, quota and validation records in “能力与启用” before enabling a capability. Source directories, published material and task content each follow their own access checks. See the [AI usage guide](../doc/ai-guide.md) for the configuration workflow.
 
-<a href="https://github.com/buuing" target="_blank">
-<img width="50px" style="border-radius:999px" src="https://avatars.githubusercontent.com/u/36689704?s=50"/>
-</a>
-<a href="https://github.com/hipi" target="_blank">
-<img width="50px" style="border-radius:999px" src="https://avatars.githubusercontent.com/u/22478003?s=50"/>
-</a>
-<a href="https://github.com/fwfmiao" target="_blank">
-<img width="50px" style="border-radius:999px" src="https://avatars.githubusercontent.com/u/29328241?s=50"/>
-</a>
-<a href="https://github.com/hdtopku" target="_blank">
-<img width="50px" style="border-radius:999px" src="https://avatars.githubusercontent.com/u/14859466?s=50"/>
-</a>
-<a href="https://github.com/shaonialife" target="_blank">
-<img width="50px" style="border-radius:999px" src="https://avatars.githubusercontent.com/u/16135960?s=50"/>
-</a>
+### Review and copy document sections
 
-## 📌 Advantages and precautions
+Outpatient notes, admission notes, progress notes, discharge summaries and imaging report drafts display the document body separately from the summary, warnings and missing information. “复制文书正文” (copy document body) opens a section review dialog. Select and review the sections; confirm review of any warnings or missing items before copying. The clipboard preserves the selected section text and order. Continue editing, signing and submitting through the original business page.
 
-```
-Compared with other open source admin frameworks, it has the following advantages:
-1. Support the front-end control routing permission intelligence and the back-end control routing permission all mode
-2. It is known that the open source Vue admin framework is the first to support the automatic generation and export function of mock
-3. More than 50 global fine configurations are provided
-4. Support SCSS automatic sorting and eslint automatic repair
-5. Axios fine encapsulation supports multiple data sources, multiple successful code arrays, and application / JSON; charset=UTF-8、application/x-www-form-urlencoded; Charset = UTF-8 multiple parameter transfer modes
-6. Support login RSA encryption
-7. Support packaging to automatically generate 7z compressed packages
-8. Support errorlog error interception
-9. Support multi theme and multi layout switching
-Precautions for use:
-1. The project uses lf line feed instead of CRLF line feed by default. When creating a new file, please pay attention to selecting the file line feed
-2. The project uses the strictest eslint verification specification (plugin: Vue / recommended) by default. Before using it, it is recommended to configure the development tool to realize automatic repair (vscode development is recommended)
-3. The project uses the MIT open source agreement with the broadest requirements, and the MIT open source agreement can be used for free
+Training follows “select course → answer and submit → review score and rationale → request AI explanation.” Fixed scores and model feedback are shown separately.
 
+## Build and checks
+
+Run these commands from `vue3-new-ui/`:
+
+| Command | Purpose |
+| --- | --- |
+| `npm run serve:rspack` | Start the development server |
+| `npm run build` | Regenerate production resources in `dist/` |
+| `npm run audit` | Audit npm dependencies at the `low` threshold |
+| `npm run check:bundle` | Check the existing `dist/` against individual JS, total JS and total asset size budgets |
+| `npm run verify` | Run the dependency audit, production build and bundle budget check in sequence |
+| `npm run build:zip` | Build and create `dist/dist.zip` |
+| `npm run test:e2e -- <test-path>` | Run selected Playwright tests |
+
+Node.js tests live in `tests/` and `scripts/`. Run individual files or both test collections:
+
+```bash
+node --test tests/aiManagementNavigation.test.cjs scripts/ai-document-draft.test.cjs
+node --test tests/*.test.cjs scripts/*.test.cjs
 ```
 
-## 💚 Suitable for people
+See [playwright.config.js](playwright.config.js) for browser test settings. Install Chromium, then select tests for the affected area:
 
-- I am developing and want to use element UI / element plus, with 1 year of front-end development experience +.
-- Familiar with vue.js technology stack and developed several practical projects with it.
-- Students who are interested in principle and technology and want to improve.
+```bash
+npx playwright install chromium
+npm run test:e2e -- --list
+npm run test:e2e -- e2e/ai-management-navigation.spec.js --workers=1
+```
 
-## 🎉 Function map
+Some tests start an isolated page through a fixture. Tests that visit the full application use `E2E_BASE_URL`, which defaults to `http://localhost:8091`. Start the frontend first, or point these tests at a server hosting the build:
 
-![img](https://gcore.jsdelivr.net/gh/zxwk1998/image/vip/flow.drawio.png)
+```bash
+E2E_BASE_URL=http://localhost:8091 npm run test:e2e -- e2e/ai-workbench.spec.js --workers=1
+npx playwright show-report
+```
 
-## 🗃️ design sketch
+## Documentation and attribution
 
-The following is a screenshot of the pro version:
+- [Project overview and backend startup](../README.en.md)
+- [AI usage and configuration guide](../doc/ai-guide.md)
+- [AI capability catalog](../doc/ai-capabilities.md)
+- [Deployment guide](../doc/installation-guide.md)
 
-<table>
-<tr>
-<td>
-<img src="https://gcore.jsdelivr.net/gh/zxwk1998/image/2.png">
-</td>
-<td>
-<img src="https://gcore.jsdelivr.net/gh/zxwk1998/image/6.png">
-</td>
-</tr>
-<tr>
-<td>
-<img src="https://gcore.jsdelivr.net/gh/zxwk1998/image/8.png">
-</td>
-<td>
-<img src="https://gcore.jsdelivr.net/gh/zxwk1998/image/9.png">
-</td>
-</tr>
-<tr>
-<td>
-<img src="https://gcore.jsdelivr.net/gh/zxwk1998/image/3.png">
-</td>
-<td>
-<img src="https://gcore.jsdelivr.net/gh/zxwk1998/image/5.png">
-</td>
-</tr>
-</table>
-
-## 📄 Commercial considerations
-
-This project can be used for commercial purposes free of charge. Please abide by the MIT agreement and keep the author's
-technical support statement. For customized source code copyright information, please contact customer service QQ 783963206.
-
-<!-- ## 严正声明
-
-近期发现不少游手好闲之人有组织有预谋的利用码云、知乎、掘金等网站可用国外非法网站提供的匿名手机号注册的账号 bug 冒充 vab 去攻击 vue-element-admin，iview-admin，若依，d2-admin，ant-design-vue 的行为，恶意制造对立，试图让其他开源作者卷入其中，对各位开源作者造成的影响我们深表歉意，我们欢迎 vab 的用户去体验其他更优秀的框架，vue-admin-beautiful 走到今天实属不易，被人冒充，被人发帖诋毁，被人故意发布错误言论假装发帖表扬实则为我们招骂，无意动任何人的奶酪，从 2020 年至今坚持全职维护已过一年时间，说实在的我们靠技术生存并不丢人吧，一年来感谢 vab 的用户对我们不离不弃，也希望大家越来越好，加油！ -->
+The frontend layout foundation comes from [Vue Admin Better](https://github.com/zxwk1998/vue-admin-better), extended with HOIM hospital workflows and the AI platform. The upstream MIT license and copyright notice are retained in this directory's [LICENSE](LICENSE).

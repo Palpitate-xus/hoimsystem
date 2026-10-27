@@ -1,144 +1,145 @@
-<div align="center">
-  <img width="200" src="https://assets.rspack.rs/rspack/rspack-logo.svg"/>
-  <h1>Vue3 Admin Better</h1>
-  <p>拒绝过度封装，去除等待时间，让项目回归纯粹，让开发变得简单</p>
-</div>
+# HOIM 前端
 
-[![stars](https://img.shields.io/github/stars/zxwk1998/vue-admin-better?style=flat-square&logo=GitHub)](https://github.com/zxwk1998/vue-admin-better)
-[![star](https://gitee.com/chu1204505056/vue-admin-better/badge/star.svg?theme=gray)](https://gitee.com/chu1204505056/vue-admin-better)
-[![license](https://img.shields.io/github/license/zxwk1998/vue-admin-better?style=flat-square)](https://en.wikipedia.org/wiki/MIT_License)
+**中文** | [English](README.en.md)
 
----
+HOIM 医院信息管理系统的 Web 前端，位于 [hoimsystem](https://github.com/Palpitate-xus/hoimsystem) 仓库的 `vue3-new-ui/` 目录，与 `fastapi_be/` 中的 FastAPI 后端配合使用。
 
-## 🚀 2026 全新启程
+页面覆盖门诊挂号与医生工作站、住院与护理、药房药库、检查检验、体检、收费、患者服务、运营报表和系统管理。菜单与操作根据登录角色和业务权限展示。
 
-- ⚡️ 项目运行速度提升 10-15 倍，打包速度提升 20-30 倍
-- 🕒 整体构建时间控制在 5 秒以内，带来飞一般的开发体验
+## 技术栈与目录
 
-## 🎉 特性
+| 用途 | 技术 |
+| --- | --- |
+| 页面与组件 | Vue 3.5、Element Plus 2、Sass |
+| 路由与状态 | Vue Router 5、Vuex 4 |
+| 接口与图表 | Axios、ECharts 6 |
+| 开发与构建 | Rspack 2、Vue Loader、Babel |
+| 测试 | Node.js 内置测试运行器、Playwright |
 
-- 💪 40+高质量单页
-- 💅 RBAC 模型 + JWT 权限控制
-- 🌍 10 万+ 项目实际应用
-- 👏 良好的类型定义
-- 🥳 开源版本支持免费商用
-- 🚀 跨平台 PC、手机端、平板
-- 📦️ 后端路由动态渲染
+具体依赖版本及命令见 [package.json](package.json)，安装版本由 [package-lock.json](package-lock.json) 记录。
 
-## 🌐 演示地址
-
-### 💡 社区版演示
-
-- [🎉 Admin Better - github 实时部署 （vue2.x + element-ui 免费商用，支持 PC、平板、手机）](https://zxwk1998.github.io/vue-admin-better/)
-- [🎉 Admin Better （vue2.x + element-ui 免费商用，支持 PC、平板、手机）](https://vuejs-core.cn/vue-admin-better)
-- [🎉 Admin Better Vue3 - github 实时部署 （vue3.x + element-plus 免费商用，支持 PC、平板、手机）](https://zxwk1998.github.io/vue3-admin-better/)
-- [🎉 Admin Better Vue3 （vue3.x + element-plus 免费商用，支持 PC、平板、手机）](https://vuejs-core.cn/vue3-admin-better)
-- [⚡️ Admin Arco （vue3.x + vite7.x + arco2.x 免费商用，支持 PC）](https://vuejs-core.cn/vue-admin-arco/)
-
-### 💰 商业版演示
-
-- [🚀 Admin Pro （vue2.x + element-ui 2.x 支持 PC、平板、手机）](https://vuejs-core.cn/admin-pro/)
-- [🚀 Admin Plus （vue3.x + element-plus 2.x 支持 PC、平板、手机）](https://vuejs-core.cn/admin-plus/)
-- [🚀 Shop Vite （vue3.x + vite7.x + element-plus 2.x 支持 PC、平板、手机）](https://vuejs-core.cn/shop-vite/)
-
-## 🌱 Vue 2.x (Element UI) - 当前仓库
-
+```text
+vue3-new-ui/
+├── src/
+│   ├── views/          # 按业务划分的页面，含 AI 工作台与管理中心
+│   ├── components/     # 业务组件、共享助手及各领域 AI 面板
+│   ├── api/            # 接口封装与来源、结果契约
+│   ├── router/         # 路由与角色元数据
+│   ├── store/          # 登录会话和页面状态
+│   ├── config/         # 标题、端口、接口等配置
+│   └── styles/         # 公共样式
+├── layouts/            # 页面布局
+├── public/             # HTML 模板与静态文件
+├── tests/              # Node.js 测试
+├── scripts/            # 构建检查、数据生成及 Node.js 测试
+├── e2e/                # Playwright 用例与隔离测试夹具
+└── rspack.config.js    # 构建、开发服务与代理配置
 ```
 
-# 克隆项目
+## 本地启动
 
-git clone -b master https://github.com/zxwk1998/vue-admin-better.git
+使用符合 `^20.19.0 || >=22.12.0` 的 Node.js 和 npm 10 或以上版本。
 
-# 安装依赖
-
-pnpm i --registry=http://mirrors.cloud.tencent.com/npm/
-
-# 本地开发 启动项目
-
+```bash
+git clone https://github.com/Palpitate-xus/hoimsystem.git
+cd hoimsystem/vue3-new-ui
+npm ci --legacy-peer-deps
 npm run serve:rspack
-
 ```
 
-开发服务器默认代理真实 FastAPI 后端（`http://localhost:8000`），不会启用 Mock。仅在没有后端时显式执行 `VUE_APP_MOCK_ENABLE=true npm run serve:rspack` 使用 Mock；生产构建始终默认关闭 Mock。
+访问 <http://localhost:8091>。后端环境、数据库迁移与 API 启动步骤见[项目说明](../README.md)和[部署手册](../doc/installation-guide.md)。AI 异步任务由后端独立 worker 处理，启动步骤见 [AI 使用指南](../doc/ai-guide.md)。
 
-## 🌱 Vue 3.x (Element Plus) [点击切换仓库](https://github.com/zxwk1998/vue3-admin-better)
+### 端口与 API 配置
 
+| 配置 | 当前值与位置 |
+| --- | --- |
+| 开发端口 | [setting.config.js](src/config/setting.config.js) 的 `devPort: "8091"`，由 Rspack 开发服务使用 |
+| 路由模式 | 同文件中的 `routerMode: "hash"` |
+| API 前缀 | [net.config.js](src/config/net.config.js) 的 `baseURL: "/api"`，开发和生产均使用此值 |
+| 开发代理 | [rspack.config.js](rspack.config.js) 的 `devServer.proxy` 将 `/api` 请求转发到 `http://localhost:8000`，保留原路径 |
+| 构建输出 | `setting.config.js` 的 `outputDir: "dist"` |
+
+连接其他后端时，修改开发代理的 `target`；修改本地端口时，调整 `devPort`。生产环境将 `dist/` 交给静态 Web 服务，并为同源 `/api` 配置后端反向代理。部署示例见[部署手册](../doc/installation-guide.md)。
+
+开发 Mock 通过命令行显式开启：
+
+```bash
+VUE_APP_MOCK_ENABLE=true npm run serve:rspack
 ```
 
-# 克隆项目
+该开关由 [rspack.js](rspack.js) 和开发服务中间件读取，默认值为 `false`。日常联调使用默认启动命令连接 FastAPI。
 
-git clone https://github.com/zxwk1998/vue3-admin-better.git
+## AI 工作台与业务入口
 
-# 安装依赖
+| 入口 | 用法 |
+| --- | --- |
+| `/#/ai/workbench` | AI 业务助手：选择当前有权使用的能力、患者或业务范围，核对资料后提交任务，查看结果、依据与复核反馈 |
+| `/#/ai/manage` | AI 管理中心：由 `super_admin` 超级管理员配置功能、模型、Prompt、知识、来源与授权，并查看任务、用量和审计 |
+| 业务记录行 | 病历“检查病历”、处方“核查处方”、药房“核查用药”、手术“术前评估”等入口，携带当前记录及患者、就诊范围 |
+| 运营与资料页面 | 床位、库存、运营报表、说明书及科研等页面提供相应来源的选择、核对和分析入口 |
 
-pnpm i --registry=http://mirrors.cloud.tencent.com/npm/
+[80 项能力目录](../doc/ai-capabilities.md)涵盖文本整理与诊疗参考、文书草稿、用药核查、患者沟通、语音、影像、心电、风险规则、运营预测、科研及教学等任务。具体任务按角色、功能配置和当前资料用途提供，结果页展示依据、资料缺口与人工复核事项。
 
-# 本地开发 启动项目
+### 超级管理员管理
 
-npm run dev
+管理中心保留 41 个入口，按四组组织，可通过“查找管理入口”搜索：
 
+| 分组 | 管理内容 |
+| --- | --- |
+| 功能与模型 | 能力启用、角色与额度、Prompt 版本、文本模型和专用服务 |
+| 知识与数据 | 知识审核、临床与运营来源、说明书、科研、运维、教学及其他领域资料治理 |
+| 任务与用量 | 全局技术任务、任务与反馈、调用统计 |
+| 权限与审计 | 患者访问授权、配置审计、反馈脱敏审核 |
+
+使用时先配置实际模型服务与用途范围，再准备并审核知识或领域来源，在“能力与启用”中选择角色、模型、Prompt、额度和验证记录后启用。来源目录、发布件和任务正文按各自权限核对。详细步骤见 [AI 使用指南](../doc/ai-guide.md)。
+
+### 文书栏目复核与复制
+
+门诊病历、入院记录、病程、出院小结和影像报告草稿将“文书正文”与摘要、警示、资料缺口分开呈现。点击“复制文书正文”后，选择栏目并逐项核对；存在警示或缺项时，确认已复核再复制。剪贴板保留所选栏目的原文及顺序，后续编辑、签名和业务提交由原业务页面完成。
+
+教学入口按“选择课程 → 作答并提交 → 查看成绩与解析 → 获取 AI 讲解”使用；固定成绩与模型反馈分别展示。
+
+## 构建与检查
+
+以下命令均在 `vue3-new-ui/` 中执行：
+
+| 命令 | 用途 |
+| --- | --- |
+| `npm run serve:rspack` | 启动开发服务 |
+| `npm run build` | 重新生成 `dist/` 生产资源 |
+| `npm run audit` | 按 `low` 等级执行 npm 依赖审计 |
+| `npm run check:bundle` | 检查已有 `dist/` 的单个 JS、JS 总量和总资源大小预算 |
+| `npm run verify` | 依次执行依赖审计、生产构建和资源预算检查 |
+| `npm run build:zip` | 构建并生成 `dist/dist.zip` |
+| `npm run test:e2e -- <用例路径>` | 运行指定 Playwright 用例 |
+
+Node.js 测试位于 `tests/` 和 `scripts/`，可以按文件运行，也可以执行两处测试集合：
+
+```bash
+node --test tests/aiManagementNavigation.test.cjs scripts/ai-document-draft.test.cjs
+node --test tests/*.test.cjs scripts/*.test.cjs
 ```
 
-## 🌱 Vue 3.x (Arco Design) [点击切换仓库](https://github.com/zxwk1998/vue-admin-arco)
+Playwright 配置见 [playwright.config.js](playwright.config.js)。先安装 Chromium，再按修改范围选择用例：
 
+```bash
+npx playwright install chromium
+npm run test:e2e -- --list
+npm run test:e2e -- e2e/ai-management-navigation.spec.js --workers=1
 ```
 
-# 克隆项目
+部分用例使用夹具启动隔离页面；访问完整应用的用例使用 `E2E_BASE_URL`，默认地址为 `http://localhost:8091`。这类用例运行前先启动前端，或指向已提供构建资源的服务，例如：
 
-git clone https://github.com/zxwk1998/vue-admin-arco.git
-
-# 安装依赖
-
-pnpm i --registry=http://mirrors.cloud.tencent.com/npm/
-
-# 本地开发 启动项目
-
-npm run dev
-
+```bash
+E2E_BASE_URL=http://localhost:8091 npm run test:e2e -- e2e/ai-workbench.spec.js --workers=1
+npx playwright show-report
 ```
 
-## 🍻 前端讨论 QQ 群
+## 相关文档与来源
 
-- [点击加入](https://vuejs-core.cn/vue-admin-better/#/donate)
+- [项目说明与后端启动](../README.md)
+- [AI 使用与配置指南](../doc/ai-guide.md)
+- [AI 能力目录](../doc/ai-capabilities.md)
+- [部署手册](../doc/installation-guide.md)
 
-## 🌟 优势亮点
-
-### 主要优势:
-
-1. **灵活权限控制** - 支持前端控制路由权限(intelligence)和后端控制路由权限(all)两种模式
-2. **开发效率提升** - 独家支持 mock 自动生成和自动导出功能
-3. **高度可配置** - 提供 50+ 项全局精细化配置选项
-4. **开发友好** - 支持 SCSS 自动排序，ESLint 自动修复
-5. **网络请求优化** - Axios 精细化封装，支持多数据源、多成功状态码，支持多种传参方式
-6. **安全增强** - 支持登录 RSA 加密
-7. **构建优化** - 支持打包自动生成 7Z 压缩包
-8. **错误监控** - 支持错误日志拦截(errorlog)
-9. **多样化支持** - 支持多主题、多布局切换
-
-### 使用须知:
-
-1. 项目默认使用 LF 换行符，请注意文件换行符设置
-2. 使用最严格的 ESLint 校验规范（plugin:vue/recommended），建议配置开发工具自动修复（推荐使用 VSCode）
-3. 项目采用 MIT 开源协议，保留协议声明即可免费商用
-
-## 💚 适合人群
-
-- 正在以及想使用 element-ui/element-plus 开发，前端开发经验 1 年+。
-- 熟悉 Vue.js 技术栈，使用它开发过几个实际项目。
-- 对原理技术感兴趣，想进阶和提升的同学。
-
-## 🎨 Star
-
-[![Stargazers for vue-admin-better](https://reporoster.com/stars/zxwk1998/vue-admin-better)](https://github.com/zxwk1998/vue-admin-better/stargazers)
-
-## ✨ Fork
-
-[![Forkers repo roster for vue-admin-better](https://reporoster.com/forks/zxwk1998/vue-admin-better)](https://github.com/zxwk1998/vue-admin-better/network/members)
-
-## 🎉 功能地图
-
-![img](https://gcore.jsdelivr.net/gh/zxwk1998/image/vip/flow.drawio.png)
-
-## 📄 vue-admin-better 开源版商用注意事项
-
-开源版本可免费用于商业用途，如果方便就留个 Star 吧
+前端布局基础源自 [Vue Admin Better](https://github.com/zxwk1998/vue-admin-better)，在此基础上实现 HOIM 医院业务与 AI 平台。保留上游 MIT 许可和版权声明，见本目录的 [LICENSE](LICENSE)。

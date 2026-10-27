@@ -45,6 +45,7 @@ def test_actual_default_uses_entire_catalog_task_and_fixed_system_without_invent
     assert value.prompt_origin.model_dump() == {"prompt_id": None, "prompt_version": 0}
     assert value.validation_snapshot.status == "unreviewed" and row.validation_status == "unreviewed"
     assert value.provider_snapshot.provider_id == provider.provider_id
+    assert value.provider_snapshot.max_attempts == 3
     assert set(value.provider_snapshot.model_dump()) == {
         "provider_id",
         "revision",
@@ -53,6 +54,7 @@ def test_actual_default_uses_entire_catalog_task_and_fixed_system_without_invent
         "api_base",
         "model",
         "timeout_seconds",
+        "max_attempts",
         "max_output_tokens",
         "validation_report",
         "temperature",

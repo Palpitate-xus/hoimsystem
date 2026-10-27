@@ -1,0 +1,143 @@
+{
+  "inventory-pressure-before": {
+    "counts": {
+      "tests": "2",
+      "errors": "0",
+      "failures": "2",
+      "skipped": "0",
+      "time": "3.094"
+    },
+    "summary": {
+      "started_at": "2026-10-27T06:57:42.830728+00:00",
+      "elapsed_seconds": 18.487625807523727,
+      "exit_code": 1,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/inventory-pressure-before/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_inventory_backpressure.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/inventory-pressure-before.xml"
+      ]
+    },
+    "junit_sha256": "7a799a0d65ddcb5281fe3adbf2d672acd5bed047352fad60b8d6749bab5dd7a6"
+  },
+  "inventory-pressure-after": {
+    "counts": {
+      "tests": "20",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "6.847"
+    },
+    "summary": {
+      "started_at": "2026-10-27T07:03:11.068241+00:00",
+      "elapsed_seconds": 21.76659427396953,
+      "exit_code": 0,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/inventory-pressure-after/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_inventory_backpressure.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_ai_inventory_write_guard.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/inventory-pressure-after.xml"
+      ]
+    },
+    "junit_sha256": "16b4edd884262a0a4da7c6fe450dd7593f22495195d4586b47c25ddba68ae369"
+  },
+  "pool-pressure-before": {
+    "counts": {
+      "tests": "2",
+      "errors": "0",
+      "failures": "2",
+      "skipped": "0",
+      "time": "9.682"
+    },
+    "summary": {
+      "started_at": "2026-10-27T07:05:16.766253+00:00",
+      "elapsed_seconds": 23.611708383075893,
+      "exit_code": 1,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/pool-pressure-before/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_database_backpressure.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/pool-pressure-before.xml"
+      ]
+    },
+    "junit_sha256": "004b74e932b2d360d9c259833a3c8510f2b6578a182912c2d632911660a4ea86"
+  },
+  "pool-pressure-after-valid": {
+    "counts": {
+      "tests": "31",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "15.308"
+    },
+    "summary": {
+      "started_at": "2026-10-27T07:08:06.901540+00:00",
+      "elapsed_seconds": 29.723495319485664,
+      "exit_code": 0,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/pool-pressure-after-valid/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_database_backpressure.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_database_config.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_operation_log_lifecycle.py",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_business_flows.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/pool-pressure-after-valid.xml"
+      ]
+    },
+    "junit_sha256": "bfff9618b3a67e5c6ef2f9a6cf12908011dd8ed0c925c23da72abbead30362e1"
+  },
+  "missing-read-routes-static-final": {
+    "counts": {
+      "tests": "67",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "7.870"
+    },
+    "summary": {
+      "started_at": "2026-10-27T07:14:36.719944+00:00",
+      "elapsed_seconds": 21.62549129407853,
+      "exit_code": 0,
+      "command": [
+        "/home/xusheng/miniconda3/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "cache_dir=/tmp/hoim-validation-20261027/backend/missing-read-routes-static-final/cache",
+        "/home/xusheng/workspace/hoimsystem/fastapi_be/tests/test_baseline_missing_reads.py",
+        "--junitxml=/tmp/hoim-validation-20261027/backend/missing-read-routes-static-final.xml"
+      ]
+    },
+    "junit_sha256": "4578ee533985418deff7f0840bbcbf42596edaf4c721c0c04a0f4b2e22aecc0e"
+  },
+  "interpretation": {
+    "inventory": "Actual PostgreSQL private-schema lock_timeout and statement_timeout produce rollback and503 instead of unhandled OperationalError. Entire prior inventory guard file also passes. No business writes replayed.",
+    "pool": "Actual Main GET/POST with held bounded connection pool return503/RetryAfter1 and no Prescription instead of500; entire database configuration, audit lifecycle and business journeys also pass.",
+    "read_routes": "67 named previously unobserved mounted GET defaults returnHTTP200 and businesscode200 when present; reads do not establish successful state-changing workflows."
+  },
+  "source_sha256": {
+    "fastapi_be/app/main.py": "f37439c88162eeaba8d6ce1f74c04142b1a04ae5677e2f9935e753e9a886d3e3",
+    "fastapi_be/app/ai/inventory_write_guard.py": "a292d609311e1007aac81c14f2a8159dc61c13477f19d37a292e53ba831e7039",
+    "fastapi_be/tests/test_inventory_backpressure.py": "0a84fc6d502b6cfd03673e19b6c32678ba709fb22f12cd33cdbfd291fc828eaa",
+    "fastapi_be/tests/test_database_backpressure.py": "64a551c4205b43454b22a671ccbfc453fbd0f9faefb822c05b79a3968932cd89",
+    "fastapi_be/tests/test_baseline_missing_reads.py": "9dcae9f74bb1f5f8aed2089eb4652a291639d6f8e21abcb4362ddca7afcb11ec"
+  }
+}

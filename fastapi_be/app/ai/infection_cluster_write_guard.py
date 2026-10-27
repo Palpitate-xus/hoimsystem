@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.ai.infection_cluster_models import AIInfectionWriteGate
+from app.sql_locks import postgresql_gate_statement
 
 
 def current(query, *, shared=False):
@@ -16,10 +17,12 @@ def lock_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
         statement = mysql_insert(AIInfectionWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(revision=AIInfectionWriteGate.revision)
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AIInfectionWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AIInfectionWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:
-        raise RuntimeError("Only explicitly tested SQLite/MySQL infection Gate dialects are supported")
+        raise RuntimeError("Only explicitly tested SQLite/MySQL/PostgreSQL infection Gate dialects are supported")
     with db.no_autoflush:
         db.execute(statement)
         return current(db.query(AIInfectionWriteGate).filter_by(gate_id=1)).one()

@@ -10,6 +10,7 @@ from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.ai.coding_evidence_models import AICodingWriteGate
+from app.sql_locks import postgresql_gate_statement
 
 
 def current_coding_rows(query, *, shared=False):
@@ -22,6 +23,8 @@ def lock_coding_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
         statement = mysql_insert(AICodingWriteGate).values(gate_id=1, revision=1).prefix_with("IGNORE")
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AICodingWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AICodingWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

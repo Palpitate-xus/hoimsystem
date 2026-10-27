@@ -7,6 +7,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.orm.attributes import set_committed_value
 
 from app.ai.charge_reconciliation_models import AIChargeWriteGate
+from app.sql_locks import postgresql_gate_statement
 
 
 def current_charge_rows(query, *, shared=False):
@@ -24,6 +25,8 @@ def lock_charge_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
         statement = _mysql_gate_statement()
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AIChargeWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AIChargeWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

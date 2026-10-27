@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.ai.research_cohort_models import AIResearchStudyScope, AIResearchWriteGate
+from app.sql_locks import postgresql_gate_statement
 
 RESEARCH_SOURCE_ROLES = frozenset({"super_admin", "admin", "director", "doctor"})
 
@@ -19,6 +20,8 @@ def lock_research_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
         statement = mysql_insert(AIResearchWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(revision=AIResearchWriteGate.revision)
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AIResearchWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AIResearchWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

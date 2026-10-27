@@ -10,6 +10,7 @@ from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.ai.inventory_native_source_models import AIInventoryWriteGate
+from app.sql_locks import postgresql_gate_statement
 
 
 def current_inventory_rows(query, *, shared=False):
@@ -25,6 +26,8 @@ def lock_inventory_gate(db):
         # can deadlock when both later upgrade to FOR UPDATE. A same-value
         # duplicate UPDATE acquires the already-required exclusive gate lock.
         statement = mysql_insert(AIInventoryWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(revision=AIInventoryWriteGate.revision)
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AIInventoryWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AIInventoryWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

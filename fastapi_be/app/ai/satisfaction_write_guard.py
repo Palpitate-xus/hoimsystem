@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import insert as mysql_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.ai.satisfaction_models import AISatisfactionWriteGate
+from app.sql_locks import postgresql_gate_statement
 
 
 def current_satisfaction_rows(query, *, shared=False):
@@ -17,6 +18,8 @@ def lock_satisfaction_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
         statement = mysql_insert(AISatisfactionWriteGate).values(gate_id=1, revision=1).on_duplicate_key_update(revision=AISatisfactionWriteGate.revision)
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AISatisfactionWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AISatisfactionWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

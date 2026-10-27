@@ -57,6 +57,7 @@
             <el-table-column prop="name" label="名称" /><el-table-column prop="model" label="模型标识" />
             <el-table-column label="类型"><template #default="{ row }">{{ row.kind === 'specialist' ? '专用适配器' : row.kind === 'responses' ? 'Responses API' : 'Chat Completions' }}</template></el-table-column>
             <el-table-column label="状态"><template #default="{ row }">{{ row.enabled ? '已启用' : '关闭' }}</template></el-table-column>
+            <el-table-column label="最多尝试次数（含首次）" min-width="210"><template #default="{ row }">{{ providerAttemptLimit(row) }}{{ providerAttemptLimit(row) === 1 ? '（关闭自动重试）' : '' }}</template></el-table-column>
             <el-table-column label="密钥"><template #default="{ row }">{{ row.has_api_key ? '已配置，不回显' : '未配置' }}</template></el-table-column>
             <el-table-column label="患者资料"><template #default="{ row }">{{ row.allows_patient_data ? '已授权传输' : '禁止传输' }}</template></el-table-column>
             <el-table-column label="操作" width="230"><template #default="{ row }"><el-button size="small" @click="editProvider(row)">编辑</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('medical_transcription')" size="small" @click="openSpeechCheck(row)">检查本地语音服务</el-button><el-button v-if="row.kind === 'specialist' && row.supported_features?.includes('ecg_analysis')" size="small" @click="openEcgCheck(row)">检查本地心电服务</el-button><el-button v-if="canCheckImage && row.kind === 'specialist' && row.supported_features?.includes('imaging_detection')" size="small" @click="openImageCheck(row)">检查本地影像服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('deterioration_risk')" size="small" @click="openNews2Check(row)">检查本地NEWS2服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('aki_risk')" size="small" @click="openAkiCheck(row)">检查本地AKI服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('sepsis_risk')" size="small" @click="openQsofaCheck(row)">检查本地qSOFA服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('sepsis_risk')" size="small" @click="openSofaCheck(row)">检查本地SOFA服务</el-button><el-button v-if="canCheckForecast&&row.kind==='specialist'&&row.supported_features?.includes('roster_optimization')" size="small" @click="openRosterCheck(row)">检查本地排班服务</el-button><el-button v-if="canCheckForecast&&row.kind==='specialist'&&row.supported_features?.includes('bed_forecast')" size="small" @click="openBedCheck(row)">检查本地床位服务</el-button><el-button v-if="canCheckForecast&&row.kind==='specialist'&&row.supported_features?.includes('surgery_scheduling')" size="small" @click="openSurgeryCheck(row)">检查本地手术排程服务</el-button><el-button v-if="canCheckForecast&&row.kind==='specialist'&&row.supported_features?.includes('supply_forecast')" size="small" @click="openSupplyCheck(row)">检查本地物资预测服务</el-button><el-button v-if="canCheckForecast&&row.kind==='specialist'&&row.supported_features?.includes('inventory_optimization')" size="small" @click="openInventoryCheck(row)">检查本地库存候选比较服务</el-button><el-button v-if="canCheckForecast && row.kind === 'specialist' && row.supported_features?.includes('visit_forecast')" size="small" @click="openForecastCheck(row)">检查本地统计服务</el-button></template></el-table-column>
@@ -168,6 +169,12 @@
         <el-form-item label="清除保存密钥"><el-checkbox v-model="providerForm.clear_api_key">清除加密保存的旧密钥</el-checkbox></el-form-item>
         <el-form-item label="患者资料传输"><el-switch v-model="providerForm.allows_patient_data" /><span class="field-hint">仅在该模型服务获授权处理患者资料时开启</span></el-form-item>
         <el-form-item label="超时秒数"><el-input-number v-model="providerForm.timeout_seconds" :min="3" :max="120" /></el-form-item>
+        <el-form-item label="最多尝试次数（含首次）" label-width="190px">
+          <el-select v-model="providerAttempts" aria-label="最多尝试次数（含首次）" :disabled="providerForm.kind === 'specialist'">
+            <el-option v-for="attempts in 3" :key="attempts" :label="attempts === 1 ? '1（关闭自动重试）' : String(attempts)" :value="attempts" />
+          </el-select>
+          <span class="field-hint">{{ providerForm.kind === 'specialist' ? '专用模型仅单次调用。' : '1表示关闭自动重试。仅连接失败或HTTP 429/502/503/504时重试，总耗时不超过配置的超时秒数。' }}</span>
+        </el-form-item>
         <el-form-item label="最大输出Token"><el-input-number v-model="providerForm.max_output_tokens" :min="256" :max="16000" /></el-form-item>
         <el-form-item label="生成温度"><el-input-number v-model="providerForm.temperature" :min="0" :max="1" :step="0.1" /></el-form-item>
         <template v-if="providerForm.kind === 'specialist'">
@@ -342,6 +349,7 @@ import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, onDeactivat
 import { ElMessage } from "element-plus";
 import store from "@/store";
 import { AI_MANAGEMENT_GROUPS, AI_MANAGEMENT_ENTRIES } from "@/utils/aiManagementNavigation";
+import { createProviderForm, providerAttemptLimit, providerWritePayload } from "@/utils/aiProviderForm";
 import AiRunHistory from "@/components/AIRunHistory/index.vue";
 import AiReviewCuration from "@/components/AIReviewCuration/index.vue";
 import AiAudioManagement from "@/components/AIAudioManagement/index.vue";
@@ -418,6 +426,7 @@ watch([search, category, setupFilter], () => { page.value = 1; });
 const featureName = key => features.value.find(item => item.key === key)?.name || key;
 const selectedFeature = ref(null), featureForm = ref({}), featureDialog = ref(false);
 const providerDialog = ref(false), providerId = ref(null), providerForm = ref({});
+const providerAttempts = computed({ get: () => providerAttemptLimit(providerForm.value), set: value => { providerForm.value.max_attempts = value; } });
 const forecastCheckTarget = ref(null);
 const news2CheckTarget = ref(null);
 const canCheckForecast = computed(() => typeof store.state.user.accessToken === "string" && store.state.user.accessToken.trim().length > 0 && Array.isArray(store.state.user.permissions) && store.state.user.permissions.includes("super_admin"));
@@ -577,21 +586,14 @@ async function submitFeature() {
 
 function editProvider(row) {
   providerId.value = row?.provider_id || null;
-  providerForm.value = {
-    name: row?.name || "", kind: row?.kind || "chat", api_base: row?.api_base || "", model: row?.model || "",
-    api_key: "", api_key_env: row?.api_key_env || "", clear_api_key: false,
-    enabled: !!row?.enabled, allows_patient_data: !!row?.allows_patient_data,
-    timeout_seconds: row?.timeout_seconds || 30, max_output_tokens: row?.max_output_tokens || 2000,
-    temperature: Number(row?.temperature ?? 0.2), supported_features: [...(row?.supported_features || [])],
-    validation_report: row?.validation_report || "", expected_revision: row?.revision || 0,
-  };
+  providerForm.value = createProviderForm(row);
   providerDialog.value = true;
 }
 
 async function submitProvider() {
   saving.value = true;
   try {
-    await saveAIProvider(providerId.value, { ...providerForm.value, api_key: providerForm.value.api_key || null });
+    await saveAIProvider(providerId.value, providerWritePayload(providerForm.value));
     providerForm.value.api_key = ""; providerDialog.value = false; await refresh(); ElMessage.success("模型服务已保存");
   } finally { saving.value = false; }
 }

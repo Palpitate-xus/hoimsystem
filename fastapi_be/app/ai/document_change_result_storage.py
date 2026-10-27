@@ -222,8 +222,8 @@ def stage_result(db, user, run, lease, value, usage, *, latency_ms):
     checked = validate_result(value, source, metadata["instructions_digest"])
     result_packet(run.run_id, bound, metadata["instructions_digest"], checked)
     usage = Usage.model_validate(usage)
-    if not usage.complete or usage.model_call_attempted is not True or type(latency_ms) is not int or not 0 <= latency_ms <= 2147483647:
-        raise ValueError("Accepted provider output requires complete actual usage and bounded actual latency")
+    if usage.model_call_attempted is not True or type(latency_ms) is not int or not 0 <= latency_ms <= 2147483647:
+        raise ValueError("Accepted provider output requires an actual call receipt and bounded actual latency")
     raw = require_case_json(checked)
     content_hash, now = c.e.bytes_hash(raw), storage.sources.utcnow()
     if now < artifact.recorded_at:
@@ -349,9 +349,9 @@ def usage_receipt(db, run):
         if (
             receipt.result_hash != (reference.content_hash if reference is not None else None)
             or run.status == "succeeded"
-            and (not receipt.usage.complete or receipt.usage.model_call_attempted is not True)
+            and receipt.usage.model_call_attempted is not True
         ):
-            raise ValueError("The accepted proof or complete actual usage differs")
+            raise ValueError("The accepted proof or actual attempted-call receipt differs")
         return receipt.usage
     except (ValueError, TypeError, KeyError, UnicodeError) as exc:
         raise HTTPException(409, "实际指南版本任务用量或租约审计不一致") from exc

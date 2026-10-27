@@ -44,8 +44,8 @@ class DrugLabelUsageReceipt(d.StrictModel):
             raise ValueError("A known token count proves the model was called")
         if (self.result_hash is not None) != (self.status == "succeeded"):
             raise ValueError("Only accepted success has a complete result hash")
-        if self.status == "succeeded" and (self.lease_token is None or self.model_call_attempted is not True or self.input_tokens is None or self.output_tokens is None):
-            raise ValueError("Acceptance requires a real leased call and both actual counts")
+        if self.status == "succeeded" and (self.lease_token is None or self.model_call_attempted is not True):
+            raise ValueError("Acceptance requires a real leased call; reported counts remain independently nullable")
         return self
 
 

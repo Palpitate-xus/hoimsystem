@@ -95,8 +95,8 @@ def load_terminal(db, run):
             if getattr(run, name) != (count if count is not None else 0):
                 raise ValueError("Legacy counters differ from the nullable original receipt")
         if run.status == "succeeded":
-            if not detail.usage.complete or detail.usage.model_call_attempted is not True:
-                raise ValueError("An accepted model result requires its actual complete usage")
+            if detail.usage.model_call_attempted is not True:
+                raise ValueError("An accepted model result requires its actual attempted-call receipt")
             result = _read_result(db, run, snapshot, binding, row)
             if detail.result_hash != row.result_hash:
                 raise ValueError("The specific acceptance event binds a different whole result")

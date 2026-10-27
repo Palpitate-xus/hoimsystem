@@ -60,7 +60,7 @@ def _current_source_authority(db, run_id):
     entry = {
         "guideline_ingestion": ("document_extraction_runtime", "recheck", "run"),
         "guideline_change_review": ("document_change_runtime", "recheck", "run"),
-        "drug_label_extraction": ("drug_label_runtime", "recheck", "run"),
+        "drug_label_extraction": ("drug_label_runtime", "recheck", "label"),
         "charge_reconciliation": ("charge_reconciliation_runtime", "recheck", "run"),
         "feedback_analysis": ("satisfaction_runtime", "recheck", "run"),
         "clinical_training": ("clinical_training_storage", "load_artifact", "execution"),
@@ -79,6 +79,10 @@ def _current_source_authority(db, run_id):
     guard = getattr(importlib.import_module("app.ai." + module), name)
     if mode == "run":
         guard(db, run)
+    elif mode == "label":
+        from app.ai.drug_label_storage import load_snapshot
+
+        guard(db, load_snapshot(db, run_id))
     elif mode == "rca":
         guard(db, actor, run_id, exclusive=False)
     else:

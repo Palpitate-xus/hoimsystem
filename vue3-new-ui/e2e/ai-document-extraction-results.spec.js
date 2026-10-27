@@ -21,3 +21,32 @@ const states=require('./fixtures/document-extraction-results/states.json');
 test('actual full five statuses retain independent unknown usage without accepted drafts outside success',async({page})=>{expect(await page.evaluate(async f=>{const a=window.__documentResultProbe.api,out=[];for(const p of Object.values(f.states))out.push(await a.verifyDocumentExtractionRun(p.detail.data,p.trace.data));out.push(await a.verifyDocumentExtractionRun(f.states.queued.detail.data,f.states.succeeded.trace.data));out.push(await a.verifyDocumentExtractionRun(f.states.running.detail.data,f.states.queued.trace.data));out.push(await a.verifyDocumentExtractionRun(f.revoked.detail.data,f.revoked.trace.data,{auditOnly:true}));out.push(await a.verifyDocumentExtractionRun(f.revoked.detail.data,f.revoked.trace.data));return out;},states)).toEqual([...Array(8).fill(true),false]);});
 for(const field of ['input_tokens','output_tokens','complete','model_call_attempted'])test('partial actual usage rejects '+field+' fabrication',async({page})=>{expect(await page.evaluate(async({p,field})=>{const q=structuredClone(p),d=q.detail.data;d.usage_receipt[field]=field==='complete'?true:field==='model_call_attempted'?1:field==='input_tokens'?false:0;return window.__documentResultProbe.api.verifyDocumentExtractionRun(d,q.trace.data);},{p:states.states.failed,field})).toBe(false);});
 test('two succeeded reads of the same frozen task cannot disagree on a literal-valid model heading',async({page})=>{expect(await page.evaluate(async p=>{const q=structuredClone(p);q.detail.data.result.document_extraction.spans[0].proposed_heading='另一条逐字位置合法但并非原保存结果的模型标题';return window.__documentResultProbe.api.verifyDocumentExtractionRun(q.detail.data,q.trace.data);},f.chat)).toBe(false);});
+
+const unknownExtraction = require('./fixtures/native-unknown-usage.cjs').loadUnknownUsage('document-extraction');
+test('actual Chat and Responses retry success retain unknown usage and complete original source proof', async ({page}) => {
+  expect(await page.evaluate(async packets => Promise.all(packets.map(async p => {
+    const u = p.detail.usage_receipt;
+    return [await window.__documentResultProbe.api.verifyDocumentExtractionRun(p.detail,p.trace),u.input_tokens,u.output_tokens,u.complete,u.model_call_attempted];
+  })),unknownExtraction)).toEqual(Array.from({length:2},()=>[true,null,null,false,true]));
+});
+test('unknown successful extraction refuses invented completeness inconsistent counts and an unattempted call', async ({page}) => {
+  expect(await page.evaluate(async packets => {
+    const out=[];
+    for(const p of packets)for(const change of ['complete','counts','attempt']) {
+      const q=structuredClone(p);
+      for(const r of [q.detail,q.trace]) {
+        if(change==='complete')r.usage_receipt.complete=true;
+        if(change==='counts'){r.input_tokens=1;r.output_tokens=2;r.usage_receipt.input_tokens=1;r.usage_receipt.output_tokens=2;}
+        if(change==='attempt')r.usage_receipt.model_call_attempted=false;
+      }
+      out.push(await window.__documentResultProbe.api.verifyDocumentExtractionRun(q.detail,q.trace));
+    }
+    return out;
+  },unknownExtraction)).toEqual(Array(6).fill(false));
+});
+test('unknown successful extraction still refuses a coherently replaced original byte anchor', async ({page}) => {
+  expect(await page.evaluate(async packets => Promise.all(packets.map(async p => {
+    const q=structuredClone(p);for(const r of [q.detail,q.trace])r.document_extraction_anchor.input_hash='f'.repeat(64);
+    return window.__documentResultProbe.api.verifyDocumentExtractionRun(q.detail,q.trace);
+  })),unknownExtraction)).toEqual([false,false]);
+});

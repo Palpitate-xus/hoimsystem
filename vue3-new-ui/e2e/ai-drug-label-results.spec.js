@@ -40,3 +40,33 @@ test('current crypto caller ticket and explicit frozen audit are mandatory',asyn
  const values=await page.evaluate(async packet=>{const a=window.__drugLabelTaskProbe.api,v=packet.states.succeeded.detail,t=packet.states.succeeded.trace;let count=0;return [await a.verifyDrugLabelRun(v,{}, {current:()=>++count<4}),await a.verifyDrugLabelTrace(t,v),await a.verifyDrugLabelTrace(t,v,{}, {allowFrozenAudit:true,current:()=>false})];},load('chat'));
  expect(values).toEqual([false,false,false]);
 });
+
+const unknownLabels = require('./fixtures/native-unknown-usage.cjs').loadUnknownUsage('drug-label');
+test('actual Chat and Responses retry success retain unknown usage and accepted result receipts',async({page})=>{
+ expect(await page.evaluate(async packets=>Promise.all(packets.map(async p=>{
+  const a=window.__drugLabelTaskProbe.api,u=p.detail.usage_receipt;
+  return [await a.verifyDrugLabelRun(p.detail),await a.verifyDrugLabelTrace(p.trace,p.detail,{}, {allowFrozenAudit:true}),u.input_tokens,u.output_tokens,u.model_call_attempted];
+ })),unknownLabels)).toEqual(Array.from({length:2},()=>[true,true,null,null,true]));
+});
+test('unknown successful label extraction refuses count divergence and a denied or unknown model attempt',async({page})=>{
+ expect(await page.evaluate(async packets=>{
+  const out=[];
+  for(const p of packets)for(const change of ['counts','attempt','unknown_attempt']){
+   const q=structuredClone(p);
+   if(change==='counts')q.detail.usage_receipt.input_tokens=0;
+   else q.detail.usage_receipt.model_call_attempted=change==='attempt'?false:null;
+   out.push(await window.__drugLabelTaskProbe.api.verifyDrugLabelRun(q.detail));
+  }
+  return out;
+ },unknownLabels)).toEqual(Array(6).fill(false));
+});
+test('unknown successful label extraction retains receipt result hashes and an accepted lease',async({page})=>{
+ expect(await page.evaluate(async packets=>{
+  const out=[];
+  for(const p of packets)for(const change of ['hash','lease']){
+   const q=structuredClone(p);if(change==='hash')q.detail.usage_receipt.result_hash='f'.repeat(64);else q.detail.usage_receipt.lease_token=null;
+   out.push(await window.__drugLabelTaskProbe.api.verifyDrugLabelRun(q.detail));
+  }
+  return out;
+ },unknownLabels)).toEqual(Array(4).fill(false));
+});

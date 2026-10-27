@@ -54,7 +54,7 @@ function runMetadata(r,expected){if(!uuid(r.run_id)||r.feature_key!==constant.fe
  const created=legacyClock(r.create_time),started=r.start_time===null?null:legacyClock(r.start_time),finished=r.finish_time===null?null:legacyClock(r.finish_time);if(!created||r.start_time!==null&&!started||r.finish_time!==null&&!finished||started&&started<created||finished&&finished<(started||created))return false;
  if(['queued','running'].includes(r.status)&&(r.latency_ms!==null||!same(r.usage,{input_tokens:null,output_tokens:null,complete:false,model_call_attempted:null})))return false;
  if(r.status==='queued'&&(started!==null||finished!==null||r.latency_ms!==null||r.error_code!==null||r.error_message!==null)||r.status==='running'&&(started===null||finished!==null||r.error_code!==null||r.error_message!==null)||['succeeded','failed','cancelled'].includes(r.status)&&finished===null)return false;
- if(r.status==='succeeded'&&(!r.usage.complete||r.usage.model_call_attempted!==true||r.error_code!==null||r.error_message!==null||started===null||r.latency_ms===null))return false;
+ if(r.status==='succeeded'&&(r.usage.model_call_attempted!==true||r.error_code!==null||r.error_message!==null||started===null||r.latency_ms===null))return false;
  for(const field of ['input_tokens','output_tokens'])if(r[field]!== (r.usage[field]===null?0:r.usage[field]))return false;
  return (expected.runId===undefined||expected.runId===r.run_id)&&(expected.contextDigest===undefined||expected.contextDigest===r.context_digest);
 }

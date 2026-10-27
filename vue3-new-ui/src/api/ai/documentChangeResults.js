@@ -57,7 +57,7 @@ function legacyClock(v){if(v===null)return true;if(typeof v!=='string'||!/^\d{4}
 function usage(run){const u=run.usage_receipt,token=v=>v===null||Number.isSafeInteger(v)&&v>=0&&v<=2000000;if(!keys(u,'input_tokens,output_tokens,complete,model_call_attempted')||!token(u.input_tokens)||!token(u.output_tokens)||typeof u.complete!=='boolean'||![null,true,false].includes(u.model_call_attempted)||u.complete!==(u.input_tokens!==null&&u.output_tokens!==null)||run.input_tokens!==u.input_tokens||run.output_tokens!==u.output_tokens)return false;
  if(u.model_call_attempted===false&&!(u.complete&&u.input_tokens===0&&u.output_tokens===0))return false;
  if(!['pending','recorded','interrupted'].includes(run.usage_receipt_status)||run.usage_receipt_status==='pending'&&(u.complete||u.model_call_attempted!==null))return false;
- return run.status!=='succeeded'||u.complete&&u.model_call_attempted===true;
+ return run.status!=='succeeded'||u.model_call_attempted===true;
 }
 function basics(run,id){return tree(run)&&object(run)&&uuid(id)&&run.run_id===id&&run.feature_key===FEATURE&&run.patient_id===null&&run.encounter_ref===null&&run.requires_human_review===true&&Object.hasOwn(documentChangeRunStates,run.status)&&[0,1].includes(run.preview)&&Number.isSafeInteger(run.prompt_version)&&run.prompt_version>=0&&positive(run.provider_revision)&&hash(run.context_digest)&&uuid(run.document_change_scope_id)&&run.split_artifacts===true&&usage(run)&&['create_time','start_time','finish_time'].every(k=>legacyClock(run[k]))&&Object.entries(run).every(([key,value])=>!key.endsWith('_findings')||key==='document_change_findings'||value===null);}
 export function documentChangeRunHasMarkers(v){try{

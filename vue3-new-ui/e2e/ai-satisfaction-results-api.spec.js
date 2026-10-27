@@ -29,3 +29,37 @@ test('all actual twelve provider and five validation fields remain required afte
 test('duplicate original JSON members remain invalid even when the raw byte anchor is rehashed',async({page})=>{await open(page);const result=await page.evaluate(async p=>{const a=window.__satisfactionResultProbe,t=structuredClone(p);t.raw_frozen_json.input_json='{"catalog_version":"duplicate",'+t.raw_frozen_json.input_json.slice(1);t.satisfaction_artifact.input_hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t.raw_frozen_json.input_json))),v=>v.toString(16).padStart(2,'0')).join('');return a.api.verifySatisfactionTrace(t);},data(5));expect(result).toBe(false);});
 
 test('native artifact audit and exact source domain markers cannot fall back to a shared legacy label',async({page})=>{await open(page);const result=await page.evaluate(()=>{const a=window.__satisfactionResultProbe.api;return[{satisfaction_artifact:null},{frozen_satisfaction_audit:null},{payload:{context:{source_domain:'recorded_satisfaction_review_case'}}},{raw_frozen_json:null},{payload:{context:{source_domain:'feedback'}}},{question:'satisfaction_artifact frozen_satisfaction_audit recorded_satisfaction_review_case'}].map(a.satisfactionRunHasMarkers);});expect(result).toEqual([true,true,true,false,false,false]);});
+
+const unknownSatisfaction=require('./fixtures/native-unknown-usage.cjs').loadUnknownUsage('satisfaction');
+test('actual Chat and Responses retry success retain independent unknown usage with full source and audit proof',async({page})=>{
+ await open(page);
+ expect(await page.evaluate(async packets=>Promise.all(packets.map(async p=>{
+  const a=window.__satisfactionResultProbe.api,u=p.detail.usage;
+  return [await a.verifySatisfactionRun(p.detail),await a.verifySatisfactionTrace(p.trace),u.input_tokens,u.output_tokens,u.complete,u.model_call_attempted];
+ })),unknownSatisfaction)).toEqual(Array.from({length:2},()=>[true,true,null,null,false,true]));
+});
+test('unknown successful satisfaction analysis refuses invented completeness inconsistent counts and an unattempted call',async({page})=>{
+ await open(page);
+ expect(await page.evaluate(async packets=>{
+  const out=[];
+  for(const p of packets)for(const change of ['complete','counts','attempt']){
+   const q=structuredClone(p);
+   if(change==='complete')q.detail.usage.complete=true;
+   if(change==='counts'){q.detail.usage.input_tokens=1;q.detail.usage.output_tokens=2;q.detail.input_tokens=1;q.detail.output_tokens=2;}
+   if(change==='attempt')q.detail.usage.model_call_attempted=false;
+   out.push(await window.__satisfactionResultProbe.api.verifySatisfactionRun(q.detail));
+  }
+  return out;
+ },unknownSatisfaction)).toEqual(Array(6).fill(false));
+});
+test('unknown successful satisfaction analysis still requires distinct audit receipts and its accepted lease',async({page})=>{
+ await open(page);
+ expect(await page.evaluate(async packets=>{
+  const out=[];
+  for(const p of packets)for(const change of ['receipt','lease']){
+   const q=structuredClone(p);if(change==='receipt')q.trace.satisfaction_artifact.usage_event_id=q.trace.satisfaction_artifact.receipt_event_id;else q.trace.satisfaction_artifact.accepted_lease=null;
+   out.push(await window.__satisfactionResultProbe.api.verifySatisfactionTrace(q.trace));
+  }
+  return out;
+ },unknownSatisfaction)).toEqual(Array(4).fill(false));
+});

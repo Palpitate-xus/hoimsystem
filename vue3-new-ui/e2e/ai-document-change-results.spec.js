@@ -32,3 +32,35 @@ test('task input preserves explicit empty and Unicode whitespace questions and r
 test('native marker presence including null cannot downgrade into generic display, genuine legacy stays distinct',async({page})=>{
  await open(page);expect(await page.evaluate(()=>{const a=window.__documentChangeResultProbe.api;return [{document_change_findings:null},{document_change_scope_id:null},{document_change_artifact:null},{frozen_request:{payload:{input:{document_change_scope_id:null}}}},{result:{schema_version:'document_change_result_ref_v1'}},{evidence:[{kind:'document_change_scope'}]},{feature_key:'patient_summary',result:{summary:'legacy'}}].map(a.documentChangeRunHasMarkers);})).toEqual([true,true,true,true,true,true,false]);
 });
+
+const unknownChange = require('./fixtures/native-unknown-usage.cjs').loadUnknownUsage('document-change');
+test('actual Chat and Responses retry success retain unknown usage across all five original parts',async({page})=>{
+ await open(page);
+ expect(await page.evaluate(async packets=>Promise.all(packets.map(async p=>{
+  const u=p.detail.usage_receipt,b={run:p.detail,trace:p.trace,source:p.source,scope:p.scope,result:p.result};
+  return [await window.__documentChangeResultProbe.api.verifyDocumentChangeRun(b,{liveScope:p.liveScope}),u.input_tokens,u.output_tokens,u.complete,u.model_call_attempted];
+ })),unknownChange)).toEqual(Array.from({length:2},()=>[true,null,null,false,true]));
+});
+test('unknown successful change review refuses invented completeness inconsistent counts and an unattempted call',async({page})=>{
+ await open(page);
+ expect(await page.evaluate(async packets=>{
+  const out=[];
+  for(const p of packets)for(const change of ['complete','counts','attempt']){
+   const q=structuredClone(p);
+   for(const r of [q.detail,q.trace]){
+    if(change==='complete')r.usage_receipt.complete=true;
+    if(change==='counts'){r.input_tokens=1;r.output_tokens=2;r.usage_receipt.input_tokens=1;r.usage_receipt.output_tokens=2;}
+    if(change==='attempt')r.usage_receipt.model_call_attempted=false;
+   }
+   out.push(await window.__documentChangeResultProbe.api.verifyDocumentChangeRun({run:q.detail,trace:q.trace,source:q.source,scope:q.scope,result:q.result},{liveScope:q.liveScope}));
+  }
+  return out;
+ },unknownChange)).toEqual(Array(6).fill(false));
+});
+test('unknown successful change review retains the recorded usage audit identity',async({page})=>{
+ await open(page);
+ expect(await page.evaluate(async packets=>Promise.all(packets.map(async p=>{
+  const q=structuredClone(p);for(const r of [q.detail,q.trace])r.document_change_artifact.usage_event_id=null;
+  return window.__documentChangeResultProbe.api.verifyDocumentChangeRun({run:q.detail,trace:q.trace,source:q.source,scope:q.scope,result:q.result},{liveScope:q.liveScope});
+ })),unknownChange)).toEqual([false,false]);
+});

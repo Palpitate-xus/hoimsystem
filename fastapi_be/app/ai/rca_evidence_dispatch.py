@@ -1,11 +1,12 @@
 """Opaque native identity and orphan-marker rejection, never Source authority."""
 
 from fastapi import HTTPException
-from sqlalchemy import case, func, or_, select
+from sqlalchemy import case, or_, select
 
 from app.ai import rca_evidence_task_contract as t
 from app.ai.models import AIRun
 from app.ai.native_task_routing import locate_native_task, opaque_run_id
+from app.sql_json import json_extract, json_type, json_valid
 
 # Presence includes JSON null. A damaged native package never becomes generic.
 INPUT_PATHS = (
@@ -22,15 +23,15 @@ RESULT_PATHS = ("$.rca_evidence_draft", "$.rca_evidence_binding")
 def marker_predicate(db):
     """The same body-free marker expression qualifies queue candidates."""
     def safe(column):
-        return case((func.json_valid(column) == 1, column), else_="{}")
+        return case((json_valid(column) == 1, column), else_="{}")
 
     def extract(column, path):
-        return func.json_extract(safe(column), path)
+        return json_extract(safe(column), path)
 
     def present(column, path):
         if db.get_bind().dialect.name in {"mysql", "mariadb"}:
-            return func.json_type(extract(column, path)).is_not(None)
-        return func.json_type(safe(column), path).is_not(None)
+            return json_type(extract(column, path)).is_not(None)
+        return json_type(safe(column), path).is_not(None)
 
     marker = or_(
         AIRun.feature_key == t.FEATURE_KEY,

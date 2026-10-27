@@ -12,12 +12,14 @@ from dataclasses import dataclass
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from sqlalchemy import BigInteger, LargeBinary, case, cast, func, literal, select
+from sqlalchemy import BigInteger, case, cast, func, literal, select
 
 from app.ai.charge_reconciliation_view_contract import ChargeUsage
 from app.ai.document_evidence_contract import SHA256, UUID
 from app.ai.models import AIAuditEvent, AIRun
 from app.ai.rca_evidence_storage_contract import RcaUsageEvent
+from app.sql_json import json_extract, json_integer, json_type, json_valid
+from app.sql_text import UTF8Bytes
 
 MAX_RECEIPT_BYTES = 65535
 
@@ -168,27 +170,28 @@ SPECS = {
 
 def json_scalar(snapshot, column, path):
     # CASE makes malformed historical TEXT harmless before JSON functions run.
-    safe = case((func.json_valid(column) == 1, column), else_=literal("{}"))
-    value = func.json_extract(safe, path)
+    safe = case((json_valid(column) == 1, column), else_=literal("{}"))
+    value = json_extract(safe, path)
     if snapshot._connection.dialect.name in {"mysql", "mariadb"}:
         value = func.json_unquote(value)
     return value
 
 
 def _document_fk(snapshot):
-    safe = case((func.json_valid(AIRun.result_json) == 1, AIRun.result_json), else_=literal("{}"))
-    extracted = func.json_extract(safe, "$.receipt_event_id")
+    safe = case((json_valid(AIRun.result_json) == 1, AIRun.result_json), else_=literal("{}"))
+    extracted = json_extract(safe, "$.receipt_event_id")
     mysql = snapshot._connection.dialect.name in {"mysql", "mariadb"}
-    kind = func.json_type(extracted) if mysql else func.json_type(safe, "$.receipt_event_id")
+    kind = json_type(extracted) if mysql else json_type(safe, "$.receipt_event_id")
     scalar = func.json_unquote(extracted) if mysql else extracted
+    identifier = json_integer(cast(scalar, BigInteger), safe, "$.receipt_event_id")
     return case(
         (
             (json_scalar(snapshot, AIRun.result_json, "$.schema_version") == "document_extraction_run_record_v1")
             & (kind == ("INTEGER" if mysql else "integer"))
             & (func.length(scalar) <= 10)
-            & (cast(scalar, BigInteger) > 0)
-            & (cast(scalar, BigInteger) <= 2147483647),
-            cast(scalar, BigInteger),
+            & (identifier > 0)
+            & (identifier <= 2147483647),
+            identifier,
         ),
         else_=None,
     ).label("usage_event_id")
@@ -238,7 +241,7 @@ def receipt_bodies(snapshot, candidates):
     ids = {identifier for identifier in ids if type(identifier) is int and identifier > 0}
     if not ids:
         return {}
-    byte_size = func.octet_length(AIAuditEvent.detail_json) if snapshot._connection.dialect.name in {"mysql", "mariadb"} else func.length(cast(AIAuditEvent.detail_json, LargeBinary))
+    byte_size = func.octet_length(AIAuditEvent.detail_json) if snapshot._connection.dialect.name in {"mysql", "mariadb"} else UTF8Bytes(AIAuditEvent.detail_json)
     headers = {
         row.event_id: row
         for row in snapshot.execute(

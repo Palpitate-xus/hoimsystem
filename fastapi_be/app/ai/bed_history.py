@@ -1,7 +1,7 @@
 """Exact bed task JSON filters with current role and original/current scope checks."""
 
 from fastapi import HTTPException
-from sqlalchemy import JSON, String, case, func, type_coerce
+from sqlalchemy import JSON, String, case, type_coerce
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.functions import FunctionElement
 
@@ -9,6 +9,7 @@ from app.ai import bed_facts as facts
 from app.ai.bed_series_models import AIBedSeries
 from app.ai.models import AIRun
 from app.models import Ward
+from app.sql_json import json_integer, json_string, json_type, json_valid
 
 
 class _JsonScalarKind(FunctionElement):
@@ -27,6 +28,11 @@ def _mysql_json_kind(element, compiler, **kwargs):
 @compiles(_JsonScalarKind, "sqlite")
 def _sqlite_json_kind(element, compiler, **kwargs):
     return "JSON_TYPE(" + ", ".join(compiler.process(value, **kwargs) for value in element.clauses) + ")"
+
+
+@compiles(_JsonScalarKind, "postgresql")
+def _postgresql_json_kind(element, compiler, **kwargs):
+    return compiler.process(json_type(*tuple(element.clauses)), **kwargs)
 
 
 def _positive(value):
@@ -84,11 +90,11 @@ def filter_history(db, user, query, *, department_id=None, ward_id=None, bed_ser
         query = query.filter(AIRun.requested_by == actor.user_id)
     # Invalid stored JSON is outside an exact scope filter, never a SQL parser
     # failure or a placeholder taking LIMIT slots from valid scoped history.
-    document = case((func.json_valid(AIRun.input_json) == 1, AIRun.input_json), else_="{}")
+    document = case((json_valid(AIRun.input_json) == 1, AIRun.input_json), else_="{}")
     binding = type_coerce(document, JSON)["payload"]["context"]["bed_binding"]
 
     def integer_member(key, value):
-        return (_JsonScalarKind(document, "$.payload.context.bed_binding." + key).in_(("integer", "INTEGER")), binding[key].as_integer() == value)
+        return (_JsonScalarKind(document, "$.payload.context.bed_binding." + key).in_(("integer", "INTEGER")), json_integer(binding[key].as_integer(), document, "$.payload.context.bed_binding." + key) == value)
 
     if department_id is not None or ward_id is not None or bed_series_id is not None:
         # A metadata scope must consist of typed JSON identities. Booleans and
@@ -97,8 +103,8 @@ def filter_history(db, user, query, *, department_id=None, ward_id=None, bed_ser
             _JsonScalarKind(document, "$.payload.context.bed_binding.department_id").in_(("integer", "INTEGER")),
             _JsonScalarKind(document, "$.payload.context.bed_binding.ward_id").in_(("integer", "INTEGER")),
             _JsonScalarKind(document, "$.payload.context.bed_binding.series_id").in_(("text", "STRING")),
-            binding["department_id"].as_integer().between(1, 2147483647),
-            binding["ward_id"].as_integer().between(1, 2147483647),
+            json_integer(binding["department_id"].as_integer(), document, "$.payload.context.bed_binding.department_id").between(1, 2147483647),
+            json_integer(binding["ward_id"].as_integer(), document, "$.payload.context.bed_binding.ward_id").between(1, 2147483647),
         )
     if department_id is not None:
         query = query.filter(*integer_member("department_id", department_id))
@@ -109,7 +115,7 @@ def filter_history(db, user, query, *, department_id=None, ward_id=None, bed_ser
         # match a task that carries another original department or ward.
         query = query.filter(
             _JsonScalarKind(document, "$.payload.context.bed_binding.series_id").in_(("text", "STRING")),
-            binding["series_id"].as_string() == bed_series_id,
+            json_string(binding["series_id"].as_string(), document, "$.payload.context.bed_binding.series_id") == bed_series_id,
             *integer_member("department_id", source.department_id),
             *integer_member("ward_id", source.ward_id),
         )

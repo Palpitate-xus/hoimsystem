@@ -11,6 +11,8 @@ from dataclasses import dataclass
 from fastapi import HTTPException
 from sqlalchemy import inspect, literal, select, union_all
 
+from app.sql_json import text_hex
+
 _STAGED = "native_task_routing_staged_identities"
 
 
@@ -164,8 +166,8 @@ def queue_identity_condition(db):
         if columns:
             advanced.append(exists().where(model.run_id == AIRun.run_id, or_(*(column.is_not(None) for column in columns))).correlate(AIRun))
     pristine = and_(
-        func.hex(AIRun.status) == "717565756564",
-        func.hex(AIRun.result_json) == "7B7D",
+        text_hex(AIRun.status) == "717565756564",
+        text_hex(AIRun.result_json) == "7B7D",
         AIRun.lease_token.is_(None),
         AIRun.start_time.is_(None),
         AIRun.finish_time.is_(None),

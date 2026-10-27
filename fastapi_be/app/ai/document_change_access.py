@@ -11,6 +11,7 @@ from sqlalchemy import case, func, inspect, or_, select
 from app.ai.document_change_run_models import AIDocumentChangeRunArtifact
 from app.ai.document_change_view_contract import FEATURE_KEY
 from app.ai.models import AIRun
+from app.sql_json import json_extract, json_type, json_valid
 
 _STAGED = "document_change_staged_identities"
 
@@ -69,7 +70,7 @@ def has_native_identity(db, run):
     predicates = []
     for name in ("input_json", "context_metadata_json", "evidence_json", "result_json"):
         column = getattr(AIRun, name)
-        valid = case((func.json_valid(column) == 1, column), else_="{}")
+        valid = case((json_valid(column) == 1, column), else_="{}")
         paths = ["$." + key for key in markers] + ["$.selected_sources.document_change_scope_id"]
         if name == "input_json":
             paths += ["$.payload.input.document_change_scope_id", "$.payload.context.selected_sources.document_change_scope_id"]
@@ -77,10 +78,10 @@ def has_native_identity(db, run):
         if mysql:
             predicates.append(func.json_contains_path(valid, "one", *paths) == 1)
         else:
-            predicates += [func.json_type(valid, path).is_not(None) for path in paths]
+            predicates += [json_type(valid, path).is_not(None) for path in paths]
 
         def extract(path, doc=valid, unquote=mysql):
-            value = func.json_extract(doc, path)
+            value = json_extract(doc, path)
             return func.json_unquote(value) if unquote else value
 
         predicates += [extract(path) == "document_change_review" for path in ("$.scope", "$.source_domain", "$.payload.context.scope", "$.payload.context.source_domain")]

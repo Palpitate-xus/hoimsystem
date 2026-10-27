@@ -1,7 +1,7 @@
 """Typed original surgery scope filters before LIMIT; full authority is separate."""
 
 from fastapi import HTTPException
-from sqlalchemy import JSON, String, case, func, type_coerce
+from sqlalchemy import JSON, String, case, type_coerce
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.functions import FunctionElement
 
@@ -10,6 +10,7 @@ from app.ai.models import AIRun
 from app.ai.surgery_models import AISurgeryPool
 from app.ai.surgery_scenario_models import AISurgeryScenario
 from app.models import Department, Doctor
+from app.sql_json import json_integer, json_string, json_type, json_valid
 
 
 class _JsonScalarKind(FunctionElement):
@@ -26,6 +27,11 @@ def _mysql_kind(element, compiler, **kwargs):
 @compiles(_JsonScalarKind, "sqlite")
 def _sqlite_kind(element, compiler, **kwargs):
     return "JSON_TYPE(" + ", ".join(compiler.process(value, **kwargs) for value in element.clauses) + ")"
+
+
+@compiles(_JsonScalarKind, "postgresql")
+def _postgresql_json_kind(element, compiler, **kwargs):
+    return compiler.process(json_type(*tuple(element.clauses)), **kwargs)
 
 
 def _uuid(value):
@@ -92,21 +98,21 @@ def filter_history(db, user, query, *, department_id=None, surgery_pool_id=None,
     query = query.filter(AIRun.feature_key == "surgery_scheduling")
     if actor.user_role != "super_admin":
         query = query.filter(AIRun.requested_by == actor.user_id)
-    document = case((func.json_valid(AIRun.input_json) == 1, AIRun.input_json), else_="{}")
+    document = case((json_valid(AIRun.input_json) == 1, AIRun.input_json), else_="{}")
     binding = type_coerce(document, JSON)["payload"]["context"]["surgery_binding"]
 
     def integer_member(key, value):
-        return _JsonScalarKind(document, "$.payload.context.surgery_binding." + key).in_(("integer", "INTEGER")), binding[key].as_integer() == value
+        return _JsonScalarKind(document, "$.payload.context.surgery_binding." + key).in_(("integer", "INTEGER")), json_integer(binding[key].as_integer(), document, "$.payload.context.surgery_binding." + key) == value
 
     query = query.filter(
         _JsonScalarKind(document, "$.payload.context.surgery_binding.department_id").in_(("integer", "INTEGER")),
-        binding["department_id"].as_integer().between(1, 2147483647),
+        json_integer(binding["department_id"].as_integer(), document, "$.payload.context.surgery_binding.department_id").between(1, 2147483647),
         *(_JsonScalarKind(document, "$.payload.context.surgery_binding." + key).in_(("text", "STRING")) for key in ("pool_id", "scenario_id")),
     )
     if department_id is not None:
         query = query.filter(*integer_member("department_id", department_id))
     if surgery_pool_id is not None:
-        query = query.filter(binding["pool_id"].as_string() == surgery_pool_id)
+        query = query.filter(json_string(binding["pool_id"].as_string(), document, "$.payload.context.surgery_binding.pool_id") == surgery_pool_id)
     if source is not None:
-        query = query.filter(binding["scenario_id"].as_string() == surgery_scenario_id, binding["pool_id"].as_string() == source.pool_id, *integer_member("department_id", source.department_id))
+        query = query.filter(json_string(binding["scenario_id"].as_string(), document, "$.payload.context.surgery_binding.scenario_id") == surgery_scenario_id, json_string(binding["pool_id"].as_string(), document, "$.payload.context.surgery_binding.pool_id") == source.pool_id, *integer_member("department_id", source.department_id))
     return query

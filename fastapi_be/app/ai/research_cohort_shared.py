@@ -5,6 +5,7 @@ from sqlalchemy import case, func, or_, select
 
 from app.ai.models import AIRun
 from app.ai.native_task_routing import locate_native_task, opaque_run_id
+from app.sql_json import json_extract, json_type, json_valid
 
 
 def research_marker_expression(*, mysql):
@@ -14,11 +15,11 @@ def research_marker_expression(*, mysql):
         (AIRun.input_json, "research_cohort_task_ref_v1"),
         (AIRun.context_metadata_json, "research_cohort_task_metadata_v1"),
     ):
-        valid = case((func.json_valid(column) == 1, column), else_="{}")
-        value = func.json_extract(valid, "$.schema_version")
+        valid = case((json_valid(column) == 1, column), else_="{}")
+        value = json_extract(valid, "$.schema_version")
         predicates.append((func.json_unquote(value) if mysql else value) == schema)
         if column is AIRun.input_json:
-            predicates.append(func.json_contains_path(valid, "one", "$.research_cohort_case_id") == 1 if mysql else func.json_type(valid, "$.research_cohort_case_id").is_not(None))
+            predicates.append(func.json_contains_path(valid, "one", "$.research_cohort_case_id") == 1 if mysql else json_type(valid, "$.research_cohort_case_id").is_not(None))
     return func.coalesce(or_(AIRun.feature_key == "research_cohort", *predicates), False)
 
 

@@ -5,6 +5,7 @@ from sqlalchemy import case, func, or_, select
 
 from app.ai.models import AIRun
 from app.ai.native_task_routing import locate_native_task, opaque_run_id
+from app.sql_json import json_extract, json_type, json_valid
 
 
 def marker_expression(*, mysql):
@@ -14,14 +15,14 @@ def marker_expression(*, mysql):
         (AIRun.context_metadata_json, "deidentification_task_metadata_v1"),
         (AIRun.result_json, "deidentification_result_pointer_v1"),
     ):
-        valid = case((func.json_valid(column) == 1, column), else_="{}")
-        value = func.json_extract(valid, "$.schema_version")
+        valid = case((json_valid(column) == 1, column), else_="{}")
+        value = json_extract(valid, "$.schema_version")
         predicates.append((func.json_unquote(value) if mysql else value) == schema)
         if column is AIRun.input_json:
             for path in ("$.deidentification_case_id", "$.input.deidentification_case_id", "$.deidentification_source", "$.deidentification_binding"):
-                predicates.append(func.json_contains_path(valid, "one", path) == 1 if mysql else func.json_type(valid, path).is_not(None))
+                predicates.append(func.json_contains_path(valid, "one", path) == 1 if mysql else json_type(valid, path).is_not(None))
         elif column is AIRun.result_json:
-            predicates.append(func.json_contains_path(valid, "one", "$.deidentification_result") == 1 if mysql else func.json_type(valid, "$.deidentification_result").is_not(None))
+            predicates.append(func.json_contains_path(valid, "one", "$.deidentification_result") == 1 if mysql else json_type(valid, "$.deidentification_result").is_not(None))
     return func.coalesce(or_(AIRun.feature_key == "deidentification", *predicates), False)
 
 

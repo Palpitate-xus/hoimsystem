@@ -14,6 +14,7 @@ from app.ai.clinical_training_run_models import AITrainingRunArtifact
 from app.ai.clinical_training_write_guard import current_actor
 from app.ai.models import AIRun
 from app.ai.native_task_routing import _domains, locate_native_task, opaque_run_id
+from app.sql_json import json_extract, json_type, json_valid
 
 
 def create_shared_run(db, user, request):
@@ -30,11 +31,11 @@ def create_shared_run(db, user, request):
 def marker_expression(*, mysql):
     predicates = [AIRun.feature_key == FEATURE]
     for column, schema in ((AIRun.input_json, "clinical_training_task_ref_v1"), (AIRun.context_metadata_json, "clinical_training_task_metadata_v1")):
-        valid = case((func.json_valid(column) == 1, column), else_="{}")
-        value = func.json_extract(valid, "$.schema_version")
+        valid = case((json_valid(column) == 1, column), else_="{}")
+        value = json_extract(valid, "$.schema_version")
         predicates.append((func.json_unquote(value) if mysql else value) == schema)
         if column is AIRun.input_json:
-            predicates.append(func.json_contains_path(valid, "one", "$.clinical_training_submission_id") == 1 if mysql else func.json_type(valid, "$.clinical_training_submission_id").is_not(None))
+            predicates.append(func.json_contains_path(valid, "one", "$.clinical_training_submission_id") == 1 if mysql else json_type(valid, "$.clinical_training_submission_id").is_not(None))
     return func.coalesce(or_(*predicates), False)
 
 

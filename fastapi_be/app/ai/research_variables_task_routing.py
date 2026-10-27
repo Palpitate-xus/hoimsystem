@@ -13,6 +13,7 @@ from app.ai.models import AIRun
 from app.ai.research_cohort_contract import UUID
 from app.ai.research_variables_task_contract import FEATURE_KEY, REFERENCE_KEY, SOURCE_DOMAIN
 from app.ai.research_variables_task_reader import _current_opaque_identity
+from app.sql_json import json_extract, json_type, json_valid
 
 
 def identifier_for(value):
@@ -42,16 +43,16 @@ def identifier_for(value):
 
 def marker_predicate(db):
     def safe(column):
-        return case((func.json_valid(column) == 1, column), else_="{}")
+        return case((json_valid(column) == 1, column), else_="{}")
 
     def item(column, path):
-        value = func.json_extract(safe(column), path)
+        value = json_extract(safe(column), path)
         return func.json_unquote(value) if db.get_bind().dialect.name in {"mysql", "mariadb"} else value
 
     def present(column, path):
         if db.get_bind().dialect.name in {"mysql", "mariadb"}:
             return func.json_contains_path(safe(column), "one", path) == 1
-        return func.json_type(safe(column), path).is_not(None)
+        return json_type(safe(column), path).is_not(None)
 
     return or_(
         AIRun.feature_key == FEATURE_KEY,

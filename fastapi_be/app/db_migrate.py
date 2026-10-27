@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 
 from alembic.config import Config
-from sqlalchemy import create_engine, inspect
+from alembic.script import ScriptDirectory
+from alembic.util import CommandError
+from sqlalchemy import MetaData, Table, create_engine, inspect, select
 
 from alembic import command
 from app.config import settings
@@ -46,6 +48,27 @@ def migrate(database_url: str | None = None) -> str:
             command.stamp(alembic_config, "head")
             return "adopted"
 
+        # An empty marker table means Alembic would start from the historical
+        # empty baseline. Validate exact recorded revisions before executing any
+        # migration against an existing database, including symbolic aliases.
+        version_table = Table("alembic_version", MetaData(), autoload_with=engine)
+        if "version_num" not in version_table.c:
+            raise RuntimeError("Alembic 版本表缺少 version_num，请先核对数据库来源")
+        with engine.connect() as connection:
+            versions = connection.execute(select(version_table.c.version_num)).scalars().all()
+        scripts = ScriptDirectory.from_config(alembic_config)
+        try:
+            valid = bool(versions) and all(
+                isinstance(version, str)
+                and bool(version)
+                and (revision := scripts.get_revision(version)) is not None
+                and revision.revision == version
+                for version in versions
+            )
+        except CommandError:
+            valid = False
+        if not valid:
+            raise RuntimeError("Alembic 版本记录为空或无法识别，请先核对数据库来源与迁移文件")
         command.upgrade(alembic_config, "head")
         return "upgraded"
     finally:

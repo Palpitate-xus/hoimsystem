@@ -1,15 +1,16 @@
 {
   "schema_version": "global_ai_usage_actual_packets_v1",
   "scope": "Seven exact positive actual Main/JWT usage HTTP responses and original role-denial status controls from whole16-case API/current-read suite; one separate actual78 local worker/service aggregate, explicitly not HTTP. Synthetic controlled data only. No result/Source content certification.",
-  "backend_capture_head": "34baa0ebd78d8d3c9ba793f6b114e89a7bb0f3cd",
-  "backend_source_freeze_sha256": "361ca3d1342da98de22aafbaabb0733fb03baa434a8a47c590eaeed6a41f1291",
+  "backend_capture_head": "3cce378dd66f2449705bb7dfef565af3c2853a75",
+  "backend_source_freeze_sha256": "5604e3b236686cc59eb2c836689b1a2da10d26c5fc94f86882a02a8d2522dcc3",
+  "capture_sha256": "46a5d150d3b9625e350398d57c3c1dd10b54925dcf58a12557c978e9b7cd82be",
   "backend_bindings": {
-    "fastapi_be/app/routers/ai_admin.py": "ead16f22bdbbb6a867bf9c284d656bf32e58eab40d74fcec830e4cd4486ef54f",
+    "fastapi_be/app/routers/ai_admin.py": "433e7c154688037a8fb61d2a51692cfec979953775b76b800005c52a2f866c77",
     "fastapi_be/app/ai/admin_read_snapshot.py": "6b46463d6ccfa2cea4c635bdf05cfe39289f02c03a65b9e35c1310e533a34e62",
-    "fastapi_be/app/ai/admin_usage_receipts.py": "57eff6eeb63e86d9bbd2314045395b5375072ea602a8a283a22b435d382d2ee6",
+    "fastapi_be/app/ai/admin_usage_receipts.py": "fe0e13b0510ca2e307d1d5214d7c62465601992dc783c0065fb3baed0fc021d7",
     "fastapi_be/app/ai/admin_usage_summary.py": "a5447fd08ec8eefb62b316db24fb9ec6f090dc5f918c7ad2d400e0163abae503",
-    "fastapi_be/app/ai/models.py": "b0ab84f20c2f6b74d89dade050350c1dab87b3b18aa3f4ad5f94a4f462dd5739",
-    "fastapi_be/app/ai/native_task_routing.py": "acb7922062cb024391b5b6420590bdd740f7f4a844c79186cfdbda5d60e63c83",
+    "fastapi_be/app/ai/models.py": "590f786f02ab6744b9bb9678d0246aded840edff5ecc73b3f49e2c35abbe1467",
+    "fastapi_be/app/ai/native_task_routing.py": "b3f3558d3ecff503b856020f062e9fef9de7755431249dbbf2d6334a8109ed02",
     "fastapi_be/app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
     "fastapi_be/tests/test_ai_admin_usage_main.py": "e069e7e1d8902482880b5a944f443335255624ad34171f1bfe4d5dd0c0b30648",
     "fastapi_be/tests/ai_admin_usage_assertions.py": "694482b2e9b3373ba442aef47ab1cb1af00f2ffde9ee772da58054c56d96feeb"
@@ -460,7 +461,7 @@
             "local_calculation_attempted_count": 1,
             "local_calculation_unattempted_count": 0,
             "local_calculation_unknown_count": 0,
-            "local_calculation_ms_known_sum": 7,
+            "local_calculation_ms_known_sum": 6,
             "local_calculation_ms_known_count": 1
           }
         ]

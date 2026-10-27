@@ -357,8 +357,8 @@ def usage_receipt(db, run):
             or detail != {"schema_version": "document_extraction_receipt_v1", "lease_token": run.lease_token, "usage": receipt, "result_hash": expected_hash, "error_code": run.error_code}
         ):
             raise ValueError("The exact final receipt differs from its actual Run")
-        if run.status == "succeeded" and not receipt["complete"]:
-            raise ValueError("An accepted result requires complete actual provider usage")
+        if run.status == "succeeded" and receipt["model_call_attempted"] is not True:
+            raise ValueError("An accepted result requires an actual model call")
         return receipt
     except (ValueError, TypeError, KeyError, UnicodeError) as exc:
         raise HTTPException(409, "原文提取的实际用量、完整结果或最终审计不一致") from exc

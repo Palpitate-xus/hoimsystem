@@ -1,8 +1,9 @@
-"""One76 text attempt with a whole-wire bound and real nullable usage.
+"""Bounded76 text delivery with whole-wire limits and nullable actual usage.
 
 All SQL authority/configuration belongs to the preceding committed dispatch.
 This module receives only detached frozen values and an already resolved secret;
-it never opens a Session, retries, follows redirects, enables tools or uses RAG.
+finite transient transport retries share its original deadline. This adapter
+keeps SQL, redirects, external tools and RAG outside the model request.
 """
 
 import asyncio
@@ -18,6 +19,7 @@ from app.ai.research_variables_storage_contract import checked_snapshot, instruc
 from app.ai.research_variables_task_binding import VariableTaskBinding
 from app.ai.research_variables_task_contract import MAX_WIRE_BYTES, canonical, strict_json, validate_frozen_source
 from app.ai.research_variables_task_result import result_for_draft
+from app.ai.text_retry import text_retries
 
 
 class VariableGatewayError(AIExecutionError):
@@ -66,6 +68,7 @@ def build_request(snapshot, binding, source):
         raise VariableGatewayError("VARIABLE_REQUEST_REJECTED", "完整已授权来源、固定Prompt、实际模型或含协议头的8MiB请求无法核对；未发送或截断") from exc
 
 
+@text_retries(provider_argument="snapshot", frozen_snapshot=True)
 async def generate_research_variables(snapshot, binding, source, *, credential, transport=None):
     attempted = False
     inputs = outputs = None

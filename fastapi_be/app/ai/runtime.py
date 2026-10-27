@@ -35,6 +35,7 @@ from app.ai.retry_policy import configured_attempts, retry_snapshots_equal
 from app.ai.review_curation import authorize_feedback_snapshot
 from app.ai.schemas import RunRequest
 from app.ai.support_context import authorize_support_snapshot
+from app.ai.text_retry import task_retry_scope
 from app.ai.tools import business_tools
 from app.config import settings
 from app.models import Doctor, Patient, User
@@ -1280,6 +1281,18 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
     return spec, provider, snapshot
 
 
+def _record_text_retry_usage(db, run, details):
+    if details is not None:
+        audit(db, run.requested_by, "run.text_model.usage", run.run_id, {
+            "schema_version": "text_model_retry_usage_v1", "lease_token": run.lease_token,
+            "terminal_status": run.status, "input_tokens": run.input_tokens,
+            "output_tokens": run.output_tokens,
+            "complete": run.input_tokens is not None and run.output_tokens is not None,
+            "model_call_attempted": True, **details,
+        })
+
+
+@task_retry_scope
 async def execute_claimed(run_id: str, lease: str, *, transport=None, research_claim_event_id=None, deidentification_claim_event_id=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
     from app import database
@@ -1427,6 +1440,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
     started = time.monotonic()
     error = result = None
     serialized_result = None
+    retry_details = None
     inputs = outputs = 0
     audio_file = None
     ecg_files = None
@@ -1492,13 +1506,15 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
                 image_files = open_verified_image(asset)
             db.expunge(provider)
         if audio_file is not None:
-            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, audio=audio_file)
+            reply = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, audio=audio_file)
         elif image_files is not None:
-            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, image=image_files[1])
+            reply = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, image=image_files[1])
         elif ecg_files is not None:
-            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, ecg=ecg_files[1])
+            reply = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, ecg=ecg_files[1])
         else:
-            result, inputs, outputs = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
+            reply = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
+        result, inputs, outputs = reply
+        retry_details = getattr(reply, "retry_details", None)
         pathway_ids = selected_pathway_ids(snapshot["payload"]["context"])
         if spec.key == "treatment_pathway" and pathway_ids and result.sections:
             required = {
@@ -1551,7 +1567,9 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         except HTTPException as exc:
             raise AIExecutionError("RESULT_STORAGE_LIMIT", "完整结果超过UTF-8文本存储能力，未接收或截断结果；可核对资料范围及适配器输出") from exc
     except AIExecutionError as exc:
-        if exc.input_tokens is not None:
+        if getattr(exc, "attempts", 0):
+            retry_details = dict(attempts=exc.attempts, max_attempts=exc.max_attempts, earlier_usage_unknown=exc.input_tokens is None or exc.output_tokens is None)
+        if getattr(exc, "model_call_attempted", False) or exc.input_tokens is not None or exc.output_tokens is not None:
             inputs, outputs = exc.input_tokens, exc.output_tokens
         error = (exc.code, exc.message)
     except HTTPException as exc:
@@ -1657,6 +1675,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             run.input_tokens, run.output_tokens = inputs, outputs
             run.latency_ms = int((time.monotonic() - started) * 1000)
             run.finish_time = utcnow()
+            _record_text_retry_usage(db, run, retry_details)
             db.commit()
             return
         if error is None:
@@ -1759,6 +1778,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
 
                     verify_accepted_result(db, run, lease, acceptance, result.model_dump(mode="json"), result_reader=read_document_result)
                     _recheck_task(db, run)
+            _record_text_retry_usage(db, run, retry_details)
             db.commit()
         except Exception:
             db.rollback()

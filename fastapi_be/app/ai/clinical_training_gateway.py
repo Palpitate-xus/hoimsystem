@@ -11,6 +11,7 @@ from app.ai import clinical_training_contract as c
 from app.ai.clinical_training_protocol import MAX_BYTES, model_wire, parse_draft
 from app.ai.clinical_training_usage_contract import usage
 from app.ai.governance import provider_credential, validate_endpoint
+from app.ai.text_retry import text_retries
 
 ACTIONS = ("tool_calls", "function_call", "function_calls", "required_action", "actions", "audio", "tool_call_id")
 
@@ -184,6 +185,7 @@ def request(provider, source, selection, task_prompt):
         raise TrainingCallError("TRAINING_REQUEST_INVALID", "当前培训来源、目标、Prompt或模型参数不能形成完整请求") from exc
 
 
+@text_retries()
 async def generate_training_feedback(provider, source, selection, task_prompt, *, transport=None):
     attempted = False
     started = time.monotonic()

@@ -17,6 +17,7 @@ from app.ai.satisfaction_draft import MAX_BYTES, SatisfactionEvidenceDraft, cano
 from app.ai.satisfaction_prompt import SATISFACTION_SYSTEM_PROMPT
 from app.ai.satisfaction_protocol import SatisfactionReplyError, parse_provider_draft
 from app.ai.satisfaction_result import result_for_draft
+from app.ai.text_retry import text_retries
 from app.config import settings
 
 TASK_BYTES = 65535
@@ -71,6 +72,7 @@ def request(provider, spec, task_prompt, data):
     return endpoint, payload
 
 
+@text_retries()
 async def generate_satisfaction(provider, spec, task_prompt, data, *, transport=None):
     inputs = outputs = None
     attempted = False

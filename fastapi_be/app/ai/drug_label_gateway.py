@@ -1,4 +1,4 @@
-"""One bounded configured text request; no SQL, tools, retries or redirects."""
+"""Validated text requests with bounded transient transport retries and no SQL."""
 
 import hashlib
 
@@ -12,6 +12,7 @@ from app.ai.drug_label_protocol import DrugLabelReplyError, parse_provider_draft
 from app.ai.drug_label_result import result_for_draft
 from app.ai.gateway import AIExecutionError, result_json_schema
 from app.ai.governance import provider_credential, validate_endpoint
+from app.ai.text_retry import text_retries
 from app.config import settings
 
 
@@ -62,6 +63,7 @@ def build_request(provider, task_prompt, data):
         raise DrugLabelGatewayError("DRUG_LABEL_REQUEST_REJECTED", "完整来源、提示、模型配置或整个请求容量无法核对；未发送或裁剪") from exc
 
 
+@text_retries()
 async def generate_drug_label(provider, task_prompt, data, *, transport=None):
     endpoint, raw, source, instructions = build_request(provider, task_prompt, data)
     attempted = False

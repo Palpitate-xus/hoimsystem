@@ -32,6 +32,7 @@ from app.ai.schemas import (
 )
 from app.ai.supply_protocol import SupplyGenerationResult
 from app.ai.surgery_protocol import SurgeryGenerationResult
+from app.ai.text_retry import text_retries
 from app.config import settings
 
 MAX_RESPONSE_BYTES = 512 * 1024
@@ -919,6 +920,7 @@ def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tup
     return value["result"], 0, 0
 
 
+@text_retries()
 async def generate(
     provider: AIProvider,
     spec: FeatureSpec,

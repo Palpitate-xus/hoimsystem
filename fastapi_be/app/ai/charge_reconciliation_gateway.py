@@ -12,6 +12,7 @@ from app.ai.charge_reconciliation_protocol import ChargeReplyError, parse_provid
 from app.ai.charge_reconciliation_result import result_for_draft
 from app.ai.gateway import AIExecutionError, _finite_response_constant, _unique_response_pairs, result_json_schema
 from app.ai.governance import encode_json, provider_credential, validate_endpoint
+from app.ai.text_retry import text_retries
 from app.config import settings
 
 
@@ -61,6 +62,7 @@ def request(provider, spec, task_prompt, data):
     return endpoint, payload
 
 
+@text_retries()
 async def generate_charge(provider, spec, task_prompt, data, *, transport=None):
     inputs = outputs = None
     attempted = False

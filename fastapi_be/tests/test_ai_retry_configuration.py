@@ -90,8 +90,8 @@ async def test_super_admin_controls_retry_policy_with_revision_conflicts(async_c
     assert db_session.get(AIProvider, current["provider_id"]).max_attempts == 1
 
 
-def migration():
-    file = Path(__file__).resolve().parents[1] / "alembic/versions/20261027_ai_provider_retry.py"
+def migration(name="ai_provider_retry"):
+    file = Path(__file__).resolve().parents[1] / ("alembic/versions/20261027_" + name + ".py")
     spec = importlib.util.spec_from_file_location("isolated_provider_retry_migration", file)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -117,6 +117,22 @@ def test_retry_migration_retains_existing_single_attempt_rows_and_new_default(tm
             migration().downgrade()
         assert "max_attempts" not in {row["name"] for row in sa.inspect(connection).get_columns("hoimsystem_ai_provider")}
         assert tuple(connection.execute(sa.text("SELECT * FROM hoimsystem_ai_provider WHERE provider_id=1")).one()) == old
+    engine.dispose()
+
+
+def test_unknown_usage_migration_preserves_rows_and_rejects_lossy_downgrade(tmp_path):
+    engine = sa.create_engine("sqlite:///" + str(tmp_path / "nullable-usage.sqlite"))
+    with engine.begin() as connection:
+        connection.execute(sa.text("CREATE TABLE hoimsystem_ai_run (run_id TEXT PRIMARY KEY, input_tokens INTEGER NOT NULL, output_tokens INTEGER NOT NULL)"))
+        connection.execute(sa.text("INSERT INTO hoimsystem_ai_run VALUES ('synthetic',5,7)"))
+        with Operations.context(MigrationContext.configure(connection)):
+            migration("text_retry_usage").upgrade()
+        assert tuple(connection.execute(sa.text("SELECT * FROM hoimsystem_ai_run")).one()) == ("synthetic", 5, 7)
+        connection.execute(sa.text("UPDATE hoimsystem_ai_run SET input_tokens=NULL"))
+        with Operations.context(MigrationContext.configure(connection)), pytest.raises(RuntimeError, match="unknown must not become zero"):
+            migration("text_retry_usage").downgrade()
+        assert connection.scalar(sa.text("SELECT input_tokens IS NULL FROM hoimsystem_ai_run")) == 1
+        assert all(row["nullable"] for row in sa.inspect(connection).get_columns("hoimsystem_ai_run") if row["name"] in {"input_tokens", "output_tokens"})
     engine.dispose()
 
 

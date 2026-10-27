@@ -17,6 +17,7 @@ from app.ai.research_cohort_contract import canonical_json
 from app.ai.research_cohort_draft import MAX_BYTES
 from app.ai.research_cohort_protocol import _nonfinite, _object, model_wire, parse_draft_json
 from app.ai.research_cohort_receipts import usage
+from app.ai.text_retry import text_retries
 
 ACTIONS = ("tool_calls", "function_call", "function_calls", "required_action", "actions", "audio", "tool_call_id")
 
@@ -164,6 +165,7 @@ def request(provider, source, question, task_prompt):
         raise ResearchCallError("RESEARCH_REQUEST_INVALID", "当前授权科研Source、问题、Prompt或模型参数不能形成完整请求") from exc
 
 
+@text_retries()
 async def generate_research(provider, source, question, task_prompt, *, transport=None):
     """No retries/redirects/tools or SQL; no provider body enters error text."""
     attempted = False

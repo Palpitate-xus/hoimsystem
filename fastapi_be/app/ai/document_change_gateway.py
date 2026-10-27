@@ -1,8 +1,9 @@
-"""One billable text request, public comparison only, complete8MiB JSON limits.
+"""Bounded text delivery for public comparisons with complete8MiB JSON limits.
 
 This is a dedicated adapter, not an authorization boundary. Its caller resolves
 current Source SQL before releasing the transaction. Neither prompts nor private
-Scope/target bodies are accepted from the provider. No retry or redirect occurs.
+Scope/target bodies are accepted from the provider. Transient retries share one
+original deadline; redirects and reply-validation retries remain disabled.
 """
 
 import asyncio
@@ -20,6 +21,7 @@ from app.ai.document_change_result import result_for_draft
 from app.ai.document_extraction_view_contract import DocumentFrozenProvider
 from app.ai.gateway import AIExecutionError
 from app.ai.governance import provider_credential, validate_endpoint
+from app.ai.text_retry import text_retries
 
 
 def _error(code, message, counts=(None, None), attempted=False):
@@ -87,6 +89,7 @@ def build_request(provider, task_prompt, payload, source):
         raise _error("DOCUMENT_CHANGE_REQUEST_REJECTED", "完整版本核对原件、Prompt或协议超过8MiB或未通过闭合核对，未发送或裁剪") from exc
 
 
+@text_retries()
 async def generate_document_change(provider, task_prompt, payload, source, *, transport=None):
     """Actual reported counts survive malformed questions and failed acceptance."""
     counts, attempted = (None, None), False

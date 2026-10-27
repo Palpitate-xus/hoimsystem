@@ -1,4 +1,4 @@
-"""One bounded RCA text attempt; no SQL, retries, redirects or external tools."""
+"""Bounded RCA text delivery; transient retries share one original deadline."""
 
 import asyncio
 import math
@@ -14,6 +14,7 @@ from app.ai.rca_evidence_protocol import RcaEvidenceReplyError, parse_provider_d
 from app.ai.rca_evidence_result import result_for_draft
 from app.ai.rca_evidence_task_contract import instructions_digest, public_payload
 from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT
+from app.ai.text_retry import text_retries
 from app.config import settings
 
 
@@ -72,6 +73,7 @@ def build_request(provider, task_prompt, data):
         raise RcaEvidenceGatewayError("RCA_REQUEST_REJECTED", "完整受审来源、任务提示、服务配置或含协议头的整个8MiB请求无法核对；未发送或裁剪") from exc
 
 
+@text_retries()
 async def generate_rca_evidence(provider, task_prompt, data, *, transport=None):
     attempted = False
     inputs = outputs = None

@@ -1,4 +1,4 @@
-"""One bounded75 Chat/Responses call; no SQL and no paid-call retry."""
+"""Bounded75 Chat/Responses delivery with nullable usage and transient retries."""
 
 import httpx
 
@@ -7,6 +7,7 @@ from app.ai.deidentification_http import parse_json
 from app.ai.deidentification_protocol import DeidentificationReplyError, _usage, build_model_wire, parse_provider_draft, wire_bytes
 from app.ai.deidentification_result import build_result
 from app.ai.governance import validate_endpoint
+from app.ai.text_retry import text_retries
 
 
 class DeidentificationExecutionError(Exception):
@@ -35,6 +36,7 @@ def prepare_request(provider, credential, body, values):
     return endpoint, headers, raw
 
 
+@text_retries()
 async def generate(request, provider, body, *, transport=None, on_attempt=None):
     counts = (None, None)
     try:

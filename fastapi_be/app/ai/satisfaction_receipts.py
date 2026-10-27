@@ -80,8 +80,8 @@ def stage_terminal(db, run, receipt):
         raise HTTPException(409, "评价终态必须有唯一不可覆盖的具体用量回执")
     if checked.model_call_attempted is None and run.error_code != "WORKER_INTERRUPTED":
         raise HTTPException(409, "只有中断任务可保留实际调用状态未知")
-    if run.status == "succeeded" and (not checked.complete or checked.model_call_attempted is not True or row.result_hash is None):
-        raise HTTPException(409, "评价完整成功结果必须有真实完整调用用量和独立接收审计")
+    if run.status == "succeeded" and (checked.model_call_attempted is not True or row.result_hash is None):
+        raise HTTPException(409, "评价完整成功结果必须有实际调用状态和独立接收审计")
     if run.status != "succeeded" and (run.result_json != "{}" or row.result_hash is not None):
         raise HTTPException(409, "失败或取消任务不能保留已接收结果")
     detail = SatisfactionUsageEvent(
@@ -138,7 +138,7 @@ def load_terminal(db, run):
         if detail.usage.model_call_attempted is None and run.error_code != "WORKER_INTERRUPTED":
             raise ValueError("Unknown call state is only retained after process interruption")
         if run.status == "succeeded":
-            if not detail.usage.complete or detail.usage.model_call_attempted is not True or detail.result_hash != row.result_hash or row.receipt_event_id == row.usage_event_id:
+            if detail.usage.model_call_attempted is not True or detail.result_hash != row.result_hash or row.receipt_event_id == row.usage_event_id:
                 raise ValueError("Successful usage and independent full-result acceptance differ")
             result = expand_result(db, run)
         else:

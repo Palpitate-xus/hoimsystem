@@ -333,7 +333,7 @@ def checked_usage(run, domain, artifact, raw):
         number = usage[key]
         if type(run[key]) is not int or run[key] != (number if number is not None else 0):
             raise ValueError("Legacy counters conflict with this specific usage event")
-    if domain == "document" and (type(usage["model_call_attempted"]) is not bool or run["status"] == "succeeded" and not usage["complete"]):
+    if domain == "document" and (type(usage["model_call_attempted"]) is not bool or run["status"] == "succeeded" and usage["model_call_attempted"] is not True):
         raise ValueError("Document extraction requires its original explicit call state")
     if domain == "document" and (record["result_hash"] is not None) != (run["status"] == "succeeded"):
         raise ValueError("The document usage event differs from terminal acceptance state")

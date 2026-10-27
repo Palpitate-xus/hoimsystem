@@ -13,6 +13,7 @@ from app.ai.coding_evidence_models import AICodingCaseSnapshot, AICodingRulePack
 from app.database import get_db
 from app.dependencies import User, require_roles
 from app.models import DrgRule, MedicalRecordHome
+from app.sql_counts import locked_row_count
 
 router = APIRouter(prefix="/ai/coding-evidence", default_response_class=JSONResponse)
 
@@ -33,7 +34,7 @@ def run_mutation(db, callback):
 
 def directory(db, model, query, page, page_size):
     primary = model.case_snapshot_id if model is AICodingCaseSnapshot else model.package_id
-    count = current_coding_rows(query.with_entities(primary), shared=True).count()
+    count = locked_row_count(current_coding_rows(query, shared=True), primary)
     identifiers = [x[0] for x in current_coding_rows(query.with_entities(primary).order_by(model.created_at.desc(), primary), shared=True).offset((page - 1) * page_size).limit(page_size).all()]
     fields = (*s.IDENTITY, *s.GOVERNANCE, "content_hash") if model is AICodingCaseSnapshot else (*s.PACKAGE_IDENTITY, *s.GOVERNANCE, "content_hash")
     result = []
@@ -101,7 +102,7 @@ def homes(patient_id: int, admission_id: str, current_user: User = Depends(requi
 def rules(page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), current_user: User = Depends(require_roles("super_admin")), db: Session = Depends(get_db)):
     s.current_actor(db, current_user, {"super_admin"})
     query = db.query(DrgRule)
-    total = current_coding_rows(query.with_entities(DrgRule.rule_id), shared=True).count()
+    total = locked_row_count(current_coding_rows(query, shared=True), DrgRule.rule_id)
     ids = [x[0] for x in current_coding_rows(query.with_entities(DrgRule.rule_id).order_by(DrgRule.rule_id), shared=True).offset((page - 1) * page_size).limit(page_size).all()]
     items = []
     for identifier in ids:

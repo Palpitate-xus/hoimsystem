@@ -16,6 +16,7 @@ from app.database import get_db
 from app.dependencies import User, require_roles
 from app.models import Doctor
 from app.routers.inpatient_support import QueryPositiveInteger
+from app.sql_counts import locked_row_count
 
 router = APIRouter(prefix="/ai/satisfaction-sources", default_response_class=JSONResponse)
 
@@ -61,7 +62,7 @@ def doctors(
         if not departments:
             raise HTTPException(403, "当前账户没有可核实的实际医生科室")
         query = query.filter(Doctor.department_id.in_(departments))
-    total = current_satisfaction_rows(query, shared=True).count()
+    total = locked_row_count(current_satisfaction_rows(query, shared=True), Doctor.doctor_id)
     rows = current_satisfaction_rows(query.order_by(Doctor.doctor_id), shared=True).offset((page - 1) * page_size).limit(page_size).all()
     return response(
         {
@@ -112,7 +113,7 @@ def cases(
         )
     elif doctor_ids or date_from is not None or date_to is not None:
         raise HTTPException(422, "审计过滤须提供完整范围，不能忽略残缺参数")
-    total = current_satisfaction_rows(query.with_entities(AISatisfactionCase.case_id), shared=True).count()
+    total = locked_row_count(current_satisfaction_rows(query, shared=True), AISatisfactionCase.case_id)
     ids = (
         current_satisfaction_rows(query.with_entities(AISatisfactionCase.case_id).order_by(AISatisfactionCase.created_at.desc(), AISatisfactionCase.case_id), shared=True)
         .offset((page - 1) * page_size)

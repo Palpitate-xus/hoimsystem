@@ -16,6 +16,7 @@ from app.database import get_db
 from app.dependencies import require_roles
 from app.models import Consumable, Pharmaceutical, User
 from app.routers.inpatient_support import QueryPositiveInteger
+from app.sql_counts import locked_row_count
 
 router = APIRouter(tags=["AI库存完整原件与有限采购候选治理"], default_response_class=JSONResponse)
 
@@ -59,7 +60,7 @@ def options(
             query = query.filter(pk == item_id)
         if keyword:
             query = query.filter(or_(model.name.contains(keyword), model.barcode.contains(keyword))) if item_kind == "pharmaceutical" else query.filter(model.name.contains(keyword))
-        total = current_inventory_rows(query.with_entities(pk), shared=True).count()
+        total = locked_row_count(current_inventory_rows(query, shared=True), pk)
         identifiers = current_inventory_rows(query.with_entities(pk).order_by(pk).offset((page - 1) * page_size).limit(page_size), shared=True).all()
         for (identifier,) in identifiers:
             sku = units.sku_binding(db, item_kind, identifier, locking=True, require_active=True)
@@ -119,7 +120,7 @@ def listing(db, user, kind, item_kind, item_id, page, page_size, *, admin=False)
     if item_id is not None:
         query = query.filter(Model.item_id == item_id)
     primary = Model.source_record_id
-    total = current_inventory_rows(query.with_entities(primary), shared=True).count()
+    total = locked_row_count(current_inventory_rows(query, shared=True), primary)
     ids = current_inventory_rows(query.with_entities(primary).order_by(Model.recorded_at.desc(), primary).offset((page - 1) * page_size).limit(page_size), shared=True).all()
     # PK page, followed only by immutable/governance scalar columns; neither
     # payload_json nor parent_binding_json is fetched or falsely certified.

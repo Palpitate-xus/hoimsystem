@@ -5,7 +5,6 @@ import hashlib
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import func
 from sqlalchemy.orm import defer
 
 from app.ai.catalog import CATALOG_VERSION, FEATURE_BY_KEY
@@ -23,6 +22,7 @@ from app.ai.satisfaction_sources import utcnow
 from app.ai.satisfaction_storage import _run_identifier, authorize_run_scope, load_snapshot, stage_anchor
 from app.ai.satisfaction_write_guard import lock_satisfaction_write
 from app.config import settings
+from app.sql_counts import locked_row_count
 
 
 def actor_epoch(actor):
@@ -127,7 +127,7 @@ def create_satisfaction_run(db, user, req):
         bundle = satisfaction_context(db, actor, req.input)
         clock = utcnow()
         start = datetime.datetime.combine(clock.date(), datetime.time.min)
-        used = db.query(func.count(AIRun.run_id)).filter(AIRun.feature_key == FEATURE_KEY, AIRun.requested_by == actor.user_id, AIRun.create_time >= start).with_for_update(read=True).scalar()
+        used = locked_row_count(db.query(AIRun).filter(AIRun.feature_key == FEATURE_KEY, AIRun.requested_by == actor.user_id, AIRun.create_time >= start).with_for_update(read=True), AIRun.run_id, aggregate=True)
         if type(config.daily_limit) is not int or config.daily_limit < 1:
             raise HTTPException(409, "评价功能当前每日额度配置无效")
         if used >= config.daily_limit:

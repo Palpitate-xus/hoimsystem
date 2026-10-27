@@ -4,7 +4,6 @@ import datetime
 import hashlib
 
 from fastapi import HTTPException
-from sqlalchemy import func
 
 from app.ai import charge_reconciliation_contract as c
 from app.ai import charge_reconciliation_sources as sources
@@ -21,6 +20,7 @@ from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
 from app.ai.native_acceptance import acceptance_state
 from app.config import settings
 from app.models import User
+from app.sql_counts import locked_row_count
 
 
 def actor_epoch(actor):
@@ -97,7 +97,7 @@ def _create_charge_run(db, user, req):
     clock = sources.utcnow()
     start = datetime.datetime.combine(clock.date(), datetime.time.min)
     # COUNT must be a current locking read, including after an older RR snapshot.
-    used = db.query(func.count(AIRun.run_id)).filter(AIRun.feature_key == FEATURE_KEY, AIRun.requested_by == actor.user_id, AIRun.create_time >= start).with_for_update(read=True).scalar()
+    used = locked_row_count(db.query(AIRun).filter(AIRun.feature_key == FEATURE_KEY, AIRun.requested_by == actor.user_id, AIRun.create_time >= start).with_for_update(read=True), AIRun.run_id, aggregate=True)
     if used >= config.daily_limit:
         raise HTTPException(429, "该功能今日调用额度已用完")
     metadata = {

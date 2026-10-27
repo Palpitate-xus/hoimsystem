@@ -3,7 +3,6 @@
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import func
 
 from app.ai import infection_cluster_contract as c
 from app.ai import infection_cluster_registry as r
@@ -13,6 +12,7 @@ from app.ai import infection_cluster_task_view_contract as wire
 from app.ai.infection_cluster_run_models import AIInfectionRunArtifact as Artifact
 from app.ai.infection_cluster_write_guard import current
 from app.dependencies import VALID_USER_ROLES
+from app.sql_counts import locked_row_count
 
 
 def _actor(db, user, owner=None):
@@ -92,7 +92,7 @@ def directory(db, user, *, scenario_id=None, page=1, size=20):
 
         TypeAdapter(c.UUID).validate_python(scenario_id)
         query = query.filter(Artifact.scenario_id == scenario_id)
-    total = current(query.with_entities(func.count(Artifact.run_id)), shared=True).scalar()
+    total = locked_row_count(current(query, shared=True), Artifact.run_id, aggregate=True)
     ids = current(query.order_by(Artifact.created_at.desc(), Artifact.run_id.desc()), shared=True).offset((page - 1) * size).limit(size).all()
     # This is a native Artifact directory, not a claim to include unverifiable
     # legacy78 generic tasks. Every item remains bodyless and hash-opaque.

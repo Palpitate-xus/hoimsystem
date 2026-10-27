@@ -20,6 +20,7 @@ from app.ai.research_cohort_registry import authorize_patient_research, authoriz
 from app.ai.research_cohort_snapshot import current_recipe, opaque, project_snapshot, verify_snapshot
 from app.ai.research_cohort_sources import _bounded, _governance, _original_json, _typed, hash_content, utc_text, utcnow
 from app.ai.research_cohort_write_guard import current_actor, current_research_rows, lock_research_write
+from app.sql_counts import locked_row_count
 
 
 def _row(db, identifier, *, body=True, locking=False):
@@ -382,9 +383,8 @@ def list_cases(db, user, scope_id, *, page=1, size=20):
         from app.ai.research_cohort_sources import _registry_authority
 
         _registry_authority(db, actor, scope_id)
-    from sqlalchemy import func
 
-    total = current_research_rows(db.query(func.count(AIResearchCohortCase.case_id)).filter_by(scope_id=scope_id), shared=True).scalar()
+    total = locked_row_count(current_research_rows(db.query(AIResearchCohortCase).filter_by(scope_id=scope_id), shared=True), AIResearchCohortCase.case_id, aggregate=True)
     rows = (
         current_research_rows(case_metadata_query(db).filter(AIResearchCohortCase.scope_id == scope_id).order_by(AIResearchCohortCase.created_at.desc(), AIResearchCohortCase.case_id), shared=True)
         .offset((page - 1) * size)

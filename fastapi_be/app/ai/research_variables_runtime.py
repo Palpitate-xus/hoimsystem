@@ -10,7 +10,7 @@ import uuid
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from app.ai import research_variables_attempts as attempts
 from app.ai import research_variables_receipts as receipts
@@ -25,6 +25,7 @@ from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
 from app.ai.research_variables_storage_contract import VariableUsageReceipt
 from app.ai.research_variables_task_context import prepare_context
 from app.ai.research_variables_task_contract import FEATURE_KEY
+from app.sql_counts import locked_row_count
 
 
 def current_daily_count(db, owner, when):
@@ -34,13 +35,13 @@ def current_daily_count(db, owner, when):
     quota calculation. No Task TEXT or broad queued-task lock is selected.
     """
     start = dt.datetime.combine(when.date(), dt.time.min)
-    return (
-        db.query(func.count(AIRun.run_id))
+    query = (
+        db.query(AIRun)
         .with_hint(AIRun, "FORCE INDEX (idx_ai_run_feature_time)", dialect_name="mysql")
         .filter(AIRun.feature_key == FEATURE_KEY, AIRun.requested_by == owner, AIRun.create_time >= start, AIRun.create_time < start + dt.timedelta(days=1))
         .with_for_update(read=True)
-        .scalar()
     )
+    return locked_row_count(query, AIRun.run_id, aggregate=True)
 
 
 def create_variable_run(db, user, req):

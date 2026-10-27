@@ -4,7 +4,7 @@ import datetime as dt
 from dataclasses import dataclass
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from app.ai import rca_evidence_context as context
 from app.ai import rca_evidence_contract as c
@@ -19,6 +19,7 @@ from app.ai.rca_evidence_task_prompt import SYSTEM_PROMPT
 from app.ai.rca_evidence_task_views import RcaFrozenProvider, RcaFrozenValidation
 from app.ai.rca_evidence_write_guard import current_rows
 from app.config import settings
+from app.sql_counts import locked_row_count
 
 
 @dataclass(frozen=True)
@@ -146,10 +147,10 @@ def current_daily_count(db, owner, when):
     execution takes Config before its Run lock, preserving this order.
     """
     start = dt.datetime.combine(when.date(), dt.time.min)
-    return (
-        db.query(func.count(AIRun.run_id))
+    query = (
+        db.query(AIRun)
         .with_hint(AIRun, "FORCE INDEX (idx_ai_run_feature_time)", dialect_name="mysql")
         .filter(AIRun.feature_key == task_types.FEATURE_KEY, AIRun.requested_by == owner, AIRun.create_time >= start, AIRun.create_time < start + dt.timedelta(days=1))
         .with_for_update(read=True)
-        .scalar()
     )
+    return locked_row_count(query, AIRun.run_id, aggregate=True)

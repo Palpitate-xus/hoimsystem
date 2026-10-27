@@ -7,7 +7,6 @@ from dataclasses import replace
 from types import SimpleNamespace
 
 from fastapi import HTTPException
-from sqlalchemy import func
 
 from app.ai import document_evidence_contract as d
 from app.ai import drug_label_sources as sources
@@ -24,6 +23,7 @@ from app.ai.models import AIAuditEvent, AIFeatureConfig, AIPromptVersion, AIProv
 from app.ai.native_acceptance import AUDIT_FIELDS, RUN_FIELDS
 from app.config import settings
 from app.models import User
+from app.sql_counts import locked_row_count
 
 FEATURE_KEY = storage.FEATURE_KEY
 WRITE_FIELDS = (*RUN_FIELDS, "input_tokens", "output_tokens", "error_code", "error_message", "latency_ms")
@@ -107,13 +107,13 @@ def current_daily_count(db, actor_id, now):
     start = datetime.datetime.combine(now.date(), datetime.time.min)
     # All 73 creators already hold Gate. The existing feature-time index avoids
     # an unrelated feature's locked Run while still counting old/broken 73 rows.
-    return (
-        db.query(func.count(AIRun.run_id))
+    query = (
+        db.query(AIRun)
         .with_hint(AIRun, "FORCE INDEX (idx_ai_run_feature_time)", dialect_name="mysql")
         .filter(AIRun.feature_key == FEATURE_KEY, AIRun.requested_by == actor_id, AIRun.create_time >= start)
         .with_for_update(read=True)
-        .scalar()
     )
+    return locked_row_count(query, AIRun.run_id, aggregate=True)
 
 
 def recheck(db, stored, *, expected_epoch=None):

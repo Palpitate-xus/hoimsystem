@@ -7,7 +7,6 @@ The caller must atomically roll back every failed stage/readback.
 import datetime as dt
 
 from fastapi import HTTPException
-from sqlalchemy import func
 
 from app.ai import operations_support_cases as cases
 from app.ai import operations_support_contract as c
@@ -20,6 +19,7 @@ from app.ai.operations_support_run_models import ARTIFACT_HASHES, ARTIFACT_SCHEM
 from app.ai.operations_support_task_contract import OperationsTaskSelection
 from app.ai.operations_support_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT
 from app.ai.operations_support_write_guard import current_rows, lock_operations_write
+from app.sql_counts import locked_row_count
 
 RAW_FIELDS = ("input_json", "evidence_json", "context_metadata_json")
 RUN_TEXT = (*RAW_FIELDS, "result_json")
@@ -350,8 +350,8 @@ def stage_run(db, user, value, *, preview=False):
     if clock < context.header["assembled_at"]:
         raise HTTPException(409, "任务登记时钟早于资料集，未改写来源时间")
     day_start = dt.datetime.combine(clock.date(), dt.time.min)
-    count_query = db.query(func.count(AIRun.run_id)).filter(AIRun.feature_key == FEATURE, AIRun.requested_by == context.actor.user_id, AIRun.create_time >= day_start)
-    used = current_rows(count_query, shared=True).scalar()
+    count_query = db.query(AIRun).filter(AIRun.feature_key == FEATURE, AIRun.requested_by == context.actor.user_id, AIRun.create_time >= day_start)
+    used = locked_row_count(current_rows(count_query, shared=True), AIRun.run_id, aggregate=True)
     if used >= context.config.daily_limit:
         raise HTTPException(429, "运维功能今日提交额度已用完")
     values = {
@@ -415,6 +415,6 @@ def stage_run(db, user, value, *, preview=False):
     remember_staged_identity(db, artifact)
     # Current actual receipt/header/source/body/config proof after every SQL trigger.
     saved = load_artifact(db, context.actor, identifier, execution=True)
-    if encoded_header({column.name: getattr(saved[0], column.name) for column in AIRun.__table__.columns}) != original or current_rows(count_query, shared=True).scalar() != used + 1:
+    if encoded_header({column.name: getattr(saved[0], column.name) for column in AIRun.__table__.columns}) != original or locked_row_count(current_rows(count_query, shared=True), AIRun.run_id, aggregate=True) != used + 1:
         raise HTTPException(409, "运维任务真实Run、Artifact或同事务当前额度读回不一致")
     return identifier

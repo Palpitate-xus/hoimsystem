@@ -45,6 +45,7 @@ from app.database import get_db
 from app.dependencies import require_roles
 from app.models import ClinicalPathway, Department, Patient, User
 from app.routers.inpatient_support import QueryPositiveInteger
+from app.sql_counts import locked_row_count
 
 
 class AIAdminRoute(APIRoute):
@@ -1223,7 +1224,7 @@ def list_global_runs(
     if encounter_ref is not None:
         query = query.filter(AIRun.encounter_ref == encounter_ref)
     current_directory = feature_key in {None, "charge_reconciliation", "clinical_training"}
-    total = query.with_entities(func.count(AIRun.run_id)).with_for_update(read=True).scalar() if current_directory else query.count()
+    total = locked_row_count(query.with_for_update(read=True), AIRun.run_id, aggregate=True) if current_directory else query.count()
     rows_query = (
         query.options(defer(AIRun.input_json), defer(AIRun.result_json), defer(AIRun.evidence_json), defer(AIRun.context_metadata_json))
         .order_by(AIRun.create_time.desc(), AIRun.run_id)

@@ -7,7 +7,6 @@ back the complete caller transaction, including after-insert source mutations.
 import datetime as dt
 
 from fastapi import HTTPException
-from sqlalchemy import func
 
 from app.ai import clinical_training_configuration as cfg
 from app.ai import clinical_training_contract as c
@@ -21,6 +20,7 @@ from app.ai.clinical_training_run_models import ARTIFACT_HASHES, ARTIFACT_SCHEMA
 from app.ai.clinical_training_task_contract import TrainingFeedbackSource, TrainingTaskSelection
 from app.ai.clinical_training_task_prompt import PROMPT_VERSION, SYSTEM_PROMPT
 from app.ai.clinical_training_write_guard import TRAINING_STAFF_ROLES, current_rows
+from app.sql_counts import locked_row_count
 
 FEATURE = cfg.FEATURE
 RAW_FIELDS = ("input_json", "evidence_json", "context_metadata_json")
@@ -205,8 +205,8 @@ def _stage_run(db, user, value, *, preview=False):
     if clock < context.submission["submitted_at"]:
         raise HTTPException(409, "培训任务时钟早于实际提交，未改写原来源时刻")
     day_start = dt.datetime.combine(clock.date(), dt.time.min)
-    count_query = db.query(func.count(AIRun.run_id)).filter(AIRun.feature_key == FEATURE, AIRun.requested_by == context.actor.user_id, AIRun.create_time >= day_start)
-    used = current_rows(count_query, shared=True).scalar()
+    count_query = db.query(AIRun).filter(AIRun.feature_key == FEATURE, AIRun.requested_by == context.actor.user_id, AIRun.create_time >= day_start)
+    used = locked_row_count(current_rows(count_query, shared=True), AIRun.run_id, aggregate=True)
     if used >= context.config.daily_limit:
         raise HTTPException(429, "培训AI功能今日提交额度已用完")
     binding = context.binding()
@@ -230,7 +230,7 @@ def _stage_run(db, user, value, *, preview=False):
 
     remember_staged_identity(db, artifact)
     saved = load_artifact(db, context.actor, run_id, execution=True)
-    if encoded_header({column.name: getattr(saved[0], column.name) for column in AIRun.__table__.columns}) != original or current_rows(count_query, shared=True).scalar() != used + 1:
+    if encoded_header({column.name: getattr(saved[0], column.name) for column in AIRun.__table__.columns}) != original or locked_row_count(current_rows(count_query, shared=True), AIRun.run_id, aggregate=True) != used + 1:
         raise HTTPException(409, "培训真实Run、Artifact或当前额度读回不同")
     return run_id
 

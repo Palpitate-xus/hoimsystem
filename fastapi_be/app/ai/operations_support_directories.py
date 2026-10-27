@@ -8,6 +8,7 @@ from app.ai import operations_support_releases as releases
 from app.ai.operations_support_models import AIOperationsCase, AIOperationsOriginal, AIOperationsRelease
 from app.ai.operations_support_projection import ReleasedOperationsDocument
 from app.ai.operations_support_write_guard import current_rows, lock_operations_write
+from app.sql_counts import locked_row_count
 
 
 def pagination(page, size):
@@ -25,7 +26,7 @@ def list_sources(db, user, kind, *, page=1, size=20):
     if actor.user_role != "super_admin":
         query = query.filter(model.status == "published") if kind == "releases" else query.filter(model.requested_by == actor.user_id)
     with db.no_autoflush:
-        total = current_rows(query, shared=True).count()
+        total = locked_row_count(current_rows(query, shared=True), getattr(model, key))
         ids = current_rows(query.order_by(getattr(model, key)), shared=True).offset((page - 1) * size).limit(size).all()
     items = []
     for (item_id,) in ids:

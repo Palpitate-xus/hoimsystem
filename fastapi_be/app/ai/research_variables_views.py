@@ -8,7 +8,6 @@ no definition, clinical text, review note, patient membership or eligibility.
 
 from fastapi import HTTPException
 from pydantic import TypeAdapter
-from sqlalchemy import func
 
 from app.ai.research_cohort_contract import UUID, ScopeReference
 from app.ai.research_cohort_sources import _typed, utc_text
@@ -18,6 +17,7 @@ from app.ai.research_variables_batches import batch_current
 from app.ai.research_variables_dictionary import dictionary_current
 from app.ai.research_variables_fields import VARIABLE_SOURCE_ROLES
 from app.ai.research_variables_models import AIResearchVariableBatch, AIResearchVariableDictionary
+from app.sql_counts import locked_row_count
 
 COMMON_COLUMNS = (
     "scope_id",
@@ -132,7 +132,7 @@ def list_sources(db, user, kind, *, scope_reference=None, technical=False, scope
     if status is not None:
         where.append(model.status == status)
     with db.no_autoflush:
-        total = current_research_rows(db.query(func.count(getattr(model, pk))).filter(*where), shared=True).scalar()
+        total = locked_row_count(current_research_rows(db.query(model).filter(*where), shared=True), getattr(model, pk), aggregate=True)
         query = db.query(*_columns(kind)).filter(*where).order_by(model.created_at.desc(), getattr(model, pk))
         rows = current_research_rows(query, shared=True).offset((page - 1) * size).limit(size).all()
     return {

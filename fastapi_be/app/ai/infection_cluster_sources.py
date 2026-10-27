@@ -8,7 +8,7 @@ import secrets
 import uuid
 
 from fastapi import HTTPException
-from sqlalchemy import func, inspect
+from sqlalchemy import inspect
 
 from app.ai import infection_cluster_contract as c
 from app.ai import infection_cluster_input as i
@@ -16,6 +16,7 @@ from app.ai import infection_cluster_projection as p
 from app.ai import infection_cluster_registry as r
 from app.ai.infection_cluster_models import AIInfectionCaseReview, AIInfectionPurposeGrant, AIInfectionSnapshot
 from app.ai.infection_cluster_write_guard import current
+from app.sql_counts import locked_row_count
 
 
 def _roots(db, req):
@@ -325,6 +326,6 @@ def snapshot_directory(db, user, *, page=1, size=20):
     query = db.query(*columns)
     if actor.user_role != "super_admin":
         query = query.filter(AIInfectionSnapshot.created_by == actor.user_id)
-    total = current(query.with_entities(func.count(AIInfectionSnapshot.snapshot_id)), shared=True).scalar()
+    total = locked_row_count(current(query, shared=True), AIInfectionSnapshot.snapshot_id, aggregate=True)
     rows = current(query.order_by(AIInfectionSnapshot.captured_at, AIInfectionSnapshot.snapshot_id), shared=True).offset((page - 1) * size).limit(size).all()
     return {"items": [metadata(row) for row in rows], "total": total, "page": page, "size": size, "clinical_body_included": False}

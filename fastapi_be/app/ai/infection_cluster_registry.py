@@ -12,7 +12,6 @@ from typing import Literal
 
 from fastapi import HTTPException
 from pydantic import model_validator
-from sqlalchemy import func
 from sqlalchemy import inspect as sa_inspect
 
 from app.ai import infection_cluster_contract as c
@@ -20,6 +19,7 @@ from app.ai import infection_cluster_input as i
 from app.ai.infection_cluster_models import AIInfectionCaseReview, AIInfectionDefinition, AIInfectionPurposeGrant
 from app.ai.infection_cluster_write_guard import current, identity, lock_gate, lock_infection_write
 from app.ai.models import AIAuditEvent
+from app.sql_counts import locked_row_count
 
 MODELS = {"grant": AIInfectionPurposeGrant, "definition": AIInfectionDefinition, "review": AIInfectionCaseReview}
 KEYS = {"grant": "grant_id", "definition": "definition_id", "review": "review_id"}
@@ -541,7 +541,7 @@ def directory(db, user, kind, *, page=1, size=20):
     # Explicit columns, never ORM entities: no payload_json or basis TEXT.
     columns = [getattr(model, key) for key in (KEYS[kind], "content_hash", "status", "revision", "recorded_at", "create_event_id", "review_event_id", "revoke_event_id")]
     query = db.query(*columns)
-    total = current(query.with_entities(func.count(getattr(model, KEYS[kind]))), shared=True).scalar()
+    total = locked_row_count(current(query, shared=True), getattr(model, KEYS[kind]), aggregate=True)
     rows = current(query.order_by(model.recorded_at, getattr(model, KEYS[kind])), shared=True).offset((page - 1) * size).limit(size).all()
     return {
         "schema_version": "infection_registry_directory_v1",

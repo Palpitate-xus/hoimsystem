@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.ai import charge_reconciliation_contract as c
@@ -12,6 +11,7 @@ from app.ai.charge_reconciliation_models import AIChargeCaseSnapshot
 from app.ai.charge_reconciliation_write_guard import current_charge_rows
 from app.database import get_db
 from app.dependencies import User, require_roles
+from app.sql_counts import locked_row_count
 
 router = APIRouter(prefix="/ai/charge-reconciliation", tags=["AI charge evidence"], default_response_class=JSONResponse)
 
@@ -84,7 +84,7 @@ def list_cases(
     query = db.query(AIChargeCaseSnapshot)
     if patient_id is not None:
         query = query.filter_by(patient_id=patient_id, admission_id=admission_id)
-    total = current_charge_rows(query.with_entities(func.count(AIChargeCaseSnapshot.case_snapshot_id)), shared=True).scalar()
+    total = locked_row_count(current_charge_rows(query, shared=True), AIChargeCaseSnapshot.case_snapshot_id, aggregate=True)
     columns = ("case_snapshot_id", "patient_id", "admission_id", "schema_version", "created_at", "created_by", "collection_digest", "content_hash", "status", "revision", "reviewed_at", "revoked_at")
     rows = (
         current_charge_rows(query.with_entities(*(getattr(AIChargeCaseSnapshot, key) for key in columns)), shared=True)

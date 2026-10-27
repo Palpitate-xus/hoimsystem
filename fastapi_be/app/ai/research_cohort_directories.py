@@ -1,12 +1,13 @@
 """Bounded technical registry references, not a clinical permission directory."""
 
 from fastapi import HTTPException
-from sqlalchemy import exists, func, or_
+from sqlalchemy import exists, or_
 
 from app.ai.research_cohort_metadata import install_metadata_functions, registry_hash_expression
 from app.ai.research_cohort_models import AIResearchPatientAuthorization, AIResearchProjectACL, AIResearchStudyScope
 from app.ai.research_cohort_sources import _registry_authority, utc_text, utcnow
 from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
+from app.sql_counts import locked_row_count
 
 COMMON = ("schema_version", "created_by", "created_at", "status", "revision", "reviewed_by", "reviewed_at", "revoked_by", "revoked_at", "valid_from", "valid_until", "content_hash")
 MANUAL = ("authorization_review_status", "authorization_reviewed_by", "authorization_reviewed_at")
@@ -41,7 +42,7 @@ def list_registry(db, user, kind, *, scope_id=None, page=1, size=20):
         columns = (pk, "scope_id", *COMMON, "user_id", "permission") if kind == "acl" else (pk, "scope_id", *COMMON, "patient_id", "authorization_kind", "access_basis", *MANUAL)
         where = [model.scope_id == scope_id]
     install_metadata_functions(db)
-    total = current_research_rows(db.query(func.count(getattr(model, pk))).filter(*where), shared=True).scalar()
+    total = locked_row_count(current_research_rows(db.query(model).filter(*where), shared=True), getattr(model, pk), aggregate=True)
     query = db.query(*(getattr(model, name) for name in columns), registry_hash_expression(model, manual=kind != "acl")).filter(*where).order_by(model.created_at.desc(), getattr(model, pk))
     rows = current_research_rows(query, shared=True).offset((page - 1) * size).limit(size).all()
     items = []

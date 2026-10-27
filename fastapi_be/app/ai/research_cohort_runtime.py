@@ -10,7 +10,6 @@ from typing import Annotated
 
 from fastapi import HTTPException
 from pydantic import Field
-from sqlalchemy import func
 
 from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
 from app.ai.research_cohort_cases import authorize_case
@@ -22,6 +21,7 @@ from app.ai.research_cohort_result_storage import load_result
 from app.ai.research_cohort_sources import utc_text, utcnow
 from app.ai.research_cohort_storage import FEATURE, _configuration, _json, freeze_artifact, load_artifact, opaque_locator
 from app.ai.research_cohort_write_guard import current_research_rows, lock_research_write
+from app.sql_counts import locked_row_count
 
 
 class ResearchRunInput(StrictModel):
@@ -88,8 +88,8 @@ def create_research_run(db, user, value, *, preview=False):
         request(provider, source, selected.question, prompt["task_prompt"])
         clock = utcnow().replace(microsecond=0)
         start = dt.datetime.combine(clock.date(), dt.time.min)
-        count_query = db.query(func.count(AIRun.run_id)).filter(AIRun.feature_key == FEATURE, AIRun.requested_by == actor.user_id, AIRun.create_time >= start)
-        used = current_research_rows(count_query, shared=True).scalar()
+        count_query = db.query(AIRun).filter(AIRun.feature_key == FEATURE, AIRun.requested_by == actor.user_id, AIRun.create_time >= start)
+        used = locked_row_count(current_research_rows(count_query, shared=True), AIRun.run_id, aggregate=True)
         if used >= config.daily_limit:
             raise HTTPException(429, "科研功能今日提交额度已用完")
         run = AIRun(
@@ -116,7 +116,7 @@ def create_research_run(db, user, value, *, preview=False):
         freeze_artifact(db, actor, identifier, selected.research_cohort_case_id, question=selected.question)
         expected = {column.name: getattr(run, column.name) for column in run.__table__.columns}
         actual = load_artifact(db, actor, identifier, execution=True)[0]
-        if {column.name: getattr(actual, column.name) for column in actual.__table__.columns} != expected or current_research_rows(count_query, shared=True).scalar() != used + 1:
+        if {column.name: getattr(actual, column.name) for column in actual.__table__.columns} != expected or locked_row_count(current_research_rows(count_query, shared=True), AIRun.run_id, aggregate=True) != used + 1:
             raise HTTPException(409, "科研Run原始字段、具体Artifact或实际当前COUNT同事务回读不一致")
         db.commit()
         return identifier
@@ -211,7 +211,7 @@ def list_research_runs(db, user, *, case_id=None, status=None, page=1, size=20, 
         query = query.filter(artifact.case_id == case_id)
     if status is not None:
         query = query.filter(AIRun.status == status)
-    total = current_research_rows(query.with_entities(func.count(AIRun.run_id)), shared=True).scalar()
+    total = locked_row_count(current_research_rows(query, shared=True), AIRun.run_id, aggregate=True)
     rows = current_research_rows(query.order_by(AIRun.create_time.desc(), AIRun.run_id).offset((page - 1) * size).limit(size), shared=True).all()
     items = []
     for row in rows:

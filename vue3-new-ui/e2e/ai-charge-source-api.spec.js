@@ -13,3 +13,31 @@ test('exact JSON transport rejects invalid refs and UTF8 bases before network',a
 
 test('actual stale author revoke validates only metadata and opaque anchors without hidden basis reconstruction',async({page})=>{await open(page);const a=require('./fixtures/charge-sources/actual-redacted-revoke.json');const result=await page.evaluate(async a=>{const p=window.__chargeSourceProbe.api;return Promise.all([p.verifyChargeReconciliationCase(a.stale_author),p.verifyChargeReconciliationCase(a.revoked_author),p.verifyChargeReconciliationMetadataRevoke(a.revoked_author,a.stale_author,a.revoke_request),p.verifyChargeReconciliationMetadataRevoke({...a.revoked_author,reviewed_by:a.revoked_author.reviewed_by+1},a.stale_author,a.revoke_request),p.verifyChargeReconciliationMetadataRevoke(a.revoked_author,a.stale_author,{...a.revoke_request,expected_governance_hash:'0'.repeat(64)}),p.verifyChargeReconciliationMetadataRevoke({...a.revoked_author,review_basis_note:'不能恢复隐去原文'},a.stale_author,a.revoke_request)]);},a);expect(result).toEqual([true,true,true,false,false,false]);});
 test('read parameter closure and impossible redacted governance stages reject before or after SHA binding',async({page})=>{await open(page);const result=await page.evaluate(async a=>{const p=window.__chargeSourceProbe.api;let blocked=0;for(const fn of [()=>p.getChargeReconciliationCases({}),()=>p.getChargeReconciliationCases({patient_id:a.published.patient_id}),()=>p.getChargeReconciliationCases({...a.create_request.request,audit_only:'true'}),()=>p.getChargeReconciliationOptions({...a.create_request.request,patient_name:'private'}),()=>p.getChargeReconciliationCase(a.published.case_snapshot_id,{auditOnly:true,foreign:true})])try{await fn();}catch{blocked++;}return[blocked,await p.verifyChargeReconciliationCase({...a.revoked_redacted,revision:1}),await p.verifyChargeReconciliationCase({...a.revoked_redacted,revoked_at:'2026-02-30T12:00:00.123456Z'}),await p.verifyChargeReconciliationCase({...a.revoked_redacted,reviewed_by:null})];},actual);expect(result).toEqual([5,false,false,false]);});
+
+
+test('actual PostgreSQL FLOAT8 capture preserves driver strings and method binding',async({page})=>{
+ await open(page);
+ const capture=require('./fixtures/charge-sources/actual-postgresql-capture.json');
+ const result=await page.evaluate(async capture=>{
+  const api=window.__chargeSourceProbe.api;
+  return [await api.verifyChargeReconciliationCapture(capture),capture.float_capture_basis,capture.charges.length,capture.charges.every(row=>row.quantity.storage_witness.method==='postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement'),capture.charges.some(row=>row.quantity.value_text==='-0.0'&&row.quantity.storage_witness.binary_hex==='-0x0.0p+0'),capture.charges.some(row=>row.quantity.state==='null'&&row.quantity.storage_witness.value_text===null)];
+ },capture);
+ expect(result).toEqual([true,'postgresql_same_statement_float8',6,true,true,true]);
+});
+for(const mode of ['mysql_basis_with_pg_method','pg_basis_with_mysql_method'])test(`self-rehashed PostgreSQL witness mismatch ${mode} rejects`,async({page})=>{
+ await open(page);
+ const capture=require('./fixtures/charge-sources/actual-postgresql-capture.json');
+ const accepted=await page.evaluate(async({capture,mode})=>{
+  const p=window.__chargeSourceProbe,v=structuredClone(capture);
+  if(mode==='mysql_basis_with_pg_method')v.float_capture_basis='mysql_same_statement_double_promotion';
+  else for(const row of v.charges)row.quantity.storage_witness.method='mysql_CAST_AS_DOUBLE_in_same_current_statement';
+  const groups=[['charges','charge','charge_id'],['orders','order','order_id'],['order_items','order_item','item_id'],['executions','execution','execution_id'],['administrations','administration','administration_id']];
+  const members=[{kind:'patient_binding',record_id:String(v.request.patient_id),content_hash:await p.supportDigest(v.patient_binding)},{kind:'admission',record_id:v.request.admission_id,content_hash:await p.supportDigest(v.admission)}];
+  for(const[key,kind,id]of groups)for(const row of v[key])members.push({kind,record_id:String(row[id]),content_hash:await p.supportDigest(row)});
+  members.sort((a,b)=>a.kind===b.kind?a.record_id<b.record_id?-1:a.record_id>b.record_id?1:0:a.kind<b.kind?-1:1);
+  v.member_manifest=members;v.manifest_hash=await p.supportDigest(members);
+  const{captured_at,collection_digest,...content}=v;v.collection_digest=await p.supportDigest(content);
+  return p.api.verifyChargeReconciliationCapture(v);
+ },{capture,mode});
+ expect(accepted).toBe(false);
+});

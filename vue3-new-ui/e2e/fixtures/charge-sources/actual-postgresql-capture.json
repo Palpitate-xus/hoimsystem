@@ -1,0 +1,260 @@
+{
+  "schema_version": "charge_ledger_collection_v1",
+  "request": {
+    "patient_id": 3,
+    "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b"
+  },
+  "captured_at": "2026-10-27T06:03:16.830991Z",
+  "float_capture_basis": "postgresql_same_statement_float8",
+  "patient_binding": {
+    "patient_id": 3,
+    "name": "合成PG患者",
+    "identity": null,
+    "phone": null,
+    "address": null
+  },
+  "admission": {
+    "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+    "admission_no": null,
+    "patient_id": 3,
+    "doctor_id": null,
+    "department_id": null,
+    "ward_id": null,
+    "bed_id": null,
+    "admission_type": 0,
+    "admission_time": "2026-10-27T06:00:00.123456",
+    "admission_diagnosis": null,
+    "chief_complaint": null,
+    "present_illness": null,
+    "past_history": null,
+    "deposit_amount": "0.00",
+    "discharge_time": null,
+    "discharge_diagnosis": null,
+    "status": 1,
+    "create_time": "2026-10-27T06:00:00.123456"
+  },
+  "charges": [
+    {
+      "charge_id": "02c65736-9baa-4c3c-83b6-6cd2235c7f64",
+      "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "patient_id": 3,
+      "item_name": "原PG记录1",
+      "item_type": "service",
+      "quantity": {
+        "state": "null",
+        "value_text": null,
+        "binary_hex": null,
+        "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+        "storage_witness": {
+          "method": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+          "value_text": null,
+          "binary_hex": null
+        }
+      },
+      "unit_price": "2.00",
+      "total_amount": "4.00",
+      "charge_date": "2026-10-27",
+      "related_order_id": null,
+      "status": 1,
+      "create_time": "2026-10-27T06:00:00.123456",
+      "settled_by": null,
+      "settled_time": null,
+      "refunded_by": null,
+      "refunded_time": null,
+      "refund_reason": null
+    },
+    {
+      "charge_id": "38758d55-1510-4988-84a2-08359460c258",
+      "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "patient_id": 3,
+      "item_name": "原PG记录5",
+      "item_type": "service",
+      "quantity": {
+        "state": "finite",
+        "value_text": "-0.0",
+        "binary_hex": "-0x0.0p+0",
+        "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+        "storage_witness": {
+          "method": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+          "value_text": "-0.0",
+          "binary_hex": "-0x0.0p+0"
+        }
+      },
+      "unit_price": "2.00",
+      "total_amount": "4.00",
+      "charge_date": "2026-10-27",
+      "related_order_id": null,
+      "status": 2,
+      "create_time": "2026-10-27T06:00:00.123456",
+      "settled_by": null,
+      "settled_time": null,
+      "refunded_by": null,
+      "refunded_time": null,
+      "refund_reason": null
+    },
+    {
+      "charge_id": "40a26cff-654e-44a9-a9ca-2ccefb14819e",
+      "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "patient_id": 3,
+      "item_name": "原PG记录2",
+      "item_type": "service",
+      "quantity": {
+        "state": "finite",
+        "value_text": "-0.5",
+        "binary_hex": "-0x1.0000000000000p-1",
+        "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+        "storage_witness": {
+          "method": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+          "value_text": "-0.5",
+          "binary_hex": "-0x1.0000000000000p-1"
+        }
+      },
+      "unit_price": "2.00",
+      "total_amount": "4.00",
+      "charge_date": "2026-10-27",
+      "related_order_id": null,
+      "status": 2,
+      "create_time": "2026-10-27T06:00:00.123456",
+      "settled_by": null,
+      "settled_time": null,
+      "refunded_by": null,
+      "refunded_time": null,
+      "refund_reason": null
+    },
+    {
+      "charge_id": "68b5d791-8e93-4df2-8318-29bf8afcc52b",
+      "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "patient_id": 3,
+      "item_name": "原PG记录4",
+      "item_type": "service",
+      "quantity": {
+        "state": "finite",
+        "value_text": "2.675",
+        "binary_hex": "0x1.5666666666666p+1",
+        "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+        "storage_witness": {
+          "method": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+          "value_text": "2.675",
+          "binary_hex": "0x1.5666666666666p+1"
+        }
+      },
+      "unit_price": "2.00",
+      "total_amount": "4.00",
+      "charge_date": "2026-10-27",
+      "related_order_id": null,
+      "status": 1,
+      "create_time": "2026-10-27T06:00:00.123456",
+      "settled_by": null,
+      "settled_time": null,
+      "refunded_by": null,
+      "refunded_time": null,
+      "refund_reason": null
+    },
+    {
+      "charge_id": "6e50712f-a70a-4e74-9e4d-ef900a22a4f2",
+      "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "patient_id": 3,
+      "item_name": "原PG记录3",
+      "item_type": "service",
+      "quantity": {
+        "state": "finite",
+        "value_text": "0.1",
+        "binary_hex": "0x1.999999999999ap-4",
+        "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+        "storage_witness": {
+          "method": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+          "value_text": "0.1",
+          "binary_hex": "0x1.999999999999ap-4"
+        }
+      },
+      "unit_price": "2.00",
+      "total_amount": "4.00",
+      "charge_date": "2026-10-27",
+      "related_order_id": null,
+      "status": 0,
+      "create_time": "2026-10-27T06:00:00.123456",
+      "settled_by": null,
+      "settled_time": null,
+      "refunded_by": null,
+      "refunded_time": null,
+      "refund_reason": null
+    },
+    {
+      "charge_id": "94688e68-ca7a-45c4-97b3-2dfc652e83d6",
+      "admission_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "patient_id": 3,
+      "item_name": "原PG记录0",
+      "item_type": "service",
+      "quantity": {
+        "state": "finite",
+        "value_text": "0.0",
+        "binary_hex": "0x0.0p+0",
+        "precision_basis": "fetched_ORM_float_not_original_decimal_or_SQLite_MySQL_precision_equivalence",
+        "storage_witness": {
+          "method": "postgresql_CAST_AS_DOUBLE_PRECISION_in_same_current_statement",
+          "value_text": "0.0",
+          "binary_hex": "0x0.0p+0"
+        }
+      },
+      "unit_price": "2.00",
+      "total_amount": "4.00",
+      "charge_date": "2026-10-27",
+      "related_order_id": null,
+      "status": 0,
+      "create_time": "2026-10-27T06:00:00.123456",
+      "settled_by": null,
+      "settled_time": null,
+      "refunded_by": null,
+      "refunded_time": null,
+      "refund_reason": null
+    }
+  ],
+  "orders": [],
+  "order_items": [],
+  "executions": [],
+  "administrations": [],
+  "member_manifest": [
+    {
+      "kind": "admission",
+      "record_id": "17bbefdf-529c-402f-8722-43c17cd20a7b",
+      "content_hash": "bdd9a9db9f504bc6ab0e5768571b94887fe85555a64ec09c723407ebf5684fa0"
+    },
+    {
+      "kind": "charge",
+      "record_id": "02c65736-9baa-4c3c-83b6-6cd2235c7f64",
+      "content_hash": "e9457132ce04066a8b89838c43225e942709eecd0169390f2fae5f2a34c9fb91"
+    },
+    {
+      "kind": "charge",
+      "record_id": "38758d55-1510-4988-84a2-08359460c258",
+      "content_hash": "32c77dc146e59bd63690a7af919ec92886feafa9d96e9efdfeaafaa421970019"
+    },
+    {
+      "kind": "charge",
+      "record_id": "40a26cff-654e-44a9-a9ca-2ccefb14819e",
+      "content_hash": "5f8aeb388b7b42e5af575fccf82e7fbcd18d05e74d185ab9fdc4330d98659cea"
+    },
+    {
+      "kind": "charge",
+      "record_id": "68b5d791-8e93-4df2-8318-29bf8afcc52b",
+      "content_hash": "36031c745b74576c5c7acfe516547206acfe24feef2ba9006e59494474bd64da"
+    },
+    {
+      "kind": "charge",
+      "record_id": "6e50712f-a70a-4e74-9e4d-ef900a22a4f2",
+      "content_hash": "b2f37b576b759d6f04561e2164769b488dea544beef7ed82e0b7c90511288872"
+    },
+    {
+      "kind": "charge",
+      "record_id": "94688e68-ca7a-45c4-97b3-2dfc652e83d6",
+      "content_hash": "70416c591f54b077470196c6aaa715821e23b9c95a401591c32994f733a50524"
+    },
+    {
+      "kind": "patient_binding",
+      "record_id": "3",
+      "content_hash": "b6ebe23c577097ea549cfd28d68bfcf82393a68250938fc9dc83aa983573c03a"
+    }
+  ],
+  "manifest_hash": "6eb6eb39cf46bc5c6fc1b8071be6d4d728adb61a7afa1987e57931c957d66133",
+  "collection_digest": "65d228cac5db5acc807b6acc2dd702897f19c61a4560ccb2df07e932d0388640"
+}

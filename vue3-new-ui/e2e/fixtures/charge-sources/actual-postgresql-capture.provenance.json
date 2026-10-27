@@ -1,0 +1,14 @@
+{
+  "source": "actual app.ai.charge_reconciliation_sources.capture_case against a temporary PostgreSQL 17.2 schema",
+  "data": "synthetic User, Patient, Admission and six charge records; transaction rolled back",
+  "values": [
+    "NULL",
+    "0",
+    "negative zero",
+    "-0.5",
+    "0.1",
+    "2.675"
+  ],
+  "sha256": "06076d06f62b3c5a9d2ed23037a9f18149f34a3b6c152495b61aa3d43c8b6834",
+  "captured_on": "2026-10-27"
+}

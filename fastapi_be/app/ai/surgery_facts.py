@@ -39,6 +39,7 @@ from app.ai.surgery_models import (
     SOURCE_KINDS as SOURCE_KINDS,
 )
 from app.models import Admission, CssdInstrument, Department, Doctor, Equipment, EquipmentInspection, EquipmentMaintenance, Patient, SurgeryApplication, SurgerySchedule, User
+from app.sql_locks import postgresql_gate_statement
 
 SOURCE_ROLES = frozenset({"admin", "super_admin", "director", "doctor"})
 RegistryKind = Literal["pool", "resource", "person_account", "room_alias", "pool_membership"]
@@ -469,6 +470,8 @@ def lock_write_gate(db):
     dialect = db.get_bind().dialect.name
     if dialect == "mysql":
         statement = mysql_insert(AISurgeryWriteGate).values(gate_id=1, revision=1).prefix_with("IGNORE")
+    elif dialect == "postgresql":
+        statement = postgresql_gate_statement(AISurgeryWriteGate)
     elif dialect == "sqlite":
         statement = sqlite_insert(AISurgeryWriteGate).values(gate_id=1, revision=1).on_conflict_do_nothing(index_elements=["gate_id"])
     else:

@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: public.ecr.aws/docker/library/postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab
     environment:
       POSTGRES_USER: benchmark
       POSTGRES_PASSWORD: benchmark-local-only
@@ -40,7 +40,7 @@ services:
       - --workers
       - ${BENCHMARK_WORKERS:-4}
       - --worker-class
-      - uvicorn.workers.UvicornWorker
+      - uvicorn_worker.UvicornWorker
       - --bind
       - 0.0.0.0:8000
       - --access-logfile

@@ -23,7 +23,7 @@ x-app: &app
 
 services:
   db:
-    image: ${PREVIEW_POSTGRES_IMAGE:-postgres:16-alpine}
+    image: ${PREVIEW_POSTGRES_IMAGE:-public.ecr.aws/docker/library/postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab}
     environment:
       POSTGRES_USER: hoim_preview
       POSTGRES_PASSWORD: ${PREVIEW_DB_PASSWORD:?Run python scripts/local_preview.py start}
@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
 
   redis:
-    image: ${PREVIEW_REDIS_IMAGE:-redis:8-alpine}
+    image: ${PREVIEW_REDIS_IMAGE:-public.ecr.aws/docker/library/redis:8-alpine@sha256:47b08295737773de3b711fb86f13ae802f5074e96a9a2d29f5f80164ac08c046}
     command: [redis-server, --appendonly, "yes", --maxmemory-policy, noeviction]
     volumes:
       - redis:/data

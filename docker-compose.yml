@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:8-alpine
+    image: public.ecr.aws/docker/library/redis:8-alpine@sha256:47b08295737773de3b711fb86f13ae802f5074e96a9a2d29f5f80164ac08c046
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
     volumes:
@@ -14,7 +14,7 @@ services:
       retries: 5
 
   db:
-    image: postgres:16-alpine
+    image: public.ecr.aws/docker/library/postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab
     container_name: hoimsystem_db
     restart: unless-stopped
     environment:

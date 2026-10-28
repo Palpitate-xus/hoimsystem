@@ -133,7 +133,7 @@ pip install gunicorn
 
 # 先执行一次迁移，再启动 4 个 API worker；API worker 不运行调度器
 python -m app.db_migrate
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker \
+gunicorn app.main:app -w 4 -k uvicorn_worker.UvicornWorker \
   --bind 0.0.0.0:8000 --access-logfile - --error-logfile -
 
 # 在另一个受进程管理器监管的进程中启动调度器
@@ -157,7 +157,7 @@ WorkingDirectory=/opt/hoimsystem/fastapi_be
 Environment="PATH=/opt/hoimsystem/fastapi_be/.venv/bin"
 EnvironmentFile=/opt/hoimsystem/fastapi_be/.env
 ExecStart=/opt/hoimsystem/fastapi_be/.venv/bin/gunicorn app.main:app \
-  -w 4 -k uvicorn.workers.UvicornWorker --bind 127.0.0.1:8000
+  -w 4 -k uvicorn_worker.UvicornWorker --bind 127.0.0.1:8000
 Restart=on-failure
 RestartSec=5
 

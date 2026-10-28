@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM public.ecr.aws/docker/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -9,8 +9,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt requirements-ecg.txt ./
-RUN pip install --no-cache-dir -r requirements.txt -r requirements-ecg.txt \
+COPY requirements-build.lock requirements.lock requirements-ecg.lock ./
+RUN python -m pip install --no-cache-dir --require-hashes -r requirements-build.lock \
+    && python -m pip install --no-cache-dir --require-hashes --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.lock -r requirements-ecg.lock \
+    && python -m pip check \
     && useradd --system --uid 10001 --create-home ecg
 
 COPY app ./app

@@ -1,19 +1,34 @@
-FROM python:3.12-slim
+# Build an audio-only toolchain from the verified upstream release. Build tools
+# and unused GUI, image, network and media-device libraries stay outside runtime.
+FROM public.ecr.aws/docker/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159 AS audio-build
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential nasm pkg-config zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+ADD --checksum=sha256:8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz /tmp/ffmpeg.tar.xz
+RUN mkdir /tmp/ffmpeg && tar -xJf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-components=1 \
+    && cd /tmp/ffmpeg && ./configure --prefix=/opt/audio --disable-doc --disable-debug --disable-autodetect \
+       --disable-network --disable-protocols --enable-protocol=file,pipe --disable-devices --disable-avdevice \
+       --disable-hwaccels --disable-swscale --disable-encoders --enable-encoder=pcm_s16le \
+       --disable-muxers --enable-muxer=pcm_s16le --disable-demuxers --enable-demuxer=wav,mp3,mov,ogg,matroska \
+       --disable-filters --enable-filter=aformat,anull,aresample,atrim,asetpts --enable-zlib \
+    && make -j8 && make install \
+    && /opt/audio/bin/ffmpeg -hide_banner -muxers | grep -q s16le \
+    && mkdir -p /opt/audio/share/licenses/ffmpeg \
+    && cp LICENSE.md COPYING.LGPLv2.1 /opt/audio/share/licenses/ffmpeg/
+
+FROM public.ecr.aws/docker/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159
 
 WORKDIR /app
-
-# 安装系统依赖
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libpq-dev \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=audio-build /opt/audio/bin/ffmpeg /opt/audio/bin/ffprobe /usr/local/bin/
+COPY --from=audio-build /opt/audio/share/licenses /usr/local/share/licenses/
+COPY ffmpeg-source.json /usr/local/share/licenses/ffmpeg/source.json
 
 # 复制依赖文件
-COPY requirements.txt .
+COPY requirements-build.lock requirements.lock ./
 
 # 安装 Python 依赖
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN python -m pip install --no-cache-dir --require-hashes -r requirements-build.lock \
+    && python -m pip install --no-cache-dir --only-binary=:all: --require-hashes -r requirements.lock \
+    && python -m pip check
 
 # 复制应用代码
 COPY . .
@@ -25,4 +40,4 @@ RUN mkdir -p app/uploads /tmp/prometheus private/ai-audio private/ai-ecg && chmo
 EXPOSE 8000
 
 # 启动命令
-CMD ["gunicorn", "app.main:app", "-c", "gunicorn.conf.py", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]
+CMD ["gunicorn", "app.main:app", "-c", "gunicorn.conf.py", "-w", "4", "-k", "uvicorn_worker.UvicornWorker", "--bind", "0.0.0.0:8000", "--access-logfile", "-", "--error-logfile", "-"]

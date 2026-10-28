@@ -1,5 +1,5 @@
 # Standalone deterministic physical-bed statistics; no hospital DB or ML training package.
-fastapi==0.136.1
-pydantic==2.12.4
-pydantic-settings==2.12.0
-uvicorn==0.46.0
+fastapi==0.162.0
+pydantic==2.14.1
+pydantic-settings==2.16.2
+uvicorn==0.54.0

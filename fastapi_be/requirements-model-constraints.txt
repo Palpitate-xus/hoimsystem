@@ -1,0 +1,10 @@
+# These versions form the existing reviewed engine identities. Lock all other
+# service dependencies independently without changing those identities.
+torch==2.14.1+cpu
+safetensors==0.8.0
+numpy==2.4.4
+faster-whisper==1.2.1
+ctranslate2==4.8.3
+onnxruntime==1.31.0
+av==16.1.0
+tokenizers==0.23.3

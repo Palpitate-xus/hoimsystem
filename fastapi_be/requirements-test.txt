@@ -1,0 +1,4 @@
+# Independent numeric oracles used by engineering tests, not by the API image.
+-r requirements.txt
+numpy==2.4.4
+scipy>=1.16,<2

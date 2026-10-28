@@ -1,0 +1,2 @@
+# Installer security fixes are included before application packages are installed.
+pip==26.2.2

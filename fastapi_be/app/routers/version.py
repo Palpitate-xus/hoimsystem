@@ -5,7 +5,7 @@ from app.config import settings
 
 router = APIRouter()
 
-APP_VERSION = "2.0.0"
+APP_VERSION = "2.1.0"
 
 
 @router.get("/version")

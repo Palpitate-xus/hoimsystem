@@ -174,5 +174,5 @@ class TestVersionEndpoint:
         r = await async_client.get("/api/version")
         assert r.status_code == 200
         data = r.json()["data"]
-        assert data["version"] == "2.0.0"
+        assert data["version"] == "2.1.0"
         assert "environment" in data

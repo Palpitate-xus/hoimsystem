@@ -695,6 +695,8 @@ os.makedirs(os.path.join(upload_dir, "reports"), exist_ok=True)
 
 from app.routers.version import APP_VERSION  # noqa: E402
 
+app.version = APP_VERSION
+
 
 @app.get("/")
 def root():

@@ -21,7 +21,9 @@ python scripts/local_preview.py start
 | API 文档 | http://localhost:51800/docs |
 | API 就绪检查 | http://localhost:51800/health/ready |
 
-宿主机只监听本机地址，数据库、Redis 和模拟模型不发布宿主机端口。在远程开发机运行时，可通过 VS Code 转发 `51891`，或从自己的电脑建立 SSH 转发：
+页面和 API 默认绑定 `0.0.0.0`，局域网内可使用 `http://开发机IP:51891` 直接访问。`0.0.0.0` 是监听地址，浏览器应填写实际 IP 或域名。数据库、Redis 和模拟模型不发布宿主机端口；需要仅本机访问时，可在 `.local-preview/preview.env` 中设置 `PREVIEW_BIND_ADDRESS=127.0.0.1`。
+
+无法直接访问开发机网络时，也可通过 VS Code 转发 `51891`，或从自己的电脑建立 SSH 转发：
 
 ```bash
 ssh -L 51891:127.0.0.1:51891 用户名@开发机

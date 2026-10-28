@@ -65,7 +65,7 @@ services:
       context: ../../fastapi_be
     command: [python, -m, uvicorn, app.main:app, --host, 0.0.0.0, --port, "8000"]
     ports:
-      - "127.0.0.1:51800:8000"
+      - "${PREVIEW_BIND_ADDRESS:-0.0.0.0}:51800:8000"
     healthcheck:
       test: [CMD, python, -c, "import urllib.request; urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8000/health/ready', timeout=3)"]
       interval: 5s
@@ -125,7 +125,7 @@ services:
       context: ../../vue3-new-ui
       dockerfile: ../deploy/preview/Dockerfile.frontend
     ports:
-      - "127.0.0.1:51891:80"
+      - "${PREVIEW_BIND_ADDRESS:-0.0.0.0}:51891:80"
     healthcheck:
       test: [CMD, curl, --noproxy, "*", -fsS, -o, /dev/null, http://127.0.0.1/]
       interval: 5s

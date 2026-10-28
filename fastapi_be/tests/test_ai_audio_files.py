@@ -106,7 +106,7 @@ def test_verified_handle_rejects_same_size_changes_missing_files_and_symlinks(au
     assert error.value.status_code == 409
 
 
-@pytest.mark.parametrize("reference", ["../secret", "/tmp/file", "0" * 36, "", str(uuid.uuid4()).upper()])
+@pytest.mark.parametrize("reference", ["../secret", "/tmp/file", "0" * 36, "", "F883DFFD-44E3-4FF2-83D8-CDD295CE4709"])
 def test_disk_path_uses_only_canonical_server_identifiers(reference, audio_store):
     with pytest.raises(HTTPException) as error:
         audio_path(reference)

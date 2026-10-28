@@ -80,7 +80,7 @@ def test_packaged_branch_cannot_fabricate_fk_version_or_extend_closed_fields(cha
 
 
 @pytest.mark.parametrize(
-    "field,changed", [("prompt_version_id", None), ("prompt_version_id", str(uuid.uuid4())), ("version", 0), ("version", 2), ("database_snapshot", None), ("task_prompt", TASK + "changed")]
+    "field,changed", [("prompt_version_id", None), ("prompt_version_id", "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"), ("version", 0), ("version", 2), ("database_snapshot", None), ("task_prompt", TASK + "changed")]
 )
 def test_saved_branch_requires_exact_original_record_id_version_and_task(field, changed):
     value = freeze_prompt(TASK, catalog_version="synthetic-v75", database_snapshot=database_snapshot())

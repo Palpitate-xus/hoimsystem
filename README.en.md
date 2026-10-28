@@ -9,11 +9,11 @@ The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)](https://fastapi.tiangolo.com/)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.12+-blue)](https://www.python.org/)
 
 ---
 
-## 📊 Project Scale
+## Project Scale
 
 | Metric | Count |
 |:------:|:-----:|
@@ -28,7 +28,7 @@ Source inventory: routes are checked against the RBAC matrix, tables are counted
 
 ---
 
-## 🌟 Features
+## Features
 
 ### Core Business (9 Domains / 40+ Modules)
 
@@ -104,7 +104,7 @@ See the [capability catalog](doc/ai-capabilities.md) for inputs, outputs and def
 
 ---
 
-## 🏗 Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -134,7 +134,22 @@ See the [capability catalog](doc/ai-capabilities.md) for inputs, outputs and def
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
+
+### Local Preview
+
+With Docker Compose, Python and Node.js installed, run from the repository root:
+
+```bash
+npm --prefix vue3-new-ui ci --legacy-peer-deps
+python scripts/local_preview.py start
+```
+
+Open **http://localhost:51891**. API documentation is at **http://localhost:51800/docs**. Sign in as `super01 / 123456` for AI administration, or `doctor1 / doctor123` for the doctor workstation.
+
+The preview uses its own database and synthetic records. It configures simulated patient summaries, outpatient note drafts and operations Q&A. Clinical tasks retain their approval requirements and use super-admin preview. See the [local preview guide](doc/local-preview.md) for status, shutdown and SSH forwarding.
+
+The following steps run the frontend and backend separately for development.
 
 ### Requirements
 
@@ -142,7 +157,7 @@ See the [capability catalog](doc/ai-capabilities.md) for inputs, outputs and def
 |:---------:|:-------:|
 | Node.js | 20.x ≥ 20.19.0, or ≥ 22.12.0 |
 | npm | ≥ 10.0.0 |
-| Python | ≥ 3.10 |
+| Python | ≥ 3.12 (backend containers use 3.12) |
 | Database | SQLite included (no install needed) |
 
 ### 1. Clone
@@ -231,7 +246,7 @@ See [doc/deployDoc.md](doc/deployDoc.md) for detailed deployment instructions (N
 
 ---
 
-## 🔑 Local Demo Accounts
+## Local Demo Accounts
 
 After migrating a fresh local development database, run the [demo account script](fastapi_be/seed_default_accounts.py) from `fastapi_be/` to create these accounts and the required doctor and patient profiles:
 
@@ -257,7 +272,7 @@ For production, create the first super administrator interactively with a strong
 
 ---
 
-## 👥 Roles
+## Roles
 
 | Role | Permissions |
 |:----:|:------------|
@@ -275,7 +290,7 @@ For production, create the first super administrator interactively with a strong
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |:--------:|:------------|
@@ -300,7 +315,7 @@ For production, create the first super administrator interactively with a strong
 
 <a id="performance-benchmark"></a>
 
-## ⚡ Performance Benchmark
+## Performance Benchmark
 
 ### Reproducible PostgreSQL Harness
 
@@ -326,18 +341,16 @@ Every Locust request validates both the HTTP status and response-body `code == 2
 
 ---
 
-## ✨ Highlights
+## Operations and Maintenance
 
-- **Broad coverage**: Outpatient + Inpatient + Pharmacy + Lab + Exam + Surgery, 9 domains 40+ modules
-- **Engineering checks**: Static RBAC drift detection, lint, automated tests, dependency audits and bundle budgets
-- **Great DX**: FastAPI auto docs, hot reload and local SQLite development
-- **Observable**: Liveness/readiness probes, Prometheus metrics, request IDs, operation auditing, and daily operational aggregates
-- **Secure**: JWT auth, bcrypt passwords, ID masking, operation auditing
-- **Good UX**: Element Plus components, unified style utilities, full empty/loading states
+- RBAC drift checks, lint, business tests, dependency audits and bundle budgets: see the [testing guide](doc/testing.md).
+- Liveness/readiness probes, Prometheus metrics, request IDs and audit logs help trace request failures, unavailable dependencies and configuration changes.
+- The API, AI worker and scheduler run separately. Integration delivery supports bounded retries, dead-letter inspection and manual replay.
+- Database migrations, backups, restoration and process supervision are described in the [installation guide](doc/installation-guide.md).
 
 ---
 
-## 📷 Screenshots
+## Screenshots
 
 ![Patient Access Flow](doc_assets/PatientAccessFlow.png)
 
@@ -345,13 +358,13 @@ More screenshots in [doc_assets/](doc_assets/).
 
 ---
 
-## 📄 License
+## License
 
 [MIT](LICENSE)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Issues and Pull Requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 

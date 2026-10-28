@@ -1,0 +1,263 @@
+{
+  "recorded_at": "2026-10-28T13:31:04.711140+00:00",
+  "scope": "Isolated local preview; this is not a new full-system regression or capacity measurement",
+  "simulated": true,
+  "model_inference": false,
+  "clinical_validation": false,
+  "deployment_commit": "33503e04f5e3e215c396733cf86e83bcffed9572",
+  "origin": "http://localhost:51891",
+  "api_docs": "http://localhost:51800/docs",
+  "backend_regression": {
+    "tests": 48,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "recorded_at": "2026-10-28T13:29:09.068Z",
+    "origin": "http://127.0.0.1:51891",
+    "simulated": true,
+    "model_inference": false,
+    "checks": [
+      {
+        "name": "super_admin_browser_login",
+        "passed": true
+      },
+      {
+        "name": "super_admin_management",
+        "passed": true,
+        "capabilities": 80
+      },
+      {
+        "name": "patient_summary_browser_workflow",
+        "passed": true,
+        "run_id": "7c0cbe56-0241-46b9-91fb-3a782eba35ec",
+        "status": "succeeded",
+        "preview": 1
+      },
+      {
+        "name": "outpatient_note_browser_workflow",
+        "passed": true,
+        "run_id": "dbcf4da5-8ffb-4726-8ec5-d214673f1a93",
+        "status": "succeeded",
+        "preview": 1
+      },
+      {
+        "name": "operations_qa_browser_workflow",
+        "passed": true,
+        "run_id": "dd20dd88-1bba-4a75-92b5-39f591e36d7d",
+        "status": "succeeded",
+        "preview": 0
+      },
+      {
+        "name": "doctor_browser_login_and_admin_denial",
+        "passed": true,
+        "admin_http_status": 403
+      },
+      {
+        "name": "patient_browser_login_and_admin_denial",
+        "passed": true,
+        "admin_http_status": 403
+      }
+    ],
+    "page_errors": [],
+    "server_errors": [],
+    "passed": true
+  },
+  "role_http": {
+    "passed": true,
+    "database": "dedicated_preview_postgresql",
+    "accounts": 11,
+    "results": [
+      {
+        "account": "admin",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "super01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "director01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "doctor1",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "nurse01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "cashier01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "pharmacist01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "guide01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "lab01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "registrar01",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      },
+      {
+        "account": "patient1",
+        "login_http": 200,
+        "prescriptions_http": 200,
+        "rows": 0,
+        "total": 0
+      }
+    ]
+  },
+  "simulator_retries": {
+    "models": {
+      "hoim-simulator:operations_qa": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:outpatient_note": {
+        "attempts": 3,
+        "injected_failures": 2,
+        "successes": 1
+      },
+      "hoim-simulator:patient_summary": {
+        "attempts": 5,
+        "injected_failures": 2,
+        "successes": 3
+      }
+    },
+    "simulated": true
+  },
+  "seed_counts_after_stop_and_restart": {
+    "users": 11,
+    "providers": 3,
+    "feature_configs": 3,
+    "medical_records": 1,
+    "beds": 6,
+    "features": {
+      "patient_summary": {
+        "enabled": false,
+        "validation_status": "unreviewed"
+      },
+      "outpatient_note": {
+        "enabled": false,
+        "validation_status": "unreviewed"
+      },
+      "operations_qa": {
+        "enabled": true,
+        "validation_status": "unreviewed"
+      }
+    }
+  },
+  "containers": {
+    "backend": {
+      "image_id": "sha256:874d4d1f96c2e4fb10bf6235a7f4d6b0d5cb02e1c367c163c71016fb26865dae",
+      "running": true,
+      "health": "healthy",
+      "published_ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "51800"
+          }
+        ]
+      }
+    },
+    "frontend": {
+      "image_id": "sha256:a0600d35920f9d85cce6ef80af5111aedddfff427156da6c69f3501ead78bece",
+      "running": true,
+      "health": "healthy",
+      "published_ports": {
+        "80/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "51891"
+          }
+        ]
+      }
+    },
+    "db": {
+      "image_id": "sha256:3da88da04dd915ff9d79e16d9a102435cd65ef42e6b48e720b11a44a2ddabffe",
+      "running": true,
+      "health": "healthy",
+      "published_ports": null
+    },
+    "redis": {
+      "image_id": "sha256:60c3a4cc62b12ee19c0743b2370a92cd1d5c31ecbee477b2af812b54c9db8d82",
+      "running": true,
+      "health": "healthy",
+      "published_ports": null
+    },
+    "simulator": {
+      "image_id": "sha256:874d4d1f96c2e4fb10bf6235a7f4d6b0d5cb02e1c367c163c71016fb26865dae",
+      "running": true,
+      "health": "healthy",
+      "published_ports": null
+    },
+    "worker": {
+      "image_id": "sha256:874d4d1f96c2e4fb10bf6235a7f4d6b0d5cb02e1c367c163c71016fb26865dae",
+      "running": true,
+      "health": null,
+      "published_ports": null
+    },
+    "scheduler": {
+      "image_id": "sha256:874d4d1f96c2e4fb10bf6235a7f4d6b0d5cb02e1c367c163c71016fb26865dae",
+      "running": true,
+      "health": null,
+      "published_ports": null
+    }
+  },
+  "prompt_export_check": {
+    "capabilities": 80,
+    "passed": true
+  },
+  "frontend": {
+    "production_build": true,
+    "warnings": 33,
+    "bundle_budget_passed": true,
+    "total_javascript_bytes": 5956305,
+    "total_assets_bytes": 6997754
+  },
+  "original_services_modified": false,
+  "private_configuration_committed": false
+}

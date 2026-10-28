@@ -1,12 +1,14 @@
 # 部署文档
 
+本机查看完整界面可直接使用 [本地演示](local-preview.md)：从仓库根目录运行 `python scripts/local_preview.py start`，页面端口为 `51891`、API 文档端口为 `51800`。下文说明分别部署开发服务与生产服务的配置。
+
 ## 一、环境要求
 
 ### 最低配置
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
-| Python | >= 3.10 | 后端运行环境 |
+| Python | >= 3.12 | 与后端容器基线一致 |
 | Node.js | 20.19+ 或 22.12+ | 前端构建环境（Rspack 2 要求） |
 | npm | >= 10.0.0 | 包管理器 |
 | SQLite | 内置 | 开发环境默认数据库 |
@@ -28,7 +30,7 @@
 ### 2.1 克隆项目
 
 ```bash
-git clone https://github.com/your-org/hoimsystem.git
+git clone https://github.com/Palpitate-xus/hoimsystem.git
 cd hoimsystem
 ```
 
@@ -45,6 +47,10 @@ source .venv/bin/activate  # Linux/macOS
 # 安装依赖
 pip install -r requirements.txt
 
+# 创建配置、设置固定 SECRET_KEY，再初始化空库或执行已有版本迁移
+cp -n .env.example .env
+python -m app.db_migrate
+
 # 启动开发服务器
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -59,13 +65,13 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 cd vue3-new-ui
 
 # 安装依赖
-npm install --legacy-peer-deps
+npm ci --legacy-peer-deps
 
 # 启动开发服务器
 npm run serve:rspack
 ```
 
-前端将运行在 http://localhost:8091。默认情况下前端通过 hash 路由直接访问后端 API（`http://localhost:8000/api`），请确保后端服务已启动。若需跨域代理，可在 `vue3-new-ui/config/proxy.js` 中配置。
+前端运行在 http://localhost:8091，浏览器请求同源 `/api`，由 Rspack 开发服务器代理到 `http://localhost:8000`。代理目标在 `vue3-new-ui/rspack.config.js` 的 `devServer.proxy` 中配置；hash 路由用于页面导航。
 
 ---
 
@@ -182,7 +188,7 @@ sudo systemctl status hoimsystem
 cd vue3-new-ui
 
 # 安装依赖
-npm install --legacy-peer-deps
+npm ci --legacy-peer-deps
 
 # 生产构建
 npm run build

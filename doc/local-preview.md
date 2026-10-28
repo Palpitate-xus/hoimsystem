@@ -4,7 +4,7 @@
 
 ## 启动
 
-安装 Docker Compose、Python 3.10+（用于运行编排脚本）和 Node.js 20.19+ 或 22.12+。后端在 Python 3.12 容器中运行。在仓库根目录执行：
+安装 Docker Compose、Python 3.10+（用于运行编排脚本）和 Node.js 24.x。后端在 Python 3.12.16 容器中运行。在仓库根目录执行：
 
 ```bash
 npm --prefix vue3-new-ui ci --legacy-peer-deps
@@ -63,3 +63,5 @@ python scripts/local_preview.py stop
 如果镜像仓库不可访问，可在私有配置 `.local-preview/preview.env` 中设置 `PREVIEW_POSTGRES_IMAGE` 和 `PREVIEW_REDIS_IMAGE`，引用已核对版本的本地镜像 ID。PostgreSQL 需 14+，Redis 服务需兼容 Redis 协议；数据库镜像主版本须与该演示数据卷一致。
 
 本机的启动、角色登录、模拟任务与重试验收见 [2026-10-28 演示验证](validation/2026-10-28-preview.md)。
+
+本轮依赖升级、局域网 HTTP、浏览器和持续负载结果见 [2026-10-28 优化验证](validation/2026-10-28-optimization.md)。

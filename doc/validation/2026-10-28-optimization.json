@@ -1,0 +1,1432 @@
+{
+  "recorded_at": "2026-10-28T16:21:43.594707+00:00",
+  "version": "2.1.0",
+  "source_commit_before_report": "67477cf8ecd75515664958b5406476aff9a62dd8",
+  "backend": {
+    "tests": 14474,
+    "passed": 14469,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 5,
+    "replacements": [
+      {
+        "report": "document-compatibility-final.xml",
+        "modules": [
+          "tests.test_ai_document_change_result_storage",
+          "tests.test_ai_document_extraction_storage",
+          "tests.test_batch4_modules.TestAntibioticCompliance",
+          "tests.test_batch4_modules.TestHomeIcdWorkbench",
+          "tests.test_batch4_modules.TestScrapBatchLedger",
+          "tests.test_batch4_modules.TestVersionEndpoint"
+        ],
+        "tests": 110
+      },
+      {
+        "report": "postgresql-final.xml",
+        "modules": [
+          "tests.test_ai_charge_reconciliation_postgresql",
+          "tests.test_ai_surgery_postgresql",
+          "tests.test_inventory_backpressure",
+          "tests.test_postgresql_native_marker_guard",
+          "tests.test_postgresql_window_registration",
+          "tests.test_postgresql_write_gates",
+          "tests.test_sql_counts"
+        ],
+        "tests": 62
+      },
+      {
+        "report": "postgresql-ddl-final.xml",
+        "modules": [
+          "tests.test_sql_json",
+          "tests.test_sql_text"
+        ],
+        "tests": 79
+      },
+      {
+        "report": "optional-tensor-isolated.xml",
+        "modules": [
+          "tests.test_ai_imaging_preprocessing"
+        ],
+        "tests": 74
+      },
+      {
+        "report": "deterministic-cases.xml",
+        "modules": [
+          "tests.test_ai_audio_files",
+          "tests.test_ai_deidentification_frozen"
+        ],
+        "tests": 54
+      }
+    ],
+    "skip_reasons": {
+      "Requires explicitly prepared pinned imaging weights and optional offline CPU runtime": 1,
+      "Requires explicitly prepared local weights and optional speech runtime": 1,
+      "set HOIM_IMAGING_REAL_MODEL to a prepared fixed public model; synthetic smoke only": 1,
+      "Requires explicitly prepared pinned ECG weights and optional CPU runtime": 1,
+      "set HOIM_IMAGING_REAL_MODEL for optional public-model synthetic inference": 1
+    }
+  },
+  "collection_consistency": {
+    "collected": 14474,
+    "executed_unique": 14474,
+    "missing": [],
+    "extra": []
+  },
+  "frontend": {
+    "unit_tests_passed": 256,
+    "focused_browser_tests_passed": 23,
+    "build_passed": true,
+    "sass_deprecation_warnings": 0,
+    "remaining_css_order_warnings": 28,
+    "bundle": {
+      "largest_javascript_bytes": 662587,
+      "total_javascript_bytes": 5980569,
+      "total_assets_bytes": 6939925
+    }
+  },
+  "preview": {
+    "roles": {
+      "roles": [
+        {
+          "role": "admin",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "super_admin",
+          "login": 200,
+          "user_info": 200,
+          "management": 200,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "director",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "doctor",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "nurse",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "cashier",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "pharmacist",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "guide",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "lab_technician",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "registrar",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        },
+        {
+          "role": "patient",
+          "login": 200,
+          "user_info": 200,
+          "management": 403,
+          "local_avatar_fallback": true
+        }
+      ],
+      "passed": true
+    },
+    "browser": {
+      "recorded_at": "2026-10-28T16:01:00.112Z",
+      "origin": "http://127.0.0.1:51891",
+      "simulated": true,
+      "model_inference": false,
+      "checks": [
+        {
+          "name": "super_admin_browser_login",
+          "passed": true
+        },
+        {
+          "name": "super_admin_management",
+          "passed": true,
+          "capabilities": 80
+        },
+        {
+          "name": "patient_summary_browser_workflow",
+          "passed": true,
+          "run_id": "e5a6eab9-5fe3-46e4-8258-fcf769807318",
+          "status": "succeeded",
+          "preview": 1
+        },
+        {
+          "name": "outpatient_note_browser_workflow",
+          "passed": true,
+          "run_id": "e02c3ade-dada-4ad2-8426-60c5763d6344",
+          "status": "succeeded",
+          "preview": 1
+        },
+        {
+          "name": "operations_qa_browser_workflow",
+          "passed": true,
+          "run_id": "268a57ad-2ed1-49ac-a28b-3c8414175af4",
+          "status": "succeeded",
+          "preview": 0
+        },
+        {
+          "name": "doctor_browser_login_and_admin_denial",
+          "passed": true,
+          "admin_http_status": 403
+        },
+        {
+          "name": "patient_browser_login_and_admin_denial",
+          "passed": true,
+          "admin_http_status": 403
+        }
+      ],
+      "page_errors": [],
+      "server_errors": [],
+      "version": "2.1.0",
+      "passed": true
+    },
+    "simulator_retries": {
+      "models": {
+        "hoim-simulator:operations_qa": {
+          "attempts": 3,
+          "injected_failures": 2,
+          "successes": 1
+        },
+        "hoim-simulator:outpatient_note": {
+          "attempts": 3,
+          "injected_failures": 2,
+          "successes": 1
+        },
+        "hoim-simulator:patient_summary": {
+          "attempts": 3,
+          "injected_failures": 2,
+          "successes": 1
+        }
+      },
+      "simulated": true
+    },
+    "versions": {
+      "backend_python": "Python 3.12.16",
+      "postgres": "postgres (PostgreSQL) 17.11 (Debian 17.11-1.pgdg12+2)",
+      "redis": "Redis server v=8.10.3 sha=00000000:1 malloc=jemalloc-5.3.0 bits=64 build=defa938dbe2c41f",
+      "nginx": "nginx version: nginx/1.30.6",
+      "openapi_version": "2.1.0",
+      "openapi_paths": 1012
+    },
+    "listeners": [
+      "0.0.0.0:51891",
+      "0.0.0.0:51800"
+    ],
+    "lan_direct_http_status": 200,
+    "lan_browser_status": 503,
+    "lan_browser_note": "The execution environment browser returned 503 for the private interface while direct HTTP returned200. Loopback browser workflows were verified."
+  },
+  "security": {
+    "locks": {
+      "status": "passed",
+      "python_locks": 18,
+      "python": [
+        {
+          "locks": [
+            "requirements-aki.lock",
+            "requirements-forecast.lock",
+            "requirements-news2.lock",
+            "requirements-qsofa.lock"
+          ],
+          "lock_sha256": "8644fa35b12df15d7af1e30f1734e4b04675c9b0c097e9c6b79835a3c37fd90a",
+          "packages": 19,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-bed.lock",
+            "requirements-inventory.lock",
+            "requirements-roster.lock",
+            "requirements-sofa.lock",
+            "requirements-supply.lock",
+            "requirements-surgery.lock"
+          ],
+          "lock_sha256": "495de2780055cc56679bda4412328bdc87c86410c1628a416f07fda66bf68eb3",
+          "packages": 16,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-build.lock"
+          ],
+          "lock_sha256": "a5156dc41a4a00784002d063a17d6fcdb3e6922dd650046fd907b80173a502a7",
+          "packages": 1,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-ecg-verification.lock"
+          ],
+          "lock_sha256": "51d513a4e3abdaa56f11019dadf7ff7b86a64c175fb3d1d7176b88784c3633e7",
+          "packages": 33,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-ecg.lock",
+            "requirements-imaging.lock"
+          ],
+          "lock_sha256": "3033ed39737fea72a0eb90d194c654efef35d8d1e407d1dc8acea3a2812d709b",
+          "packages": 12,
+          "advisory_aliases": [
+            {
+              "name": "torch",
+              "installed_version": "2.14.1+cpu",
+              "advisory_version": "2.14.1"
+            }
+          ],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-imaging-service.lock"
+          ],
+          "lock_sha256": "4bccab965849c72bc651202e5ce872d7968cd7e4f6ecbc13725e9828b4f267ed",
+          "packages": 37,
+          "advisory_aliases": [
+            {
+              "name": "torch",
+              "installed_version": "2.14.1+cpu",
+              "advisory_version": "2.14.1"
+            }
+          ],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-speech.lock"
+          ],
+          "lock_sha256": "0032754dda8b82832fcc2fa92cec501733deed4fc3577c8d1a16887512b442d3",
+          "packages": 23,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements-test.lock"
+          ],
+          "lock_sha256": "c9b760d8c7f5320b992e026d50818ae14bdcea10e94cfe556319a201845b86e4",
+          "packages": 55,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        },
+        {
+          "locks": [
+            "requirements.lock"
+          ],
+          "lock_sha256": "1d45b0e588961cebebb71fb5effadcfe1f17c96229781d86699247a363e530a0",
+          "packages": 53,
+          "advisory_aliases": [],
+          "exit_code": 0,
+          "skipped": [],
+          "vulnerabilities": 0
+        }
+      ],
+      "npm_exit_code": 0
+    },
+    "container_api": {
+      "package_matches": 166,
+      "unique_advisories": 74,
+      "severity": {
+        "High": 55,
+        "Medium": 54,
+        "Negligible": 47,
+        "Low": 10
+      },
+      "fix_states": [
+        {
+          "severity": "High",
+          "state": "not-fixed",
+          "count": 1
+        },
+        {
+          "severity": "High",
+          "state": "wont-fix",
+          "count": 54
+        },
+        {
+          "severity": "Low",
+          "state": "wont-fix",
+          "count": 10
+        },
+        {
+          "severity": "Medium",
+          "state": "fixed",
+          "count": 6
+        },
+        {
+          "severity": "Medium",
+          "state": "wont-fix",
+          "count": 48
+        },
+        {
+          "severity": "Negligible",
+          "state": "fixed",
+          "count": 1
+        },
+        {
+          "severity": "Negligible",
+          "state": "not-fixed",
+          "count": 46
+        }
+      ],
+      "raw_sha256": "eb863259b41cf26f294108ae2aa2f4a551806330979dbffb08678f36d6e0a4ff"
+    },
+    "container_frontend": {
+      "package_matches": 3,
+      "unique_advisories": 1,
+      "severity": {
+        "Medium": 3
+      },
+      "fix_states": [
+        {
+          "severity": "Medium",
+          "state": "",
+          "count": 3
+        }
+      ],
+      "raw_sha256": "e1a9cea068d73cc057691da4166360acda48a78ca1f60988e8cb489cfdde02a0"
+    },
+    "ffmpeg": {
+      "version": "9.0.2",
+      "url": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz",
+      "sha256": "8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e",
+      "signature": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz.asc",
+      "signer": "FCF986EA15E6E293A5644F10B4322F04D67658D8"
+    },
+    "audio": {
+      "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+      "protocols": [
+        "file",
+        "pipe"
+      ],
+      "formats": {
+        ".wav": {
+          "media_type": "audio/wav",
+          "duration_ms": 500,
+          "sample_rate": 16000,
+          "channels": 1,
+          "codec": "pcm_s16le"
+        },
+        ".mp3": {
+          "media_type": "audio/mpeg",
+          "duration_ms": 500,
+          "sample_rate": 16000,
+          "channels": 1,
+          "codec": "mp3"
+        },
+        ".m4a": {
+          "media_type": "audio/mp4",
+          "duration_ms": 500,
+          "sample_rate": 16000,
+          "channels": 1,
+          "codec": "aac"
+        },
+        ".ogg": {
+          "media_type": "audio/ogg",
+          "duration_ms": 500,
+          "sample_rate": 48000,
+          "channels": 1,
+          "codec": "opus"
+        },
+        ".oga": {
+          "media_type": "audio/ogg",
+          "duration_ms": 484,
+          "sample_rate": 16000,
+          "channels": 1,
+          "codec": "vorbis"
+        },
+        ".webm": {
+          "media_type": "audio/webm",
+          "duration_ms": 500,
+          "sample_rate": 48000,
+          "channels": 1,
+          "codec": "opus"
+        }
+      }
+    },
+    "service_builds": [
+      {
+        "service": "forecast",
+        "exit_code": 0
+      },
+      {
+        "service": "news2",
+        "exit_code": 0
+      },
+      {
+        "service": "aki",
+        "exit_code": 0
+      },
+      {
+        "service": "qsofa",
+        "exit_code": 0
+      },
+      {
+        "service": "sofa",
+        "exit_code": 0
+      },
+      {
+        "service": "roster",
+        "exit_code": 0
+      },
+      {
+        "service": "bed",
+        "exit_code": 0
+      },
+      {
+        "service": "inventory",
+        "exit_code": 0
+      },
+      {
+        "service": "supply",
+        "exit_code": 0
+      },
+      {
+        "service": "surgery",
+        "exit_code": 0
+      },
+      {
+        "service": "ecg",
+        "exit_code": 0
+      },
+      {
+        "service": "imaging",
+        "exit_code": 0
+      },
+      {
+        "service": "speech",
+        "exit_code": 0
+      }
+    ],
+    "service_imports": [
+      {
+        "service": "forecast",
+        "exit_code": 0
+      },
+      {
+        "service": "news2",
+        "exit_code": 0
+      },
+      {
+        "service": "aki",
+        "exit_code": 0
+      },
+      {
+        "service": "qsofa",
+        "exit_code": 0
+      },
+      {
+        "service": "sofa",
+        "exit_code": 0
+      },
+      {
+        "service": "roster",
+        "exit_code": 0
+      },
+      {
+        "service": "bed",
+        "exit_code": 0
+      },
+      {
+        "service": "inventory",
+        "exit_code": 0
+      },
+      {
+        "service": "supply",
+        "exit_code": 0
+      },
+      {
+        "service": "surgery",
+        "exit_code": 0
+      },
+      {
+        "service": "ecg",
+        "exit_code": 0
+      },
+      {
+        "service": "imaging",
+        "exit_code": 0
+      },
+      {
+        "service": "speech",
+        "exit_code": 0
+      }
+    ]
+  },
+  "performance": {
+    "short_controls": {
+      "baseline-u100-60s": {
+        "status": "completed",
+        "profile": "large",
+        "users": 100,
+        "configured_measurement_seconds": 60,
+        "measured_seconds": 60.000388883054256,
+        "drain_seconds": 1.3833421906456351,
+        "measurement_started_at": "2026-10-28T14:34:38.632680+00:00",
+        "requests": 5364,
+        "failures": 0,
+        "failure_ratio": 0.0,
+        "rps": 89.39942056800469,
+        "average_ms": 630.736703374496,
+        "p50_ms": 490,
+        "p95_ms": 1500,
+        "p99_ms": 3100,
+        "max_ms": 5698.972238227725,
+        "entries": [
+          {
+            "method": "GET",
+            "name": "/api/departmentManagement/getList?page=1&page_size=20",
+            "requests": 1295,
+            "failures": 0,
+            "average_ms": 442.20374799099784,
+            "p50_ms": 370,
+            "p95_ms": 1000,
+            "p99_ms": 1500
+          },
+          {
+            "method": "GET",
+            "name": "/api/chargeManagement/getList?page=1&page_size=20",
+            "requests": 577,
+            "failures": 0,
+            "average_ms": 820.8868417394972,
+            "p50_ms": 770,
+            "p95_ms": 1600,
+            "p99_ms": 2000
+          },
+          {
+            "method": "GET",
+            "name": "/api/medicalRecord/getList?page=1&page_size=20",
+            "requests": 355,
+            "failures": 0,
+            "average_ms": 319.8441105094594,
+            "p50_ms": 260,
+            "p95_ms": 800,
+            "p99_ms": 1200
+          },
+          {
+            "method": "GET",
+            "name": "/api/patientManagement/getList?page=1&page_size=20",
+            "requests": 833,
+            "failures": 0,
+            "average_ms": 506.3157736693843,
+            "p50_ms": 440,
+            "p95_ms": 1100,
+            "p99_ms": 1500
+          },
+          {
+            "method": "GET",
+            "name": "/api/doctorManagement/getList?page=1&page_size=20",
+            "requests": 1018,
+            "failures": 0,
+            "average_ms": 389.81037025114847,
+            "p50_ms": 320,
+            "p95_ms": 940,
+            "p99_ms": 1300
+          },
+          {
+            "method": "GET",
+            "name": "/api/prescriptionManagement/getList?page=1&page_size=20",
+            "requests": 677,
+            "failures": 0,
+            "average_ms": 888.8538948025009,
+            "p50_ms": 850,
+            "p95_ms": 1600,
+            "p99_ms": 2000
+          },
+          {
+            "method": "POST",
+            "name": "/api/log/getList",
+            "requests": 228,
+            "failures": 0,
+            "average_ms": 766.734883569083,
+            "p50_ms": 720,
+            "p95_ms": 1400,
+            "p99_ms": 1800
+          },
+          {
+            "method": "POST",
+            "name": "/api/prescriptionManagement/create",
+            "requests": 85,
+            "failures": 0,
+            "average_ms": 1134.4628658255233,
+            "p50_ms": 1100,
+            "p95_ms": 2500,
+            "p99_ms": 3600
+          },
+          {
+            "method": "GET",
+            "name": "/api/log/stats",
+            "requests": 161,
+            "failures": 0,
+            "average_ms": 2661.098617990935,
+            "p50_ms": 2600,
+            "p95_ms": 4200,
+            "p99_ms": 4700
+          },
+          {
+            "method": "POST",
+            "name": "/api/appointmentManagement/create",
+            "requests": 135,
+            "failures": 0,
+            "average_ms": 765.9081379917485,
+            "p50_ms": 700,
+            "p95_ms": 1500,
+            "p99_ms": 2700
+          }
+        ],
+        "initial_appointment_targets": 2303,
+        "remaining_appointment_targets": 2169,
+        "exceptions": 0,
+        "setup_seconds": 35.49388769362122,
+        "timing_note": "Setup/ramp and 2-second warmup excluded. Deadline stops new work; up to 10s in-flight drain included in request counts and separately recorded."
+      },
+      "optimized-u100-60s": {
+        "status": "completed",
+        "profile": "large",
+        "users": 100,
+        "configured_measurement_seconds": 60,
+        "measured_seconds": 60.000933728180826,
+        "drain_seconds": 1.4554649805650115,
+        "measurement_started_at": "2026-10-28T14:43:47.170865+00:00",
+        "requests": 5197,
+        "failures": 0,
+        "failure_ratio": 0.0,
+        "rps": 86.61531874726657,
+        "average_ms": 676.0470160799794,
+        "p50_ms": 510,
+        "p95_ms": 1600,
+        "p99_ms": 4400,
+        "max_ms": 6196.21420186013,
+        "entries": [
+          {
+            "method": "GET",
+            "name": "/api/doctorManagement/getList?page=1&page_size=20",
+            "requests": 954,
+            "failures": 0,
+            "average_ms": 399.2909623878135,
+            "p50_ms": 280,
+            "p95_ms": 1100,
+            "p99_ms": 1600
+          },
+          {
+            "method": "GET",
+            "name": "/api/departmentManagement/getList?page=1&page_size=20",
+            "requests": 1338,
+            "failures": 0,
+            "average_ms": 381.0518006265152,
+            "p50_ms": 250,
+            "p95_ms": 1100,
+            "p99_ms": 1500
+          },
+          {
+            "method": "GET",
+            "name": "/api/prescriptionManagement/getList?page=1&page_size=20",
+            "requests": 666,
+            "failures": 0,
+            "average_ms": 982.0458604464749,
+            "p50_ms": 930,
+            "p95_ms": 1700,
+            "p99_ms": 2100
+          },
+          {
+            "method": "GET",
+            "name": "/api/chargeManagement/getList?page=1&page_size=20",
+            "requests": 540,
+            "failures": 0,
+            "average_ms": 882.6697681823539,
+            "p50_ms": 820,
+            "p95_ms": 1500,
+            "p99_ms": 2000
+          },
+          {
+            "method": "GET",
+            "name": "/api/patientManagement/getList?page=1&page_size=20",
+            "requests": 820,
+            "failures": 0,
+            "average_ms": 538.8067916626247,
+            "p50_ms": 420,
+            "p95_ms": 1200,
+            "p99_ms": 2000
+          },
+          {
+            "method": "POST",
+            "name": "/api/log/getList",
+            "requests": 184,
+            "failures": 0,
+            "average_ms": 901.629568948208,
+            "p50_ms": 830,
+            "p95_ms": 1800,
+            "p99_ms": 2300
+          },
+          {
+            "method": "GET",
+            "name": "/api/medicalRecord/getList?page=1&page_size=20",
+            "requests": 331,
+            "failures": 0,
+            "average_ms": 304.1662920992315,
+            "p50_ms": 170,
+            "p95_ms": 950,
+            "p99_ms": 1400
+          },
+          {
+            "method": "POST",
+            "name": "/api/appointmentManagement/create",
+            "requests": 149,
+            "failures": 0,
+            "average_ms": 843.4726406113814,
+            "p50_ms": 680,
+            "p95_ms": 1900,
+            "p99_ms": 3400
+          },
+          {
+            "method": "GET",
+            "name": "/api/log/stats",
+            "requests": 144,
+            "failures": 0,
+            "average_ms": 3969.6433730746826,
+            "p50_ms": 4000,
+            "p95_ms": 5800,
+            "p99_ms": 6100
+          },
+          {
+            "method": "POST",
+            "name": "/api/prescriptionManagement/create",
+            "requests": 71,
+            "failures": 0,
+            "average_ms": 1214.855149676892,
+            "p50_ms": 1100,
+            "p95_ms": 2600,
+            "p99_ms": 3400
+          }
+        ],
+        "initial_appointment_targets": 2300,
+        "remaining_appointment_targets": 2153,
+        "exceptions": 0,
+        "setup_seconds": 35.134981761686504,
+        "timing_note": "Setup/ramp and 2-second warmup excluded. Deadline stops new work; up to 10s in-flight drain included in request counts and separately recorded."
+      },
+      "optimized-indexes-u100-60s": {
+        "status": "completed",
+        "profile": "large",
+        "users": 100,
+        "configured_measurement_seconds": 60,
+        "measured_seconds": 60.00033852458,
+        "drain_seconds": 0.7108866553753614,
+        "measurement_started_at": "2026-10-28T14:54:20.749891+00:00",
+        "requests": 6634,
+        "failures": 0,
+        "failure_ratio": 0.0,
+        "rps": 110.56604284461307,
+        "average_ms": 427.52012176599766,
+        "p50_ms": 310,
+        "p95_ms": 1200,
+        "p99_ms": 2200,
+        "max_ms": 3156.181446276605,
+        "entries": [
+          {
+            "method": "GET",
+            "name": "/api/prescriptionManagement/getList?page=1&page_size=20",
+            "requests": 823,
+            "failures": 0,
+            "average_ms": 649.4979700356505,
+            "p50_ms": 580,
+            "p95_ms": 1300,
+            "p99_ms": 2200
+          },
+          {
+            "method": "GET",
+            "name": "/api/chargeManagement/getList?page=1&page_size=20",
+            "requests": 638,
+            "failures": 0,
+            "average_ms": 561.4258801304738,
+            "p50_ms": 500,
+            "p95_ms": 1200,
+            "p99_ms": 1700
+          },
+          {
+            "method": "GET",
+            "name": "/api/patientManagement/getList?page=1&page_size=20",
+            "requests": 1028,
+            "failures": 0,
+            "average_ms": 392.8899062391559,
+            "p50_ms": 280,
+            "p95_ms": 1000,
+            "p99_ms": 1500
+          },
+          {
+            "method": "GET",
+            "name": "/api/doctorManagement/getList?page=1&page_size=20",
+            "requests": 1317,
+            "failures": 0,
+            "average_ms": 300.1646444176012,
+            "p50_ms": 130,
+            "p95_ms": 910,
+            "p99_ms": 1500
+          },
+          {
+            "method": "GET",
+            "name": "/api/departmentManagement/getList?page=1&page_size=20",
+            "requests": 1770,
+            "failures": 0,
+            "average_ms": 289.41902257923016,
+            "p50_ms": 120,
+            "p95_ms": 900,
+            "p99_ms": 1400
+          },
+          {
+            "method": "GET",
+            "name": "/api/medicalRecord/getList?page=1&page_size=20",
+            "requests": 405,
+            "failures": 0,
+            "average_ms": 278.26513063484504,
+            "p50_ms": 95,
+            "p95_ms": 890,
+            "p99_ms": 2200
+          },
+          {
+            "method": "POST",
+            "name": "/api/log/getList",
+            "requests": 243,
+            "failures": 0,
+            "average_ms": 596.4388065883285,
+            "p50_ms": 490,
+            "p95_ms": 1400,
+            "p99_ms": 1800
+          },
+          {
+            "method": "POST",
+            "name": "/api/prescriptionManagement/create",
+            "requests": 81,
+            "failures": 0,
+            "average_ms": 627.4883261548332,
+            "p50_ms": 390,
+            "p95_ms": 1500,
+            "p99_ms": 2800
+          },
+          {
+            "method": "POST",
+            "name": "/api/appointmentManagement/create",
+            "requests": 169,
+            "failures": 0,
+            "average_ms": 526.510161254004,
+            "p50_ms": 490,
+            "p95_ms": 1200,
+            "p99_ms": 1500
+          },
+          {
+            "method": "GET",
+            "name": "/api/log/stats",
+            "requests": 160,
+            "failures": 0,
+            "average_ms": 1465.7739817339461,
+            "p50_ms": 1400,
+            "p95_ms": 2400,
+            "p99_ms": 2800
+          }
+        ],
+        "initial_appointment_targets": 2302,
+        "remaining_appointment_targets": 2134,
+        "exceptions": 0,
+        "setup_seconds": 33.737596452236176,
+        "timing_note": "Setup/ramp and 2-second warmup excluded. Deadline stops new work; up to 10s in-flight drain included in request counts and separately recorded."
+      }
+    },
+    "sustained": {
+      "soak-u100-1800s": {
+        "load": {
+          "status": "completed",
+          "host": "http://127.0.0.1:51902",
+          "profile": "soak",
+          "users": 100,
+          "configured_seconds": 1800,
+          "measurement_seconds": 1800.0006253467873,
+          "drain_seconds": 2.0137877501547337,
+          "started_at": "2026-10-28T15:08:21.886296+00:00",
+          "requests": 164311,
+          "failures": 6,
+          "failure_ratio": 3.651611882345065e-05,
+          "rps_including_drain": 91.18184560889006,
+          "average_ms": 594.3313393690177,
+          "p50_ms": 300,
+          "p95_ms": 1500,
+          "p99_ms": 6600,
+          "max_ms": 15603.981797583401,
+          "unaccounted_in_flight": 0,
+          "target_pool_exhausted": false,
+          "remaining_appointment_targets": 64909,
+          "exceptions": 0,
+          "entries": [
+            {
+              "method": "GET",
+              "name": "/api/departmentManagement/getList?page=1&page_size=20",
+              "requests": 42029,
+              "failures": 0,
+              "average_ms": 186.12327349257137,
+              "p50_ms": 180,
+              "p95_ms": 370,
+              "p99_ms": 580
+            },
+            {
+              "method": "GET",
+              "name": "/api/medicalRecord/getList?page=1&page_size=20",
+              "requests": 10671,
+              "failures": 0,
+              "average_ms": 103.61827577861126,
+              "p50_ms": 88,
+              "p95_ms": 240,
+              "p99_ms": 470
+            },
+            {
+              "method": "GET",
+              "name": "/api/doctorManagement/getList?page=1&page_size=20",
+              "requests": 31797,
+              "failures": 0,
+              "average_ms": 185.86582037798826,
+              "p50_ms": 180,
+              "p95_ms": 370,
+              "p99_ms": 580
+            },
+            {
+              "method": "POST",
+              "name": "/api/log/getList",
+              "requests": 6355,
+              "failures": 0,
+              "average_ms": 954.1810788983591,
+              "p50_ms": 910,
+              "p95_ms": 1500,
+              "p99_ms": 2000
+            },
+            {
+              "method": "GET",
+              "name": "/api/patientManagement/getList?page=1&page_size=20",
+              "requests": 25139,
+              "failures": 0,
+              "average_ms": 410.48435306420237,
+              "p50_ms": 390,
+              "p95_ms": 700,
+              "p99_ms": 890
+            },
+            {
+              "method": "GET",
+              "name": "/api/prescriptionManagement/getList?page=1&page_size=20",
+              "requests": 20922,
+              "failures": 0,
+              "average_ms": 1071.6054223904464,
+              "p50_ms": 1100,
+              "p95_ms": 1600,
+              "p99_ms": 2000
+            },
+            {
+              "method": "POST",
+              "name": "/api/appointmentManagement/create",
+              "requests": 4204,
+              "failures": 0,
+              "average_ms": 604.9104699684214,
+              "p50_ms": 570,
+              "p95_ms": 1100,
+              "p99_ms": 1300
+            },
+            {
+              "method": "GET",
+              "name": "/api/chargeManagement/getList?page=1&page_size=20",
+              "requests": 17016,
+              "failures": 0,
+              "average_ms": 903.9377903768383,
+              "p50_ms": 890,
+              "p95_ms": 1400,
+              "p99_ms": 1800
+            },
+            {
+              "method": "GET",
+              "name": "/api/log/stats",
+              "requests": 4171,
+              "failures": 0,
+              "average_ms": 5394.317603240684,
+              "p50_ms": 5600,
+              "p95_ms": 8800,
+              "p99_ms": 9800
+            },
+            {
+              "method": "POST",
+              "name": "/api/prescriptionManagement/create",
+              "requests": 2007,
+              "failures": 6,
+              "average_ms": 1788.566115994413,
+              "p50_ms": 1200,
+              "p95_ms": 4800,
+              "p99_ms": 11000
+            }
+          ],
+          "timing_note": "Only requests started during the measured window are counted; their completion includes a bounded drain. Setup, ramp and warmup excluded. HTTP and business failures both count."
+        },
+        "process": {
+          "exit_code": 4,
+          "wall_seconds": 1836.042543752119
+        },
+        "before_counts": {
+          "patient": 100000,
+          "medical_record": 500000,
+          "prescription": 500007,
+          "charge": 500007,
+          "pre_pha": 500007,
+          "appointment": 0,
+          "operation_log": 500599
+        },
+        "after_counts": {
+          "patient": 100000,
+          "medical_record": 500000,
+          "prescription": 502009,
+          "charge": 502009,
+          "pre_pha": 502009,
+          "appointment": 4211,
+          "operation_log": 587179
+        },
+        "integrity": {
+          "negative_drug_stock": 0,
+          "duplicate_active_appointments": 0,
+          "orphan_prescription_lines": 0,
+          "orphan_prescription_charges": 0
+        },
+        "resources": {
+          "api": {
+            "samples": 364,
+            "peak_cpu_percent_one_core_100": 270.16,
+            "peak_memory_mib": 1138.7,
+            "first_memory": "1.033GiB / 4GiB",
+            "last_memory": "1.111GiB / 4GiB"
+          },
+          "db": {
+            "samples": 364,
+            "peak_cpu_percent_one_core_100": 427.03,
+            "peak_memory_mib": 549.1,
+            "first_memory": "327.5MiB / 4GiB",
+            "last_memory": "482MiB / 4GiB"
+          }
+        },
+        "runtime": [
+          {
+            "name": "hoim-soak-20261028-api-1",
+            "image_id": "sha256:5de13a55aaa1d7c0a046ed22b9db6a12a0a814c988a6bf27d753529534f2e4e3",
+            "image_name": "hoim-soak-runtime-final:20261028",
+            "nano_cpus": 4000000000,
+            "memory_bytes": 4294967296,
+            "command": [
+              "gunicorn",
+              "run_benchmark:app",
+              "--workers",
+              "4",
+              "--worker-class",
+              "uvicorn_worker.UvicornWorker",
+              "--bind",
+              "0.0.0.0:8000",
+              "--access-logfile",
+              "-"
+            ]
+          },
+          {
+            "name": "hoim-soak-20261028-db-1",
+            "image_id": "sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5",
+            "image_name": "public.ecr.aws/docker/library/postgres:17-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5",
+            "nano_cpus": 4000000000,
+            "memory_bytes": 4294967296,
+            "command": [
+              "postgres",
+              "-c",
+              "shared_preload_libraries=pg_stat_statements",
+              "-c",
+              "max_connections=120",
+              "-c",
+              "track_io_timing=on"
+            ]
+          }
+        ]
+      },
+      "steady-u70-600s": {
+        "load": {
+          "status": "completed",
+          "host": "http://127.0.0.1:51902",
+          "profile": "soak",
+          "users": 70,
+          "configured_seconds": 600,
+          "measurement_seconds": 600.0002374416217,
+          "drain_seconds": 0.8152986587956548,
+          "started_at": "2026-10-28T15:38:58.993673+00:00",
+          "requests": 45602,
+          "failures": 0,
+          "failure_ratio": 0.0,
+          "rps_including_drain": 75.90016778856781,
+          "average_ms": 419.7017907732215,
+          "p50_ms": 190,
+          "p95_ms": 1100,
+          "p99_ms": 5100,
+          "max_ms": 13274.491049349308,
+          "unaccounted_in_flight": 0,
+          "target_pool_exhausted": false,
+          "remaining_appointment_targets": 67906,
+          "exceptions": 0,
+          "entries": [
+            {
+              "method": "GET",
+              "name": "/api/departmentManagement/getList?page=1&page_size=20",
+              "requests": 11775,
+              "failures": 0,
+              "average_ms": 108.38990985841002,
+              "p50_ms": 92,
+              "p95_ms": 240,
+              "p99_ms": 400
+            },
+            {
+              "method": "GET",
+              "name": "/api/medicalRecord/getList?page=1&page_size=20",
+              "requests": 2873,
+              "failures": 0,
+              "average_ms": 66.22515142669339,
+              "p50_ms": 54,
+              "p95_ms": 160,
+              "p99_ms": 280
+            },
+            {
+              "method": "GET",
+              "name": "/api/doctorManagement/getList?page=1&page_size=20",
+              "requests": 8647,
+              "failures": 0,
+              "average_ms": 108.20703133720978,
+              "p50_ms": 93,
+              "p95_ms": 240,
+              "p99_ms": 390
+            },
+            {
+              "method": "GET",
+              "name": "/api/chargeManagement/getList?page=1&page_size=20",
+              "requests": 4752,
+              "failures": 0,
+              "average_ms": 649.8254782036935,
+              "p50_ms": 640,
+              "p95_ms": 1100,
+              "p99_ms": 1300
+            },
+            {
+              "method": "GET",
+              "name": "/api/patientManagement/getList?page=1&page_size=20",
+              "requests": 6919,
+              "failures": 0,
+              "average_ms": 266.54692909723786,
+              "p50_ms": 250,
+              "p95_ms": 480,
+              "p99_ms": 630
+            },
+            {
+              "method": "GET",
+              "name": "/api/prescriptionManagement/getList?page=1&page_size=20",
+              "requests": 5928,
+              "failures": 0,
+              "average_ms": 760.0554899919298,
+              "p50_ms": 750,
+              "p95_ms": 1300,
+              "p99_ms": 1500
+            },
+            {
+              "method": "POST",
+              "name": "/api/log/getList",
+              "requests": 1752,
+              "failures": 0,
+              "average_ms": 626.92896524693,
+              "p50_ms": 630,
+              "p95_ms": 1000,
+              "p99_ms": 1200
+            },
+            {
+              "method": "POST",
+              "name": "/api/appointmentManagement/create",
+              "requests": 1210,
+              "failures": 0,
+              "average_ms": 365.86618189091894,
+              "p50_ms": 320,
+              "p95_ms": 740,
+              "p99_ms": 1100
+            },
+            {
+              "method": "GET",
+              "name": "/api/log/stats",
+              "requests": 1173,
+              "failures": 0,
+              "average_ms": 4503.486684952265,
+              "p50_ms": 4600,
+              "p95_ms": 6800,
+              "p99_ms": 7600
+            },
+            {
+              "method": "POST",
+              "name": "/api/prescriptionManagement/create",
+              "requests": 573,
+              "failures": 0,
+              "average_ms": 829.9013718436057,
+              "p50_ms": 550,
+              "p95_ms": 2200,
+              "p99_ms": 7600
+            }
+          ],
+          "timing_note": "Only requests started during the measured window are counted; their completion includes a bounded drain. Setup, ramp and warmup excluded. HTTP and business failures both count."
+        },
+        "process": {
+          "exit_code": 0,
+          "wall_seconds": 635.0310073103756
+        },
+        "before_counts": {
+          "patient": 100000,
+          "medical_record": 500000,
+          "prescription": 502009,
+          "charge": 502009,
+          "pre_pha": 502009,
+          "appointment": 0,
+          "operation_log": 587179
+        },
+        "after_counts": {
+          "patient": 100000,
+          "medical_record": 500000,
+          "prescription": 502587,
+          "charge": 502587,
+          "pre_pha": 502587,
+          "appointment": 1214,
+          "operation_log": 611424
+        },
+        "integrity": {
+          "negative_drug_stock": 0,
+          "duplicate_active_appointments": 0,
+          "orphan_prescription_lines": 0,
+          "orphan_prescription_charges": 0
+        },
+        "resources": {
+          "api": {
+            "samples": 127,
+            "peak_cpu_percent_one_core_100": 252.78,
+            "peak_memory_mib": 1158.1,
+            "first_memory": "1.107GiB / 4GiB",
+            "last_memory": "1.122GiB / 4GiB"
+          },
+          "db": {
+            "samples": 127,
+            "peak_cpu_percent_one_core_100": 408.51,
+            "peak_memory_mib": 446.5,
+            "first_memory": "326.9MiB / 4GiB",
+            "last_memory": "408MiB / 4GiB"
+          }
+        },
+        "runtime": [
+          {
+            "name": "hoim-soak-20261028-api-1",
+            "image_id": "sha256:5de13a55aaa1d7c0a046ed22b9db6a12a0a814c988a6bf27d753529534f2e4e3",
+            "image_name": "hoim-soak-runtime-final:20261028",
+            "nano_cpus": 4000000000,
+            "memory_bytes": 4294967296,
+            "command": [
+              "gunicorn",
+              "run_benchmark:app",
+              "--workers",
+              "4",
+              "--worker-class",
+              "uvicorn_worker.UvicornWorker",
+              "--bind",
+              "0.0.0.0:8000",
+              "--access-logfile",
+              "-"
+            ]
+          },
+          {
+            "name": "hoim-soak-20261028-db-1",
+            "image_id": "sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5",
+            "image_name": "public.ecr.aws/docker/library/postgres:17-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5",
+            "nano_cpus": 4000000000,
+            "memory_bytes": 4294967296,
+            "command": [
+              "postgres",
+              "-c",
+              "shared_preload_libraries=pg_stat_statements",
+              "-c",
+              "max_connections=120",
+              "-c",
+              "track_io_timing=on"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "source_hashes": {
+    "fastapi_be/requirements.lock": "1d45b0e588961cebebb71fb5effadcfe1f17c96229781d86699247a363e530a0",
+    "fastapi_be/dependencies-lock-manifest.json": "97ab9678ed32802857c2f90f7d1cc637d270d2073c799c3349359096488e6cbe",
+    "fastapi_be/app/routers/admin.py": "0f42dcfa723fe9caf3390e87fe8f2dd2ccaa83802601dd2fe82506d9e33dcdf9",
+    "fastapi_be/app/routers/system.py": "597a02fbf52bcfc03fc6016c1515c52fc6a0f6e077f697e2841c4274c43fd64b",
+    "vue3-new-ui/package-lock.json": "2237d1ecaa4cd2b91224fcdbe3f09ec261edf1a03ef80881f65903cd49536d6d"
+  },
+  "raw_evidence": ".local-preview/dependencies and .local-preview/performance",
+  "evidence_hashes": {
+    ".local-preview/dependencies/backend-final.xml": "6e1ab7f14f17ca68d6980d07ba547483a11837736f210803ce0655e0e955ac9f",
+    ".local-preview/dependencies/collection-consistency-final.json": "2ba575de88b003d64cfd59236efb68d658c28c89d85d96847f1fd9d83b2e41de",
+    ".local-preview/dependencies/preview-simulator-retries.json": "2d5d81844445375eefcf3c85e112bf24a2ed60d9b33c0761d92a886dd1c52178",
+    ".local-preview/dependencies/audio-runtime-release.json": "53ac1124df77ab0e52917b52f782c8f879915b87fb9ae6dd71c7ec0d1bce0166",
+    ".local-preview/dependencies/release-lock-audits/summary.json": "0d78a6ffad722d36b43ecd98e7c75e4db2459c52175ff97005b16fcb8b34ced8",
+    ".local-preview/performance/soak-u100-1800s/resources.jsonl": "7e4b290522aa315925fe672b03b11aeec8922b8d8b2c1f3bdedfafdb3e723f6c",
+    ".local-preview/performance/steady-u70-600s/resources.jsonl": "045d873ab02fec2a22455b774b71a34c00437b09744dcdb18fd96818d83e0dbe"
+  }
+}

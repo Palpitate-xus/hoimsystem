@@ -209,7 +209,7 @@ async def get_combined_data():
 # 工作进程数 = (CPU 核数 × 2) + 1
 gunicorn app.main:app \
   -w 4 \
-  -k uvicorn.workers.UvicornWorker \
+  -k uvicorn_worker.UvicornWorker \
   --worker-connections 1000 \
   --bind 0.0.0.0:8000
 ```
@@ -581,3 +581,11 @@ PostgreSQL、4 个 Gunicorn worker 和一次性初始化器，再运行
 - [SQLAlchemy Performance](https://docs.sqlalchemy.org/en/20/faq/performance.html)
 - [Vue 3 Performance](https://vuejs.org/guide/best-practices/performance.html)
 - [Web Vitals](https://web.dev/vitals/)
+
+## 2026-10-28 持续负载复验
+
+本轮在已有大档历史数据外增加 50 万条审计日志，并保留数据库 4 CPU / 4 GiB、API 4 CPU / 4 GiB 与 4 个 worker。科室查询改为批量取主任与院区；日志计数合并，排名查询使用覆盖索引。
+
+100 用户 60 秒单轮 SQL 对照中，吞吐从 89.4 增至 110.6 RPS，P95 从 1.5 秒降至 1.2 秒。持续测试另用 `soak` 配置：100 用户 30 分钟完成 164,311 次请求，6 次开方请求因库存写门闩保护返回 503；70 用户 10 分钟完成 45,602 次请求，无失败。所有失败均计入，没有通过扩大锁超时或取消事务保护掩盖压力。
+
+两轮均未发现负库存、重复有效预约、孤立处方明细或孤立费用。较长测试使用不同规模的审计日志和排班，不能直接用短测 RPS 推算生产容量；完整分位数、资源采样与证据摘要见 [优化验证报告](validation/2026-10-28-optimization.md)。

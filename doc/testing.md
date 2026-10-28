@@ -10,7 +10,8 @@
 
 ```bash
 cd fastapi_be
-python -m pip install -r requirements.txt
+python -m pip install --require-hashes -r requirements-build.lock
+python -m pip install --require-hashes -r requirements-test.lock
 python -m pytest tests --junitxml=pytest-results.xml
 ```
 
@@ -36,6 +37,7 @@ SQLite 回归用于业务规则和协议；并发结论使用独立 PostgreSQL �
 ```bash
 export HOIM_TEST_POSTGRES_URL='postgresql+psycopg2://benchmark:benchmark-local-only@127.0.0.1:18427/hoimsystem_benchmark'
 python -m pytest tests/test_postgresql_write_gates.py tests/test_ai_surgery_postgresql.py
+export HOIM_TEST_POSTGRES_DDL_URL="$HOIM_TEST_POSTGRES_URL"
 python -m pytest tests/test_sql_json.py tests/test_sql_text.py tests/test_sql_counts.py
 ```
 
@@ -88,7 +90,7 @@ python -m pytest tests/test_ai_local_speech_real.py
 
 ```bash
 cd vue3-new-ui
-npm ci
+npm ci --legacy-peer-deps
 node --test tests/*.test.cjs
 npm run audit
 npm run build
@@ -107,3 +109,17 @@ npx playwright test --list
 ## 结果归档
 
 每次完整验证保存版本、收集清单、JUnit/Playwright JSON、覆盖率、失败与跳过原因、修复提交、整文件复验、真实服务及模拟服务的区别。发布报告附原始证据摘要和校验值；敏感配置、密钥、数据库文件及私有上传不进入版本管理。
+
+## 持续负载入口
+
+`soak` 数据配置包含 10 万患者、各 50 万条处方/费用/病历、50 万条审计日志，以及 20 名医生的完整周排班。预约池按家庭成员与不同医生日期组合生成，避免长测中目标耗尽后悄悄改变读写比例。
+
+```bash
+BENCHMARK_PROFILE=soak python fastapi_benchmark/run_load.py \
+  --host http://127.0.0.1:51902 --users 100 --seconds 1800 \
+  --output /tmp/hoim-soak-001
+```
+
+目标必须运行隔离压测入口，`/benchmark/info` 要匹配专用 PostgreSQL 数据库名、数据配置和负载模式。准备、登录、升压与预热不计入测量；请求在发出前标记所属时间窗，结束后限时排空在途请求。HTTP 和业务错误均保留，写入目标耗尽或请求未记账会判定结果无效；有请求失败时严格返回非零退出码。
+
+本轮全量回归、容器审计、浏览器与长测结果见 [2026-10-28 优化验证](validation/2026-10-28-optimization.md)。

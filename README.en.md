@@ -4,12 +4,13 @@
 
 A comprehensive hospital information management system for small and medium-sized hospitals, built with **Vue 3 + FastAPI**, covering core business flows including **outpatient, inpatient, pharmacy, lab, physical examination, and billing**.
 
-The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM tasks, plus speech, imaging, ECG, risk assessment, forecasting, optimization and fixed local statistics. Staff can submit tasks from business pages or the AI workbench. Super administrators manage models, prompts, knowledge, sources, permissions and usage in one place. See the [AI usage guide](doc/ai-guide.md) for configuration and workflows.
+The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM tasks, plus speech, imaging, ECG, risk assessment, forecasting, optimization and fixed local statistics. Staff can submit tasks from business pages or the AI workbench. Super administrators manage models, prompts, knowledge, sources, permissions and usage in one place. The workbench groups tasks by workflow and stores favorites separately for each account and role. See the [AI usage guide](doc/ai-guide.md) for configuration and workflows.
 
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)](https://fastapi.tiangolo.com/)
-[![Python](https://img.shields.io/badge/Python-3.12+-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.162.0-009688)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue)](https://www.python.org/)
 
 ---
 
@@ -20,7 +21,7 @@ The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM 
 | Backend Router Modules | **134** mounted modules |
 | API Endpoints | **1,087** RBAC route methods; see the [access matrix](doc/api-rbac-matrix.md) |
 | Database Table Definitions | **266** ORM table definitions, including AI sources and governance |
-| Frontend Pages | **160** Vue page files |
+| Frontend Pages | **161** Vue page files |
 | User Roles | **11**, including super admin, lab technician, and registrar |
 | AI Capability Catalog | **80** capabilities, including **63** text LLM tasks |
 
@@ -145,7 +146,7 @@ npm --prefix vue3-new-ui ci --legacy-peer-deps
 python scripts/local_preview.py start
 ```
 
-Open **http://localhost:51891**. API documentation is at **http://localhost:51800/docs**. Sign in as `super01 / 123456` for AI administration, or `doctor1 / doctor123` for the doctor workstation.
+Open **http://localhost:51891**. API documentation is at **http://localhost:51800/docs**. Both listen on `0.0.0.0`; use the host IP for local network access. Sign in as `super01 / 123456` for AI administration, or `doctor1 / doctor123` for the doctor workstation.
 
 The preview uses its own database and synthetic records. It configures simulated patient summaries, outpatient note drafts and operations Q&A. Clinical tasks retain their approval requirements and use super-admin preview. See the [local preview guide](doc/local-preview.md) for status, shutdown and SSH forwarding.
 
@@ -155,9 +156,9 @@ The following steps run the frontend and backend separately for development.
 
 | Component | Version |
 |:---------:|:-------:|
-| Node.js | 20.x ≥ 20.19.0, or ≥ 22.12.0 |
+| Node.js | 24.x (container: 24.22.1) |
 | npm | ≥ 10.0.0 |
-| Python | ≥ 3.12 (backend containers use 3.12) |
+| Python | 3.12.x (container: 3.12.16) |
 | Database | SQLite included (no install needed) |
 
 ### 1. Clone
@@ -180,7 +181,8 @@ source venv/bin/activate    # Linux/Mac
 # venv\Scripts\activate     # Windows
 
 # Install dependencies
-pip install -r requirements.txt
+python -m pip install --require-hashes -r requirements-build.lock
+python -m pip install --only-binary=:all: --require-hashes -r requirements.lock
 
 # Create the configuration file; configure the database and SECRET_KEY in .env
 cp -n .env.example .env
@@ -369,3 +371,5 @@ More screenshots in [doc_assets/](doc_assets/).
 Issues and Pull Requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 **Contact**: palpitate.xus@outlook.com
+
+Dependency locks, audit commands and image maintenance are documented in [dependency maintenance](doc/dependencies.md). Release checks and local version management are in the [release process](doc/release-process.md).

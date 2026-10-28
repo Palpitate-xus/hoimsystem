@@ -4,12 +4,13 @@
 
 基于 **Vue 3 + FastAPI** 的中小型医院综合信息管理系统，覆盖 **门诊、住院、药房、检验、体检、收费** 等核心业务全流程。
 
-AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM 任务，以及语音、影像、心电、风险评估、预测优化和本地固定统计。医护人员可从业务页面或 AI 工作台发起任务，超级管理员统一管理模型、Prompt、知识、来源、权限和用量。配置与使用方法见 [AI 使用指南](doc/ai-guide.md)。
+AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM 任务，以及语音、影像、心电、风险评估、预测优化和本地固定统计。医护人员可从业务页面或 AI 工作台发起任务，超级管理员统一管理模型、Prompt、知识、来源、权限和用量。工作台按业务分类展示任务，常用收藏按账号和角色保存在本机；个人中心展示账号与使用偏好。配置与使用方法见 [AI 使用指南](doc/ai-guide.md)。
 
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688)](https://fastapi.tiangolo.com/)
-[![Python](https://img.shields.io/badge/Python-3.12+-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.162.0-009688)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue)](https://www.python.org/)
 
 ---
 
@@ -20,7 +21,7 @@ AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM
 | 后端路由模块 | **134** 个已挂载模块 |
 | API 接口 | **1,087** 个 RBAC 路由方法（见 [访问矩阵](doc/api-rbac-matrix.md)） |
 | 数据库表定义 | **266** 个 ORM 表定义（含 AI 来源与治理表） |
-| 前端页面 | **160** 个 Vue 页面文件 |
+| 前端页面 | **161** 个 Vue 页面文件 |
 | 用户角色 | **11** 种（含超级管理员、检验技师和挂号员） |
 | AI 能力目录 | **80** 项，其中 **63** 项使用文本 LLM |
 
@@ -344,7 +345,7 @@ npm --prefix vue3-new-ui ci --legacy-peer-deps
 python scripts/local_preview.py start
 ```
 
-页面地址为 **http://localhost:51891**，API 文档为 **http://localhost:51800/docs**。使用 `super01 / 123456` 查看超级管理员管理中心，使用 `doctor1 / doctor123` 查看医生工作站。
+页面地址为 **http://localhost:51891**，API 文档为 **http://localhost:51800/docs**。两者默认监听 `0.0.0.0`，局域网访问时将 localhost 换为开发机 IP。使用 `super01 / 123456` 查看超级管理员管理中心，使用 `doctor1 / doctor123` 查看医生工作站。
 
 演示自动创建独立数据库、账号和合成病历，配置患者摘要、门诊病历草稿及运营问答的模拟模型服务。临床任务使用超级管理员预览，保留原有审核与启用要求。查看状态、停止服务和远程端口转发见 [本地演示指南](doc/local-preview.md)。
 
@@ -354,9 +355,9 @@ python scripts/local_preview.py start
 
 | 组件 | 版本 |
 |:----:|:----:|
-| Node.js | 20.x ≥ 20.19.0，或 ≥ 22.12.0 |
+| Node.js | 24.x（容器固定 24.22.1） |
 | npm | ≥ 10.0.0 |
-| Python | ≥ 3.12（后端容器使用 3.12） |
+| Python | 3.12.x（容器固定 3.12.16） |
 | 数据库 | 内置 SQLite，无需安装 |
 
 ### 1. 克隆项目
@@ -379,7 +380,8 @@ source venv/bin/activate    # Linux/Mac
 # venv\Scripts\activate     # Windows
 
 # 安装依赖
-pip install -r requirements.txt
+python -m pip install --require-hashes -r requirements-build.lock
+python -m pip install --only-binary=:all: --require-hashes -r requirements.lock
 
 # 从示例创建配置文件，并设置 .env 中的数据库与 SECRET_KEY
 cp -n .env.example .env
@@ -580,3 +582,5 @@ docker compose down -v
 欢迎提交 Issue 和 Pull Request。详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 **联系方式**：palpitate.xus@outlook.com
+
+依赖锁定、审计与镜像维护见 [依赖维护](doc/dependencies.md)；版本校验与本地发布步骤见 [发布流程](doc/release-process.md)。

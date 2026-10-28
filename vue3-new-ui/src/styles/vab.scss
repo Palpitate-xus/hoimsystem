@@ -4,10 +4,10 @@
 
 @charset "utf-8";
 
-@import "./normalize.scss";
-@import "./transition.scss";
-@import "./loading.scss";
-@import "./nav-icons.scss"; // 导入导航图标样式
+@use "./normalize.scss";
+@use "./transition.scss";
+@use "./loading.scss";
+@use "./nav-icons.scss";
 
 $base: ".vab";
 

@@ -132,7 +132,7 @@ module.exports = {
                   relativePath.replace(/\\/g, "/") !==
                   "src/styles/variables.scss"
                 ) {
-                  return `@import "~@/styles/variables.scss";${content}`;
+                  return `@use "@/styles/variables.scss" as *;\n${content}`;
                 }
                 return content;
               },

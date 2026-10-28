@@ -4,7 +4,7 @@ import traceback
 from decimal import Decimal
 
 from fastapi import APIRouter, BackgroundTasks, Depends
-from sqlalchemy import func
+from sqlalchemy import false, func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.ai.inventory_write_guard import current_inventory_rows, lock_inventory_write
@@ -549,22 +549,22 @@ def get_prescription_list(current_user: User = Depends(get_current_user), keywor
         selectinload(Prescription.pre_phas).joinedload(PrePha.pharmaceutical),
         selectinload(Prescription.charges),
     )
-    if current_user.user_role == "admin":
+    if current_user.user_role in ADMIN_ROLES:
         pass
     elif current_user.user_role in ("doctor", "director"):
         doctor_obj = db.query(Doctor).filter(Doctor.user_id == current_user.user_id).first()
         if doctor_obj:
             query = query.filter(Prescription.doctor_id == doctor_obj.doctor_id)
         else:
-            query = query.filter(Prescription.prescription_id == -1)
+            query = query.filter(false())
     elif current_user.user_role == "patient":
         patient_obj = db.query(Patient).filter(Patient.identity == current_user.username).first()
         if patient_obj:
             query = query.filter(Prescription.patient_id == patient_obj.patient_id)
         else:
-            query = query.filter(Prescription.prescription_id == -1)
+            query = query.filter(false())
     else:
-        query = query.filter(Prescription.prescription_id == -1)
+        query = query.filter(false())
 
     prescriptions, total = paginate(query, page, page_size)
     for item in prescriptions:

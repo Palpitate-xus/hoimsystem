@@ -1,9 +1,10 @@
 import datetime
 
+import pytest
 from fastapi import BackgroundTasks
 from sqlalchemy import event
 
-from app.models import Charge, Pharmaceutical, PrePha, Prescription
+from app.models import Charge, Pharmaceutical, PrePha, Prescription, User
 from app.routers.doctor import get_prescription_list, prescription_register
 from app.schemas import PrescriptionCreateRequest
 
@@ -102,3 +103,18 @@ def test_prescription_create_loads_all_drugs_in_one_select(seed_data, db_session
 
     assert result["code"] == 200
     assert len(drug_selects) == 1
+
+
+def test_super_administrator_can_read_prescriptions_without_a_doctor_profile(seed_data, db_session):
+    actor = User(user_id=987654321, username="scope_super", user_role="super_admin")
+    result = get_prescription_list(actor, None, 1, 20, db_session)
+    assert result["code"] == 200
+    assert result["total"] >= 1
+    assert any(item["patient_id"] == seed_data["patient"].patient_id for item in result["data"])
+
+
+@pytest.mark.parametrize("role", ["doctor", "director", "patient", "nurse", "pharmacist", "guide", "cashier", "lab_technician", "registrar"])
+def test_prescription_list_does_not_expose_rows_outside_the_callers_scope(seed_data, db_session, role):
+    actor = User(user_id=987654322, username="scope_missing", user_role=role)
+    result = get_prescription_list(actor, None, 1, 20, db_session)
+    assert result == {"code": 200, "msg": "success", "data": [], "total": 0}

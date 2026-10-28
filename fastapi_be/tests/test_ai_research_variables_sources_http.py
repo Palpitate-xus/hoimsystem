@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """76 real Main/JWT with a temporary dedicated router, never fake authority."""
 
 import datetime as dt
@@ -37,23 +39,22 @@ PRIVATE = (
 
 @pytest.fixture
 def mounted_variable_router():
-    from fastapi.routing import APIRoute
 
     from app.main import app
     from app.routers.ai_research_variables_sources import router
 
     original = list(app.router.routes)
-    existing = [r for r in original if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
+    existing = [r for r in api_routes(original) if r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
     if existing:
         assert len(existing) == 17 and len({(m, r.path) for r in existing for m in r.methods}) == 17
         assert ("GET", "/api/ai/research-variables/scopes/{scope_id}") in {(m, r.path) for r in existing for m in r.methods}
         yield
         return
-    source_routes = [r for r in original if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
+    source_routes = [r for r in api_routes(original) if r.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
     assert len(source_routes) == 23
     app.include_router(router, prefix="/api")
     try:
-        mounted = [r for r in app.router.routes if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
+        mounted = [r for r in api_routes(app.router.routes) if r.endpoint.__module__ == "app.routers.ai_research_variables_sources"]
         assert len(mounted) == 17 and len({(m, r.path) for r in mounted for m in r.methods}) == 17
         yield
     finally:

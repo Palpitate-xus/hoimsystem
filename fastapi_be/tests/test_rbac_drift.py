@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """RBAC 矩阵漂移检测。
 
 防止 rbac_matrix.json（及由其生成的 doc/api-rbac-matrix.md）与代码脱节：
@@ -76,7 +78,6 @@ def generator():
 )
 def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, generator):
     """Use actual mounted routes and closure roles, not a second invented role list."""
-    from fastapi.routing import APIRoute
 
     from app.dependencies import get_current_user, require_roles
     from app.main import app
@@ -86,7 +87,7 @@ def test_observation_matrix_matches_real_mounted_paths_and_role_guards(module, g
             yield child.call
             yield from dependencies(child)
 
-    mounted = {(method, route.path): route for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__ == f"app.routers.{module}" for method in route.methods}
+    mounted = {(method, route.path): route for route in api_routes(app.routes) if route.endpoint.__module__ == f"app.routers.{module}" for method in route.methods}
     generated = {(item["method"], item["path"]): item for item in generator["collect_endpoints"]() if item["module"] == f"{module}.py"}
     assert mounted, "测试必须覆盖实际主应用挂载路由"
     assert generated.keys() == mounted.keys()
@@ -126,11 +127,10 @@ def test_observation_groups_come_from_real_module_constants(generator):
 
 def test_all_matrix_paths_match_actual_main_router_mounts(generator):
     """Include health/metrics mounts without assuming every router uses /api."""
-    from fastapi.routing import APIRoute
 
     from app.main import app
 
-    actual = Counter((method, route.path) for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__.startswith("app.routers.") for method in route.methods)
+    actual = Counter((method, route.path) for route in api_routes(app.routes) if route.endpoint.__module__.startswith("app.routers.") for method in route.methods)
     generated = Counter((row["method"], row["path"]) for row in generator["collect_endpoints"]())
     committed = Counter((row["method"], row["path"]) for row in json.loads((Path(SCRIPT).parents[1] / "rbac_matrix.json").read_text()))
     assert actual
@@ -140,7 +140,6 @@ def test_all_matrix_paths_match_actual_main_router_mounts(generator):
 
 def test_all_mounted_require_roles_match_actual_dependency_closures(generator):
     """Every restricted route must retain all actual roles, including old groups."""
-    from fastapi.routing import APIRoute
 
     from app.dependencies import get_current_user, require_roles
     from app.main import app
@@ -152,8 +151,8 @@ def test_all_mounted_require_roles_match_actual_dependency_closures(generator):
 
     generated = {(item["method"], item["path"]): item["auth"] for item in generator["collect_endpoints"]()}
     checked = set()
-    for route in app.routes:
-        if not isinstance(route, APIRoute) or not route.endpoint.__module__.startswith("app.routers."):
+    for route in api_routes(app.routes):
+        if not route.endpoint.__module__.startswith("app.routers."):
             continue
         calls = list(dependencies(route.dependant))
         guards = [
@@ -245,7 +244,6 @@ def test_main_router_import_aliases_and_empty_mount_prefix(tmp_path, generator):
 
 def test_mount_and_router_prefixes_match_actual_fastapi_composition(tmp_path, generator):
     from fastapi import APIRouter, FastAPI
-    from fastapi.routing import APIRoute
 
     source = tmp_path / "main.py"
     source.write_text('from app.routers import scoped\napp.include_router(scoped.router, prefix="/hospital")\n')
@@ -255,7 +253,7 @@ def test_mount_and_router_prefixes_match_actual_fastapi_composition(tmp_path, ge
     actual_app, actual_router = FastAPI(), APIRouter(prefix="/observations")
     actual_router.add_api_route("/points", lambda: None, methods=["GET"])
     actual_app.include_router(actual_router, prefix="/hospital")
-    assert [generated["path"]] == [route.path for route in actual_app.routes if isinstance(route, APIRoute)]
+    assert [generated["path"]] == [route.path for route in api_routes(actual_app.routes)]
 
 
 @pytest.mark.parametrize(

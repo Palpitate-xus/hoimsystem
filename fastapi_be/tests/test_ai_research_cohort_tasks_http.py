@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual mounted Main/JWT tasks and separate parts, no real model or export."""
 
 import hashlib
@@ -5,7 +7,6 @@ import json
 
 import httpx
 import pytest
-from fastapi.routing import APIRoute
 
 from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider, AIRun
 from app.ai.research_cohort_artifact_models import AIResearchCohortRunArtifact
@@ -31,10 +32,10 @@ BASE = "/api/ai/research-cohort/tasks"
 def actual_task_routes():
     from app.main import app
 
-    routes = [r for r in app.routes if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_cohort_tasks"]
+    routes = [r for r in api_routes(app.routes) if r.endpoint.__module__ == "app.routers.ai_research_cohort_tasks"]
     assert len(routes) == 5
     assert len({(method, route.path) for route in routes for method in route.methods}) == 5
-    source = [r for r in app.routes if isinstance(r, APIRoute) and r.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
+    source = [r for r in api_routes(app.routes) if r.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
     assert len(source) == 23
 
 

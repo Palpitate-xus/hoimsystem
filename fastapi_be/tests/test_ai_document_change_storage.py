@@ -48,6 +48,7 @@ def task(case, *, stage=True, kind="chat"):
     values = {"document_change_scope_id": scope.snapshot.scope_id, "question": "\ufeff原样问题\r\n😀e\u0301"}
     bundle, record, source = prepare_context(db, actor, values)
     provider = AIProvider(
+        max_attempts=1,  # This fixture freezes the legacy single-attempt provider fields.
         name="change storage " + str(uuid.uuid4()),
         kind=kind,
         api_base="https://synthetic.invalid/v1",

@@ -25,7 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_expanded_histories_and_additive_domains_preserve_all_twelve_artifact_domains():
     scripts = ScriptDirectory.from_config(Config(str(ROOT / "alembic.ini")))
-    assert scripts.get_heads() == ["20261023_native_variables_merge"]
+    assert scripts.get_heads() == ["20261028_audit_covering"]
+    assert scripts.get_revision("20261028_audit_covering").down_revision == "20261027_text_retry_usage"
+    assert scripts.get_revision("20261027_text_retry_usage").down_revision == "20261027_ai_provider_retry"
     assert set(scripts.get_revision("20261023_native_variables_merge").down_revision) == {"20261023_native_infection_merge", "20261021_research_variable_runs"}
     assert set(scripts.get_revision("20261023_native_infection_merge").down_revision) == {"20261023_native_rca_merge", "20261021_infection_runs"}
     assert set(scripts.get_revision("20261023_native_rca_merge").down_revision) == {"20261023_native_training_merge", "20261021_rca_evidence_runs"}

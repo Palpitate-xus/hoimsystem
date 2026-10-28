@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual product Main JWT dedicated75 Task routes, with MockTransport model."""
 
 import pytest
@@ -18,7 +20,7 @@ from tests.test_ai_research_cohort_sources import research_case as research_case
 @pytest.fixture(scope="module", autouse=True)
 def mount_dedicated_router_for_actual_main_only():
     expected = {(tuple(sorted(route.methods)), "/api" + route.path) for route in router.routes}
-    actual = [(tuple(sorted(route.methods)), route.path) for route in app.routes if route.path.startswith("/api/ai/deidentification/tasks")]
+    actual = [(tuple(sorted(route.methods)), route.path) for route in api_routes(app.routes) if route.path.startswith("/api/ai/deidentification/tasks")]
     assert len(expected) == len(actual) == 9 and set(actual) == expected
 
 

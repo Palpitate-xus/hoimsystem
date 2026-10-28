@@ -89,6 +89,10 @@ def test_pure_modules_import_without_database_settings_dotenv_network_or_other_f
     root = Path(__file__).resolve().parents[1]
     program = r"""
 import builtins,sys
+# Initialize the approved validation dependency before guarding application
+# imports; its plugin discovery imports stdlib email/socket without network I/O.
+import pydantic
+pydantic.create_model('ApprovedDependencyProbe', value=(int, ...))
 original=builtins.__import__
 blocked=('sqlalchemy','dotenv','socket','httpx','requests','urllib3','app.database','app.models','app.main','app.config','app.settings','app.ai.satisfaction_sources','app.ai.charge_reconciliation')
 attempts=[]

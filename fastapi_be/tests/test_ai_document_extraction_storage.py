@@ -54,6 +54,7 @@ def create_task(db, *, kind="chat", original_text=None, stage=True):
     db.commit()
     original = approved_original(db, actor, original_text)
     provider = AIProvider(
+        max_attempts=1,  # This fixture freezes the legacy single-attempt provider fields.
         name="document storage provider",
         kind=kind,
         api_base="https://synthetic.invalid/v1",
@@ -180,7 +181,7 @@ def test_real_sql_queue_complete_result_and_independent_full_byte_anchors(task_f
     raw_digest = hashlib.sha256((EXTRACTION_SYSTEM_PROMPT + "\n\n" + case.prompt.task_prompt).encode()).hexdigest()
     assert metadata["instructions_digest"] == raw_digest != c.digest([EXTRACTION_SYSTEM_PROMPT, case.prompt.task_prompt])
     assert metadata["model_version"] == case.provider.model
-    assert set(snapshot["provider_snapshot"]) == set(storage.DocumentFrozenProvider.model_fields)
+    assert set(snapshot["provider_snapshot"]) == {name for name, field in storage.DocumentFrozenProvider.model_fields.items() if field.is_required()}
     anchor = case.db.get(AIDocumentExtractionRunAnchor, case.run.run_id)
     assert anchor.input_hash == hashlib.sha256(case.run.input_json.encode()).hexdigest()
     assert anchor.evidence_hash == hashlib.sha256(case.run.evidence_json.encode()).hexdigest()
@@ -264,7 +265,7 @@ def test_each_complete_payload_section_missing_rejected_even_after_rehash(task_f
     assert409(lambda: storage.load_snapshot(case.db, case.run))
 
 
-@pytest.mark.parametrize("field", list(storage.DocumentFrozenProvider.model_fields))
+@pytest.mark.parametrize("field", [name for name, info in storage.DocumentFrozenProvider.model_fields.items() if info.is_required()])
 def test_all_twelve_provider_fields_required_despite_self_rehashed_input(task_factory, field):
     case = task_factory()
     snapshot = copy.deepcopy(case.snapshot)

@@ -62,7 +62,7 @@ def configured(case, *, preview=True, enabled=0, kind="chat"):
 
 
 @pytest.mark.parametrize("kind", ["chat", "responses"])
-def test_actual_configuration_freezes_complete_catalog_default_prompt_and_provider12_validation5(kind, grant_case):
+def test_actual_configuration_freezes_complete_catalog_default_prompt_and_provider13_validation5(kind, grant_case):
     case, db = grant_case, grant_case["db"]
     stored, value, _ = configured(case, kind=kind)
     identifier = inspect(stored.run).identity[0]
@@ -70,7 +70,7 @@ def test_actual_configuration_freezes_complete_catalog_default_prompt_and_provid
     assert loaded.source == value.source and current.prompt_version == 0
     assert current.task_prompt == FEATURE_BY_KEY["incident_rca"].task_prompt and current.task_prompt != TASK_PROMPT
     assert current.task_prompt.endswith(TASK_PROMPT) and loaded.snapshot.system_prompt == SYSTEM_PROMPT
-    assert len(type(current.frozen_provider).model_fields) == 12 and len(type(current.frozen_validation).model_fields) == 5
+    assert len(type(current.frozen_provider).model_fields) == 13 and current.frozen_provider.max_attempts == 3 and len(type(current.frozen_validation).model_fields) == 5
     assert current.provider.kind == kind and loaded.snapshot.provider_snapshot == current.frozen_provider
     assert loaded.snapshot.actor_epoch.token_invalid_before is None
     assert configuration.current_daily_count(db, case["actor"].user_id, NOW) == 1

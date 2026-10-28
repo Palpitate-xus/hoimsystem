@@ -1,10 +1,11 @@
+from tests.routing import api_routes
+
 """Actual Main/JWT -> shared queue -> local ASGI -> committed split parts."""
 
 import asyncio
 import json
 
 import pytest
-from fastapi.routing import APIRoute
 from sqlalchemy import event, text
 from sqlalchemy.orm import Session
 
@@ -244,7 +245,7 @@ async def test_real_feedback_sql_trigger_rolls_back_feedback_and_specific_audit(
 async def test_main_route_registration_and_foreign_scope_rejects_before_task_write(configured, pipeline, async_client):
     from app.main import app
 
-    routes = [row for row in app.routes if isinstance(row, APIRoute) and row.endpoint.__module__ == "app.routers.ai_operations_support_tasks"]
+    routes = [row for row in api_routes(app.routes) if row.endpoint.__module__ == "app.routers.ai_operations_support_tasks"]
     assert len(routes) == 7
     value = pipeline
     body = selection(configured)

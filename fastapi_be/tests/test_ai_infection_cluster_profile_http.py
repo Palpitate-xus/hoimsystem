@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual Main JWT/ASGI local governance, separate from clinical validation."""
 
 # ruff: noqa: F811 -- importing the actual same-case SQL fixture registers it.
@@ -115,4 +117,4 @@ async def test_method_configuration_does_not_restore_withdrawn_patient_purpose_o
 
 def test_actual_router_explicit_jsonresponse_and_seven_routes_mounted():
     assert router.default_response_class.__name__ == "JSONResponse" and len(router.routes) == 7
-    assert all(any(actual.path == "/api" + route.path for actual in app.routes) for route in router.routes)
+    assert all(any(actual.path == "/api" + route.path for actual in api_routes(app.routes)) for route in router.routes)

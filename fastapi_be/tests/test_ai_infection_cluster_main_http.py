@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual application Main/JWT/ASGI source lifecycle, not a model or hospital trial."""
 
 # ruff: noqa: F811 -- importing the actual synthetic SQL fixture registers it.
@@ -123,7 +125,7 @@ async def test_source_governance_does_not_inherit_legacy_broad_roles(async_clien
 
 def test_actual_source_router_keeps_jsonresponse_whole_body():
     assert router.default_response_class.__name__ == "JSONResponse"
-    assert any(route.path == ROOT + "/snapshots/{snapshot_id}/parts/{part}" for route in app.routes)
+    assert any(route.path == ROOT + "/snapshots/{snapshot_id}/parts/{part}" for route in api_routes(app.routes))
 
 
 @pytest.mark.asyncio

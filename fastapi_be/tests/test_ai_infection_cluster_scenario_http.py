@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual Main/JWT ASGI governance; Source fixture uses actual SQLite services."""
 
 # ruff: noqa: F811 -- importing the actual same-case SQL fixture registers it.
@@ -112,4 +114,4 @@ async def test_actual_withdrawn_super_reads_technical_directory_and_zero_clinica
 def test_actual_router_explicit_json_response_and_seven_mounted_routes():
     assert router.default_response_class.__name__ == "JSONResponse"
     assert len(router.routes) == 7
-    assert all(any("/api" + route.path == actual.path for actual in app.routes) for route in router.routes)
+    assert all(any("/api" + route.path == actual.path for actual in api_routes(app.routes)) for route in router.routes)

@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual product Main/JWT with18 Source routes; no live model or MySQL proof."""
 
 import datetime as dt
@@ -28,7 +30,7 @@ def mounted_deidentification_router():
     from app.routers.ai_deidentification import router
 
     expected = {(tuple(sorted(route.methods)), "/api" + route.path) for route in router.routes}
-    actual = [(tuple(sorted(route.methods)), route.path) for route in app.routes if route.path.startswith("/api/ai/deidentification/") and "/tasks" not in route.path]
+    actual = [(tuple(sorted(route.methods)), route.path) for route in api_routes(app.routes) if route.path.startswith("/api/ai/deidentification/") and "/tasks" not in route.path]
     assert len(expected) == len(actual) == 18 and set(actual) == expected
     yield
 

@@ -96,14 +96,27 @@ def test_untrusted_or_changed_acceptance_rolls_back_every_blob_pointer_receipt(c
     assert db.get(AIRun, run.run_id).result_json == "{}" and db.query(AIAuditEvent).count() == audit_count
 
 
-@pytest.mark.parametrize("usage", [{**KNOWN, "input_tokens": True}, {**KNOWN, "input_tokens": None, "complete": False}, {**KNOWN, "input_tokens": -1}, {**KNOWN, "model_call_attempted": False}])
-def test_success_never_substitutes_false_or_unknown_usage(change_case, usage):
+@pytest.mark.parametrize("usage", [{**KNOWN, "input_tokens": True}, {**KNOWN, "input_tokens": -1}, {**KNOWN, "model_call_attempted": False}])
+def test_success_never_substitutes_invalid_usage(change_case, usage):
     db, actor, *_ = change_case
     case = executing(change_case)
     run = case["run"]
     with pytest.raises(HTTPException):
         result_store.stage_result(db, actor, run, run.lease_token, case["result"], usage, latency_ms=0)
     assert db.query(AIDocumentChangeRunResult).count() == 0 and db.get(AIDocumentChangeRunArtifact, run.run_id).usage_event_id is None
+
+
+def test_success_preserves_independent_unknown_usage_without_fabricating_a_complete_receipt(change_case):
+    db, actor, *_ = change_case
+    case = executing(change_case)
+    run = case["run"]
+    unknown = {**KNOWN, "input_tokens": None, "complete": False}
+    result_store.stage_result(db, actor, run, run.lease_token, case["result"], unknown, latency_ms=0)
+    db.commit()
+    assert run.status == "succeeded"
+    assert result_store.usage_receipt(db, run).model_dump(mode="json") == unknown
+    assert result_store.usage_receipt(db, run).input_tokens is None
+    assert result_store.usage_receipt(db, run).complete is False
 
 
 def test_queue_cancel_proves_no_call_and_never_reads_live_source(change_case):

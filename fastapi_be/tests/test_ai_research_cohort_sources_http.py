@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual product Main/JWT/SQLite Source routes; native task integration is separate."""
 
 import datetime as dt
@@ -15,11 +17,10 @@ from tests.test_ai_research_cohort_sources import research_case as research_case
 
 @pytest.fixture
 def mounted_research_router():
-    from fastapi.routing import APIRoute
 
     from app.main import app
 
-    routes = [route for route in app.routes if isinstance(route, APIRoute) and route.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
+    routes = [route for route in api_routes(app.routes) if route.endpoint.__module__ == "app.routers.ai_research_cohort_sources"]
     assert len(routes) == 23
     assert len({(method, route.path) for route in routes for method in route.methods}) == 23
     yield

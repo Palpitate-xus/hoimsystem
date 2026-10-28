@@ -164,7 +164,8 @@ def test_gateway_binding_rejects_plausible_fabrication_in_every_numeric_and_iden
     elif change == "recipe":
         value["local_runtime"]["recipe_digest"] = "d" * 64
     elif change == "python":
-        value["local_runtime"]["python_version"] = "3.12.13"
+        current = value["local_runtime"]["python_version"]
+        value["local_runtime"]["python_version"] = "3.12.0" if current != "3.12.0" else "3.12.1"
     elif change == "model":
         model = "stat-forecast:" + "e" * 64
     else:

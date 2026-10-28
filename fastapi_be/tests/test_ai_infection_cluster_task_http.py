@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Actual Main JWT/ASGI→durable queue→local worker→split current reads."""
 
 # ruff: noqa: F811 -- imported actual Source/Task fixtures are intentionally registered.
@@ -156,7 +158,7 @@ async def test_actual_main_queued_cancel_after_processing_withdrawal_never_needs
 
 def test_main_explicit_jsonresponse_and_six_new_mounted_routes():
     assert router.default_response_class.__name__ == "JSONResponse" and len(router.routes) == 6
-    assert all(any(actual.path == "/api" + route.path for actual in app.routes) for route in router.routes)
+    assert all(any(actual.path == "/api" + route.path for actual in api_routes(app.routes)) for route in router.routes)
 
 
 @pytest.mark.asyncio

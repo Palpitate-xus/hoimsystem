@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Real JWT/isolated ASGI/SQL API; source operations do not mount native execution."""
 
 import json
@@ -212,7 +214,7 @@ async def test_main_source_router_is_mounted_and_actual_jwt_lifecycle_is_separat
     case = surgery_case
     paths = [
         (route.path, method)
-        for route in app.routes
+        for route in api_routes(app.routes)
         for method in getattr(route, "methods", ())
         if route.path.startswith(("/api/ai/surgery-sources", "/api/ai/surgery-registry", "/api/ai/surgery-protected-capsules"))
     ]

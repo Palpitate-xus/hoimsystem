@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Product Main/JWT routes and exact independent canonical Source parts."""
 
 import json
@@ -21,11 +23,10 @@ BASE = "/api/ai/operations-support"
 
 @pytest.fixture
 def mounted():
-    from fastapi.routing import APIRoute
 
     from app.main import app
 
-    routes = [row for row in app.routes if isinstance(row, APIRoute) and row.endpoint.__module__ == "app.routers.ai_operations_support_sources"]
+    routes = [row for row in api_routes(app.routes) if row.endpoint.__module__ == "app.routers.ai_operations_support_sources"]
     assert len(routes) == 17
     assert len({(method, row.path) for row in routes for method in row.methods}) == 17
     return routes

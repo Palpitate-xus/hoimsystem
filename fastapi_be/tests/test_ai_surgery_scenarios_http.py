@@ -1,3 +1,5 @@
+from tests.routing import api_routes
+
 """Real main/JWT/ASGI surgery scenarios, with only isolated synthetic SQL data."""
 
 import copy
@@ -34,7 +36,7 @@ async def test_actual_main_five_routes_and_whole_jwt_lifecycle_never_make_bookin
     from app.main import app
 
     case = snapshot_case[3]
-    paths = [(route.path, method) for route in app.routes for method in getattr(route, "methods", ()) if route.path.startswith(BASE)]
+    paths = [(route.path, method) for route in api_routes(app.routes) for method in getattr(route, "methods", ()) if route.path.startswith(BASE)]
     assert len(paths) == len(set(paths)) == 5
     before_schedule = db_session.query(SurgerySchedule).count()
     draft = await create_http(async_client, auth_headers, snapshot_case)

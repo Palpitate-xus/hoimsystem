@@ -5,10 +5,19 @@ import datetime
 import sys
 import uuid
 
+from benchmark_database import (  # noqa: F401
+    BACKEND_DIR,
+    BENCHMARK_DB,
+    configure_application_environment,
+    validate_benchmark_url,
+)
+from benchmark_profiles import (
+    MAX_FAMILY_MEMBERS,
+    PROFILES,
+    patient_identity,
+    portal_owner_offsets,
+)
 from sqlalchemy import insert, select
-
-from benchmark_database import BACKEND_DIR, BENCHMARK_DB, configure_application_environment, validate_benchmark_url  # noqa: F401
-from benchmark_profiles import MAX_FAMILY_MEMBERS, PROFILES, patient_identity, portal_owner_offsets
 
 sys.path.insert(0, str(BACKEND_DIR))
 
@@ -25,6 +34,7 @@ from app.models import (  # noqa: E402
     DoctorSchedule,
     FamilyMember,
     MedicalRecord,
+    OperationLog,
     Patient,
     Pharmaceutical,
     PrePha,
@@ -32,7 +42,6 @@ from app.models import (  # noqa: E402
     User,
 )
 from app.security import hash_password  # noqa: E402
-
 
 BATCH_SIZE = 2_000
 
@@ -86,13 +95,18 @@ def init(profile_name: str = "smoke"):
             Doctor(name="王医生", sex=1, department_id=depts[0].department_id, title="主任医师", education="博士", phone="13900139001", permission="doctor", user_id=users[1].user_id),
             Doctor(name="李医生", sex=1, department_id=depts[1].department_id, title="副主任医师", education="硕士", phone="13900139002", permission="doctor", user_id=users[2].user_id),
         ]
+        doctors.extend(
+            Doctor(name=f"合成医生{index + 1}", sex=index % 2, department_id=depts[index % len(depts)].department_id,
+                   title="主治医师", education="本科", phone=f"139{index:08d}", permission="doctor")
+            for index in range(2, profile.doctors)
+        )
         db.add_all(doctors)
         db.flush()
 
         # 排班
         schedules = []
         for doc in doctors:
-            for week in ["星期一", "星期二", "星期三"]:
+            for week in ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"][:profile.schedule_days]:
                 for time_slot in ["01", "02"]:
                     schedules.append(
                         DoctorSchedule(
@@ -228,12 +242,21 @@ def init(profile_name: str = "smoke"):
         _batched_insert(db, Charge, charge_rows)
         _batched_insert(db, MedicalRecord, medical_record_rows)
 
+        for start in range(0, profile.audit_logs, BATCH_SIZE):
+            _batched_insert(db, OperationLog, [
+                {"user_id": users[index % len(users)].user_id, "username": users[index % len(users)].username,
+                 "role": users[index % len(users)].user_role, "action": ("查询", "新增", "更新", "导出")[index % 4],
+                 "target": "合成压测记录", "result": "失败" if index % 19 == 0 else "成功", "status_code": 400 if index % 19 == 0 else 200,
+                 "create_time": now - datetime.timedelta(hours=index % 168), "method": "GET", "path": "/synthetic-benchmark"}
+                for index in range(start, min(start + BATCH_SIZE, profile.audit_logs))
+            ])
+
         db.commit()
         print(
             f"Initialized profile={profile_name}: {len(depts)} departments, "
             f"{len(doctors)} doctors, {len(schedules)} schedules, "
             f"{profile.patients} patients, {profile.pharmaceuticals} pharmaceuticals, "
-            f"{profile.history_rows} prescriptions/charges/medical records"
+            f"{profile.history_rows} prescriptions/charges/medical records, {profile.audit_logs} audit logs"
         )
     except Exception:
         db.rollback()

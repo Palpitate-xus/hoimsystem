@@ -10,6 +10,8 @@ from benchmark_metadata import register_metadata_hooks
 from benchmark_profiles import PROFILES, patient_identity, portal_owner_offsets
 from benchmark_setup import load_write_targets_or_stop
 from locust import HttpUser, between, events, task
+from locust.exception import StopUser
+
 
 def patient_credentials():
     password = os.getenv("BENCHMARK_PATIENT_PASSWORD", "123456")
@@ -60,6 +62,12 @@ class HOIMUser(HttpUser):
 
     wait_time = between(0.2, 0.8)
 
+    def _measurement_context(self):
+        measurement = getattr(self.environment, "benchmark_measurement_id", None)
+        if measurement:
+            self.environment.benchmark_in_flight += 1
+        return {"benchmark_measurement_id": measurement}
+
     def _headers(self, role="admin"):
         return {"accesstoken": random.choice(TOKEN_POOLS[role])}
 
@@ -69,6 +77,8 @@ class HOIMUser(HttpUser):
             headers=self._headers(role),
             params=params,
             catch_response=True,
+            timeout=30,
+            context=self._measurement_context(),
         ) as response:
             mark_business_result(response)
 
@@ -106,6 +116,8 @@ class HOIMUser(HttpUser):
             headers=self._headers(),
             json={"page": 1, "page_size": 20},
             catch_response=True,
+            timeout=30,
+            context=self._measurement_context(),
         ) as response:
             mark_business_result(response)
 
@@ -118,12 +130,19 @@ class HOIMUser(HttpUser):
         try:
             payload = APPOINTMENT_TARGETS.popleft()
         except IndexError:
-            return
+            # Exhaustion invalidates the configured read/write mixture.
+            import gevent
+
+            self.environment.process_exit_code = 4
+            gevent.spawn(self.environment.runner.quit)
+            raise StopUser() from None
         with self.client.post(
             "/api/appointmentManagement/create",
             headers={"accesstoken": APPOINTMENT_TOKENS[payload["patient_id"]]},
             json=payload,
             catch_response=True,
+            timeout=30,
+            context=self._measurement_context(),
         ) as response:
             mark_business_result(response)
 
@@ -137,5 +156,7 @@ class HOIMUser(HttpUser):
                 "phas": [{"id": random.choice(PRESCRIPTION_PHARMACEUTICAL_IDS), "number": 1}],
             },
             catch_response=True,
+            timeout=30,
+            context=self._measurement_context(),
         ) as response:
             mark_business_result(response)

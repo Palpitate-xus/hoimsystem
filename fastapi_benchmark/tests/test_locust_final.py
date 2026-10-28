@@ -1,6 +1,7 @@
 import sys
 from collections import deque
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -49,9 +50,13 @@ class FakeClient:
 class FakeUser:
     def __init__(self, responses):
         self.client = FakeClient(responses)
+        self.environment = SimpleNamespace(benchmark_measurement_id=None, benchmark_in_flight=0)
 
     def _headers(self, role="admin"):
         return locust_final.HOIMUser._headers(self, role)
+
+    def _measurement_context(self):
+        return locust_final.HOIMUser._measurement_context(self)
 
 
 @pytest.mark.parametrize(
@@ -137,3 +142,37 @@ def test_credentials_follow_bounded_households_and_allow_explicit_account(monkey
     assert len(set(username for username, _ in credentials)) == 64
     monkeypatch.setenv("BENCHMARK_PATIENT_USERNAME", "custom-patient")
     assert locust_final.patient_credentials() == (("custom-patient", "123456"),)
+
+
+def test_write_measurement_is_captured_before_the_response_and_uses_a_timeout(monkeypatch):
+    monkeypatch.setattr(locust_final, "TOKEN_POOLS", {"doctor": ("doctor",)})
+    monkeypatch.setattr(locust_final, "PRESCRIPTION_PATIENT_IDS", (1,))
+    monkeypatch.setattr(locust_final, "PRESCRIPTION_PHARMACEUTICAL_IDS", (2,))
+    user = FakeUser([FakeLocustResponse()])
+    user.environment.benchmark_measurement_id = "measured"
+
+    def post(_path, **kwargs):
+        assert user.environment.benchmark_in_flight == 1
+        user.environment.benchmark_measurement_id = None
+        assert kwargs["context"] == {"benchmark_measurement_id": "measured"}
+        assert kwargs["timeout"] == 30
+        return FakeLocustResponse()
+
+    user.client.post = post
+    locust_final.HOIMUser.create_prescription(user)
+
+
+def test_exhausted_appointment_targets_stop_the_test_instead_of_changing_its_mix(monkeypatch):
+    import gevent
+    from locust.exception import StopUser
+
+    stopped = []
+    user = FakeUser([])
+    user.environment.runner = SimpleNamespace(quit=lambda: stopped.append(True))
+    monkeypatch.setattr(locust_final, "APPOINTMENT_TARGETS", deque())
+    monkeypatch.setattr(gevent, "spawn", lambda callback: callback())
+    with pytest.raises(StopUser):
+        locust_final.HOIMUser.create_appointment(user)
+    assert user.environment.process_exit_code == 4
+    assert stopped == [True]
+    assert user.client.posts == []

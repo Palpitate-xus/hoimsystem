@@ -1020,6 +1020,8 @@ class OperationLog(Base):
         Index("idx_operation_log_user_time", "user_id", "create_time"),
         Index("idx_operation_log_path", "path"),
         Index("idx_operation_log_result_time", "result", "create_time"),
+        Index("idx_operation_log_username", "username"),
+        Index("idx_operation_log_action", "action"),
     )
 
     log_id = Column(Integer, primary_key=True, autoincrement=True)

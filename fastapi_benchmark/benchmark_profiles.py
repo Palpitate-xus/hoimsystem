@@ -8,6 +8,9 @@ class BenchmarkProfile:
     patients: int
     history_rows: int
     pharmaceuticals: int
+    doctors: int = 2
+    schedule_days: int = 3
+    audit_logs: int = 0
 
 
 PROFILES = {
@@ -15,6 +18,7 @@ PROFILES = {
     "small": BenchmarkProfile(patients=1_000, history_rows=5_000, pharmaceuticals=100),
     "medium": BenchmarkProfile(patients=10_000, history_rows=50_000, pharmaceuticals=1_000),
     "large": BenchmarkProfile(patients=100_000, history_rows=500_000, pharmaceuticals=5_000),
+    "soak": BenchmarkProfile(patients=100_000, history_rows=500_000, pharmaceuticals=5_000, doctors=20, schedule_days=7, audit_logs=500_000),
 }
 MAX_PORTAL_HOUSEHOLDS = 64
 MAX_FAMILY_MEMBERS = 8

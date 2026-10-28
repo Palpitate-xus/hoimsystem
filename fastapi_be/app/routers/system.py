@@ -82,23 +82,23 @@ def get_log_stats(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db:
 
     since = datetime.datetime.now() - datetime.timedelta(hours=24)
     total, failed, last_24h = db.query(
-        func.count(OperationLog.log_id),
+        func.count(),
         func.count(case((OperationLog.result == "失败", 1))),
         func.count(case((OperationLog.create_time >= since, 1))),
     ).one()
     # Top 5 操作最多的用户
     top_users = (
-        db.query(OperationLog.username, func.count(OperationLog.log_id).label("cnt"))
+        db.query(OperationLog.username, func.count().label("cnt"))
         .group_by(OperationLog.username)
-        .order_by(func.count(OperationLog.log_id).desc())
+        .order_by(func.count().desc())
         .limit(5)
         .all()
     )
     # Top 5 操作类型
     top_actions = (
-        db.query(OperationLog.action, func.count(OperationLog.log_id).label("cnt"))
+        db.query(OperationLog.action, func.count().label("cnt"))
         .group_by(OperationLog.action)
-        .order_by(func.count(OperationLog.log_id).desc())
+        .order_by(func.count().desc())
         .limit(5)
         .all()
     )

@@ -78,13 +78,14 @@ def get_log_list(req: LogListRequest, keyword: str | None = None, current_user: 
 @router.get("/log/stats")
 def get_log_stats(current_user: User = Depends(require_roles(*ADMIN_ROLES)), db: Session = Depends(get_db)):
     """审计统计面板。"""
-    from sqlalchemy import func
+    from sqlalchemy import case, func
 
-    total = db.query(OperationLog).count()
-    failed = db.query(OperationLog).filter(OperationLog.result == "失败").count()
-    # 最近 24h
     since = datetime.datetime.now() - datetime.timedelta(hours=24)
-    last_24h = db.query(OperationLog).filter(OperationLog.create_time >= since).count()
+    total, failed, last_24h = db.query(
+        func.count(OperationLog.log_id),
+        func.count(case((OperationLog.result == "失败", 1))),
+        func.count(case((OperationLog.create_time >= since, 1))),
+    ).one()
     # Top 5 操作最多的用户
     top_users = (
         db.query(OperationLog.username, func.count(OperationLog.log_id).label("cnt"))

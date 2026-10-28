@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
@@ -220,21 +220,21 @@ def update_patient(req: PatientUpdateRequest, current_user: User = Depends(requi
 @router.get("/departmentManagement/getList")
 def get_department_list(keyword: str | None = None, campus_id: int | None = None, page: int | None = None, page_size: int | None = None, current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)):
-    query = db.query(Department)
+    query = db.query(Department).options(joinedload(Department.campus))
     if campus_id is not None:
         query = query.filter(Department.campus_id == campus_id)
     departments, total = paginate(query, page, page_size)
+    director_ids = {item.director for item in departments if item.director is not None}
+    directors = dict(db.query(Doctor.doctor_id, Doctor.name).filter(Doctor.doctor_id.in_(director_ids)).all()) if director_ids else {}
     data = []
     for item in departments:
-        director = db.query(Doctor).filter(Doctor.doctor_id == item.director).first()
-        director_name = director.name if director else ""
         data.append(
             {
                 "id": item.department_id,
                 "name": item.name,
                 "phone": item.phone,
                 "location": item.location,
-                "director": director_name,
+                "director": directors.get(item.director) or "",
                 "campus_id": item.campus_id,
                 "campus_name": item.campus.name if item.campus else "",
             }

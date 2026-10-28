@@ -33,6 +33,7 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+.local-preview/
 .venv/
 .venv-speech/
 .venv-ecg/

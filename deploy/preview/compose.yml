@@ -1,0 +1,143 @@
+name: hoim-preview
+
+x-app: &app
+  image: hoimsystem-preview-backend:local
+  pull_policy: never
+  env_file: ../../.local-preview/preview.env
+  environment: &environment
+    ENVIRONMENT: development
+    HOIM_LOCAL_PREVIEW: "1"
+    DATABASE_URL: postgresql://hoim_preview:${PREVIEW_DB_PASSWORD:?Run python scripts/local_preview.py start}@db:5432/hoimsystem_preview
+    REDIS_URL: redis://redis:6379/0
+    AUTO_CREATE_SCHEMA: "false"
+    SCHEDULER_ENABLED: "false"
+    ALLOWED_ORIGINS: http://localhost:51891,http://127.0.0.1:51891
+    AI_AUDIO_STORAGE_DIR: /app/private/ai-audio
+    AI_ECG_STORAGE_DIR: /app/private/ai-ecg
+    AI_IMAGE_STORAGE_DIR: /app/private/ai-images
+  volumes:
+    - uploads:/app/app/uploads
+    - private:/app/private
+  restart: unless-stopped
+  init: true
+
+services:
+  db:
+    image: ${PREVIEW_POSTGRES_IMAGE:-postgres:16-alpine}
+    environment:
+      POSTGRES_USER: hoim_preview
+      POSTGRES_PASSWORD: ${PREVIEW_DB_PASSWORD:?Run python scripts/local_preview.py start}
+      POSTGRES_DB: hoimsystem_preview
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U hoim_preview -d hoimsystem_preview]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  redis:
+    image: ${PREVIEW_REDIS_IMAGE:-redis:8-alpine}
+    command: [redis-server, --appendonly, "yes", --maxmemory-policy, noeviction]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  seed:
+    <<: *app
+    command: [python, seed_local_preview.py]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  backend:
+    <<: *app
+    build:
+      context: ../../fastapi_be
+    command: [python, -m, uvicorn, app.main:app, --host, 0.0.0.0, --port, "8000"]
+    ports:
+      - "127.0.0.1:51800:8000"
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8000/health/ready', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+  simulator:
+    image: hoimsystem-preview-backend:local
+    pull_policy: never
+    # The simulator accepts loopback only. Share the API network namespace;
+    # its endpoint remains private and cannot be called through the UI proxy.
+    network_mode: service:backend
+    command: [python, /preview/llm_simulator.py, --port, "51853", --key-file, /run/simulator.key, --fail-first, "2", --failure, "503"]
+    volumes:
+      - ../../fastapi_benchmark/llm_simulator.py:/preview/llm_simulator.py:ro
+      - ../../.local-preview/simulator.key:/run/simulator.key:ro
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:51853/health/ready', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+        restart: true
+
+  worker:
+    <<: *app
+    network_mode: service:backend
+    command: [python, -m, app.ai.worker, --interval, "1"]
+    depends_on:
+      backend:
+        condition: service_healthy
+        restart: true
+      simulator:
+        condition: service_healthy
+
+  scheduler:
+    <<: *app
+    command: [python, -m, app.scheduler_runner]
+    environment:
+      <<: *environment
+      SCHEDULER_ENABLED: "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  frontend:
+    image: hoimsystem-preview-frontend:local
+    pull_policy: never
+    build:
+      context: ../../vue3-new-ui
+      dockerfile: ../deploy/preview/Dockerfile.frontend
+    ports:
+      - "127.0.0.1:51891:80"
+    healthcheck:
+      test: [CMD, curl, --noproxy, "*", -fsS, -o, /dev/null, http://127.0.0.1/]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  database:
+  redis:
+  uploads:
+  private:

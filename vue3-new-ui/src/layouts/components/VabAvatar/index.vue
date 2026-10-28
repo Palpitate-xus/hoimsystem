@@ -5,7 +5,8 @@
       :class="{ 'horizontal-layout': isHorizontalLayout }"
     >
       <div class="avatar-wrapper">
-        <img :src="avatar" alt="用户头像" class="user-avatar" />
+        <img v-if="showAvatar" :src="avatar" alt="用户头像" class="user-avatar" referrerpolicy="no-referrer" @error="avatarFailed = true" />
+        <span v-else class="user-avatar avatar-fallback" role="img" aria-label="用户头像">{{ initial }}</span>
       </div>
       <div class="user-info">
         <div class="username">{{ username }}</div>
@@ -18,10 +19,11 @@
     <template #dropdown>
       <el-dropdown-menu class="custom-dropdown">
         <div class="dropdown-header">
-          <img :src="avatar" alt="用户头像" class="header-avatar" />
+          <img v-if="showAvatar" :src="avatar" alt="用户头像" class="header-avatar" referrerpolicy="no-referrer" @error="avatarFailed = true" />
+          <span v-else class="header-avatar avatar-fallback" role="img" aria-label="用户头像">{{ initial }}</span>
           <div class="header-info">
             <div class="header-username">{{ username }}</div>
-            <div class="header-email">admin@example.com</div>
+            <div class="header-role">{{ userRole }}</div>
           </div>
         </div>
 
@@ -31,7 +33,7 @@
           <span>个人中心</span>
         </el-dropdown-item>
 
-        <el-dropdown-item command="settings" class="dropdown-item">
+        <el-dropdown-item v-if="canManageSystem" command="settings" class="dropdown-item">
           <!-- 直接使用图标组件 -->
           <Setting class="dropdown-icon" />
           <span>系统设置</span>
@@ -50,11 +52,11 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { useRouter, useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
 import { recordRoute } from "@/config";
+import { roleLabel, userInitial } from "@/utils/userPresentation";
 import {
   ArrowDown,
   User,
@@ -73,17 +75,15 @@ const route = useRoute();
 // 计算属性
 const avatar = computed(() => store.getters["user/avatar"]);
 const username = computed(() => store.getters["user/username"]);
+const avatarFailed = ref(false);
+const showAvatar = computed(() => typeof avatar.value === "string" && avatar.value.trim() && !avatarFailed.value);
+const initial = computed(() => userInitial(username.value));
+watch(avatar, () => { avatarFailed.value = false; });
+const canManageSystem = computed(() => (store.getters["user/permissions"] || []).some(role => ["super_admin", "admin"].includes(role)));
 const layout = computed(() => store.getters["settings/layout"]);
 const isHorizontalLayout = computed(() => layout.value === "horizontal");
 
-const userRole = computed(() => {
-  const permissions = store.getters["user/permissions"] || [];
-  if (permissions.includes("admin")) return "管理员";
-  if (permissions.includes("director")) return "科室主任";
-  if (permissions.includes("doctor")) return "医生";
-  if (permissions.includes("patient")) return "患者";
-  return "用户";
-});
+const userRole = computed(() => roleLabel(store.getters["user/permissions"]));
 
 // 方法
 const handleCommand = (command) => {
@@ -101,11 +101,11 @@ const handleCommand = (command) => {
 };
 
 const personalCenter = () => {
-  router.push("/personalCenter/personalCenter");
+  router.push({ name: "Account" });
 };
 
 const settings = () => {
-  ElMessage.info("系统设置功能开发中...");
+  router.push({ name: "Config" });
 };
 
 const logout = () => {
@@ -118,6 +118,16 @@ const logout = () => {
 </script>
 
 <style lang="scss" scoped>
+.avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
 .avatar-container {
   display: flex;
   align-items: center;
@@ -215,7 +225,7 @@ const logout = () => {
         margin-bottom: 4px;
       }
 
-      .header-email {
+      .header-role {
         font-size: 12px;
         opacity: 0.8;
       }

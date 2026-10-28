@@ -57,6 +57,14 @@ export const asyncRoutes = [
     redirect: "/index",
     children: [
       {
+        path: "account",
+        alias: "/personalCenter/personalCenter",
+        name: "Account",
+        component: () => import("@/views/account/index.vue"),
+        hidden: true,
+        meta: { title: "个人中心" },
+      },
+      {
         path: "index",
         name: "Index",
         component: () => import("@/views/index/index.vue"),

@@ -216,11 +216,10 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
         permissions = [user.user_role]
     else:
         permissions = []
-    avatar_url = "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F202006%2F07%2F20200607000651_vopye.jpg&refer=http%3A%2F%2Fc-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=auto?sec=1672814873&t=b4388830c9cf3005e51d64f282b07abc"
     return {
         "code": 200,
         "msg": "success",
-        "data": {"permissions": permissions, "username": user.username, "avatar": avatar_url},
+        "data": {"permissions": permissions, "username": user.username, "avatar": ""},
     }
 
 

@@ -2,10 +2,18 @@
   <div class="ai-assistant" v-loading="loading">
     <el-form label-position="top">
       <el-form-item label="AI 功能">
-        <el-select v-model="featureKey" filterable placeholder="选择本次需要的辅助功能" style="width: 100%">
-          <el-option v-for="item in features" :key="item.key" :label="item.number + ' · ' + item.name" :value="item.key" />
-        </el-select>
+        <div class="feature-picker">
+          <el-select v-model="featureKey" filterable placeholder="选择本次需要的辅助功能" style="width: 100%">
+            <el-option-group v-for="group in featureGroups" :key="group.key" :label="group.label">
+              <el-option v-for="item in group.items" :key="item.key" :label="item.number + ' · ' + item.name" :value="item.key" />
+            </el-option-group>
+          </el-select>
+          <el-button link :disabled="!favoriteKey || !featureKey" :aria-pressed="isFavorite" @click="toggleFavorite">{{ isFavorite ? '取消收藏' : '收藏任务' }}</el-button>
+        </div>
       </el-form-item>
+      <section v-if="favoriteFeatures.length" class="favorite-features" aria-label="常用 AI 任务">
+        <span>常用任务</span><el-button v-for="item in favoriteFeatures" :key="item.key" size="small" :type="item.key === featureKey ? 'primary' : 'default'" plain @click="featureKey = item.key">{{ item.name }}</el-button>
+      </section>
       <template v-if="selected">
         <div class="feature-description"><strong>需要的资料：</strong>{{ selected.inputs.join('、') }}<br /><strong>预期产出：</strong>{{ selected.deliverables.join('；') }}</div>
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
@@ -249,6 +257,7 @@ import ResearchCohortPanel from '@/components/ai/ResearchCohortPanel.vue';
 import DeidentificationPanel from '@/components/ai/DeidentificationPanel.vue';
 import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { useStore } from "vuex";
+import { favoriteStorageKey, readFavorites, writeFavorites } from "@/utils/aiFavorites.cjs";
 import { ElMessage } from "element-plus";
 import { documentBody, documentReviewNotes, documentSections, isDocumentDraft } from "@/utils/aiDocumentDraft";
 import { cancelAIRun, createAIRun, getAIClinicalContext, getAIOperationalContext, getAIEncounters, getAIFeatures, getAIPatients, getAIPrescriptions, getAIPathwayOptions, getAIServiceOptions, getAIRun, getAIRuns, reviewAIRun } from "@/api/ai";
@@ -323,6 +332,32 @@ const hasInitial=key=>props.initialInput!==null&&typeof props.initialInput==='ob
 const canPreview = computed(() => Array.isArray(store.getters["user/permissions"])&&store.getters["user/permissions"].includes("super_admin"));
 const statuses = { queued: "已排队", running: "生成中", succeeded: "待复核", failed: "失败", cancelled: "已取消" };
 const loading = ref(false), submitting = ref(false), patientLoading = ref(false), features = ref([]), featureKey = ref("");
+const favoriteKey = computed(() => favoriteStorageKey(store.getters["user/username"], store.getters["user/permissions"]));
+const favoriteKeys = ref([]);
+const favoriteFeatures = computed(() => favoriteKey.value ? features.value.filter(item => favoriteKeys.value.includes(item.key)) : []);
+const isFavorite = computed(() => favoriteKeys.value.includes(featureKey.value));
+const featureGroups = computed(() => {
+  const labels = { cdss: "临床辅助", pharmacy: "用药与药房", records: "病历与文书", diagnostics: "检查与检验", inpatient: "住院与护理", patient: "患者服务", operations: "运营管理", knowledge: "知识与科研" };
+  const groups = new Map();
+  for (const item of features.value) {
+    const key = item.category || "other";
+    if (!groups.has(key)) groups.set(key, { key, label: labels[key] || "其他任务", items: [] });
+    groups.get(key).items.push(item);
+  }
+  return [...groups.values()];
+});
+function favoriteStore() { try { return window.localStorage; } catch { return null; } }
+function refreshFavorites() { favoriteKeys.value = readFavorites(favoriteStore(), favoriteKey.value); }
+function toggleFavorite() {
+  if (!favoriteKey.value || !features.value.some(item => item.key === featureKey.value)) return;
+  const keys = isFavorite.value ? favoriteKeys.value.filter(key => key !== featureKey.value) : [...favoriteKeys.value, featureKey.value];
+  favoriteKeys.value = keys;
+  if (!writeFavorites(favoriteStore(), favoriteKey.value, keys)) ElMessage.warning("收藏仅在本次页面中保留，浏览器未允许保存设置。");
+}
+function favoriteStorageChanged(event) { if (event.key === favoriteKey.value || event.key === null) refreshFavorites(); }
+watch(favoriteKey, refreshFavorites, { immediate: true, flush: "sync" });
+onMounted(() => window.addEventListener("storage", favoriteStorageChanged));
+onBeforeUnmount(() => window.removeEventListener("storage", favoriteStorageChanged));
 const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null), patients = ref([]), encounters = ref([]), prescriptions = ref([]);
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const documentDraft = computed(() => isDocumentDraft(run.value?.feature_key || featureKey.value));
@@ -884,6 +919,11 @@ onBeforeUnmount(() => { viewActive.value = false;codingSelection.value=null;codi
 </script>
 
 <style scoped>
+.feature-picker { display: flex; align-items: center; gap: 12px; width: 100%; }
+.feature-picker :deep(.el-select) { flex: 1; min-width: 0; }
+.favorite-features { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; }
+.favorite-features > span { font-size: 13px; color: var(--el-text-color-secondary); margin-right: 4px; }
+.favorite-features :deep(.el-button + .el-button) { margin-left: 0; }
 .feature-description { line-height: 1.8; color: #606266; margin-bottom: 16px; }
 .spaced { margin-top: 14px; margin-bottom: 14px; }
 .actions, .result-header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }

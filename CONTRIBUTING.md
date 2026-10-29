@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢您对医院门诊信息管理系统（HIS-OP）的关注！本文档将帮助您快速参与项目贡献。
+本文说明 HOIM 项目的本地开发、代码规范和提交要求。
 
 ## 一、开发环境准备
 
@@ -13,16 +13,17 @@ git clone https://github.com/YOUR_USERNAME/hoimsystem.git
 cd hoimsystem
 
 # 添加上游仓库
-git remote add upstream https://github.com/original-owner/hoimsystem.git
+git remote add upstream https://github.com/Palpitate-xus/hoimsystem.git
 ```
 
 ### 1.2 启动后端
 
 ```bash
 cd fastapi_be
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install --require-hashes -r requirements-build.lock
+python -m pip install --require-hashes -r requirements.lock
 
 # 启动开发服务器
 uvicorn app.main:app --reload --port 8000
@@ -32,7 +33,7 @@ uvicorn app.main:app --reload --port 8000
 
 ```bash
 cd vue3-new-ui
-npm install --legacy-peer-deps
+npm ci --legacy-peer-deps
 npm run serve:rspack
 ```
 
@@ -61,11 +62,13 @@ ruff format app/
 
 ### 2.2 前端（Vue）
 
-使用 **Prettier** 进行格式化：
+沿用现有文件的缩进和格式，提交前运行：
 
 ```bash
 cd vue3-new-ui
-npx prettier --write "src/**/*.{js,vue}"
+npm run test:unit
+npm run build
+npm run check:bundle
 ```
 
 核心规范：
@@ -73,6 +76,12 @@ npx prettier --write "src/**/*.{js,vue}"
 - 组件名使用 PascalCase
 - 变量和函数使用 camelCase
 - 优先使用 `<script setup>` 语法
+
+### 2.3 页面与提示文案
+
+页面优先展示筛选条件、业务数据和操作。菜单、面包屑及标签已标明模块时，省去重复的介绍横幅。
+
+提示直接说明当前状态、具体原因和下一步，例如“缺少执行时间，请补录”“本次未生成草稿”。影响判断的数据范围、适用条件和不确定性写在对应结果旁，注明实际字段、日期或缺项；同一事项说明一次。模型版本和校验信息放在任务详情中。
 
 ---
 

@@ -8,6 +8,7 @@ from pathlib import Path
 from fastapi import HTTPException
 from sqlalchemy import and_, or_
 
+from app.access_labels import MODULE_LABELS, permission_label
 from app.access_models import AccessPolicy
 from app.models import User
 
@@ -23,43 +24,6 @@ ROLE_LABELS = {
     "patient": "患者",
     "lab_technician": "检验技师",
     "registrar": "挂号员",
-}
-MODULE_LABELS = {
-    "user": "账号",
-    "admin": "基础资料",
-    "system": "系统",
-    "events": "实时通知",
-    "ai": "AI任务",
-    "ai_admin": "AI管理",
-    "doctor": "医生工作站",
-    "pharmacy": "药房",
-    "inpatient": "住院",
-    "charge": "收费",
-    "patient": "患者服务",
-    "permission_management": "权限管理",
-    "admission": "入院管理",
-    "discharge": "出院管理",
-    "prescription": "处方",
-    "medical_record": "病历",
-    "patient_card": "诊疗卡",
-    "research": "科研",
-    "blood": "输血",
-    "nursing": "护理",
-    "backup": "备份恢复",
-    "schedule": "排班",
-    "follow_up": "随访",
-    "exam": "体检",
-    "surgery": "手术",
-    "infection": "院感",
-    "insurance": "医保",
-    "pharmaceutical": "药品",
-    "queue": "排队叫号",
-    "checkin": "报到签到",
-    "registration": "挂号",
-    "appointment": "预约",
-    "equipment": "物资设备",
-    "report": "报表",
-    "lab": "检验",
 }
 ESSENTIAL = {"POST /api/userInfo", "POST /api/logout", "GET /api/access/me"}
 
@@ -85,40 +49,7 @@ def permission_catalog():
             roles = ["super_admin", "admin"]
         tail = row["path"].rstrip("/").split("/")[-1]
         read = row["method"] == "GET" or tail in {"getList", "list", "search", "report", "stats", "preview", "context"}
-        actions = {
-            "getList": "查看列表",
-            "list": "查看列表",
-            "getDetail": "查看详情",
-            "detail": "查看详情",
-            "create": "新增",
-            "update": "修改",
-            "delete": "删除",
-            "export": "导出",
-            "import": "导入",
-            "audit": "审核",
-            "sign": "签署",
-            "cancel": "取消",
-            "approve": "审批",
-            "reject": "驳回",
-            "refund": "退费",
-            "dispense": "发药",
-            "execute": "执行",
-            "complete": "完成",
-            "resetPassword": "重置密码",
-            "updateRole": "修改角色",
-            "stats": "查看统计",
-            "search": "搜索",
-            "report": "查看报表",
-            "download": "下载",
-            "upload": "上传",
-            "preview": "预览",
-            "context": "读取依据",
-            "catalog": "查看权限目录",
-            "me": "查看本人权限",
-        }
-        label = actions.get(tail, row["function"].replace("_", " "))
-        if row["method"] == "GET" and "{" in tail:
-            label = "查看详情"
+        label = permission_label(module, row["method"], row["path"], row["function"])
         items[code] = {
             "code": code,
             "label": label,

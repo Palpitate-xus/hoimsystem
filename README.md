@@ -8,6 +8,8 @@ AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM
 
 管理员可按岗位和用户配置接口操作、AI 能力、患者列表字段及临床数据范围，前端导航与后端校验使用同一份有效权限。操作步骤见 [权限管理指南](doc/permission-management.md)，权限、撤权与并发的执行结果见 [验证记录](doc/validation/2026-10-29-permissions.md)。
 
+LLM 任务按认证、限流、服务故障和响应格式等原因显示处理建议，支持有界重试、状态查询恢复、执行中断与用量审计。处理规则见 [模型报错与恢复](doc/ai-error-handling.md)。
+
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
@@ -506,6 +508,7 @@ python seed_default_accounts.py
 | [数据库文档](doc/databaseDoc.md) | 核心表结构说明；当前 269 个 ORM 表定义以模型源码为准 |
 | [权限管理](doc/permission-management.md) | 岗位与用户策略、接口与字段权限、数据范围、停用、审计和会话升级 |
 | [AI 使用指南](doc/ai-guide.md) | 工作台、超管配置、来源准备与功能启用 |
+| [模型报错与恢复](doc/ai-error-handling.md) | 错误分类、重试边界、查询恢复和故障排查 |
 | [AI 能力清单](doc/ai-capabilities.md) | 全部 80 项功能、输入、产出及默认角色 |
 | [默认 Prompt](doc/ai-prompts.json) | 任务文本、目录版本及固定系统契约 |
 | [AI 体验验证](doc/ai-experience-verification.json) | Prompt、文书、管理导航与业务界面的测试记录 |

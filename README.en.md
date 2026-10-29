@@ -8,6 +8,8 @@ The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM 
 
 Administrators configure role and individual access to API operations, AI capabilities, patient-directory fields and clinical data scopes. Navigation and backend checks use the same effective permissions. See the [permission management guide](doc/permission-management.md) for setup and the [verification record](doc/validation/2026-10-29-permissions.md) for authorization, revocation and concurrency results.
 
+LLM tasks show specific guidance for authentication, rate limits, service failures and malformed responses. Bounded retries, status-query recovery, interrupted-task handling and usage audits follow the [error handling guide](doc/ai-error-handling.md).
+
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)

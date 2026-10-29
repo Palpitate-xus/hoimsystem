@@ -1,0 +1,70 @@
+name: Dependency audit
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "31 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          check-latest: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          check-latest: true
+          package-manager-cache: false
+
+      - name: Check dependency lock provenance
+        id: lock_check
+        run: python fastapi_be/scripts/lock_dependencies.py
+
+      - name: Install fixed audit tooling
+        id: bootstrap
+        run: |
+          python -m pip install --no-cache-dir --require-hashes -r fastapi_be/requirements-build.lock
+          python -m pip install --no-cache-dir pip-audit==2.10.0
+
+      - name: Audit Python locks and npm dependencies
+        id: audit
+        run: python fastapi_be/scripts/audit_dependencies.py --output dependency-audit
+
+      - name: Record audit step outcomes
+        if: always()
+        env:
+          LOCK_CHECK_OUTCOME: ${{ steps.lock_check.outcome }}
+          BOOTSTRAP_OUTCOME: ${{ steps.bootstrap.outcome }}
+          AUDIT_OUTCOME: ${{ steps.audit.outcome }}
+        run: |
+          mkdir -p dependency-audit
+          printf 'lock_check=%s\nbootstrap=%s\naudit=%s\n' "$LOCK_CHECK_OUTCOME" "$BOOTSTRAP_OUTCOME" "$AUDIT_OUTCOME" > dependency-audit/ci-outcomes.txt
+
+      - name: Upload dependency audit reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dependency-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dependency-audit/
+          if-no-files-found: error
+          retention-days: 14

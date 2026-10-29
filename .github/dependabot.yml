@@ -26,3 +26,11 @@ updates:
     groups:
       container-images:
         patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 1
+    groups:
+      workflow-actions:
+        patterns: ["*"]

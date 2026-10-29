@@ -3,6 +3,7 @@
 import datetime
 import hashlib
 import json
+import logging
 import time
 import uuid
 
@@ -39,6 +40,26 @@ from app.ai.text_retry import task_retry_scope
 from app.ai.tools import business_tools
 from app.config import settings
 from app.models import Doctor, Patient, User
+
+logger = logging.getLogger("ai.runtime")
+
+
+def _log_execution_failure(run_id, feature_key, phase, error, *, event_logger=None):
+    """Keep exception values, SQL parameters and clinical text out of logs."""
+    from app.ai.catalog import FEATURE_BY_KEY
+
+    try:
+        identifier = str(uuid.UUID(run_id))
+    except (TypeError, ValueError, AttributeError):
+        identifier = "-"
+    feature = feature_key if isinstance(feature_key, str) and feature_key in FEATURE_BY_KEY else "-"
+    (event_logger or logger).warning(
+        "AI task processing failed run_id=%s feature=%s phase=%s error_type=%s",
+        identifier,
+        feature,
+        phase,
+        type(error).__name__,
+    )
 
 
 def authorized_feature(db: Session, user: User, key: str) -> tuple[FeatureSpec, AIFeatureConfig | None]:
@@ -1058,7 +1079,15 @@ def claim_next_run(db: Session):
     for _ in range(128):
         candidate = (
             db.query(AIRun.run_id, AIRun.feature_key)
-            .filter(AIRun.status == "queued", ~AIRun.run_id.in_(skipped), queue_candidate_condition(db), deidentification_queue_condition(db), operations_condition(db), training_condition(db), queue_identity_condition(db))
+            .filter(
+                AIRun.status == "queued",
+                ~AIRun.run_id.in_(skipped),
+                queue_candidate_condition(db),
+                deidentification_queue_condition(db),
+                operations_condition(db),
+                training_condition(db),
+                queue_identity_condition(db),
+            )
             .order_by(AIRun.create_time, AIRun.run_id)
             .first()
         )
@@ -1289,13 +1318,22 @@ def _recheck_task(db: Session, run: AIRun) -> tuple[FeatureSpec, AIProvider, dic
 
 def _record_text_retry_usage(db, run, details):
     if details is not None:
-        audit(db, run.requested_by, "run.text_model.usage", run.run_id, {
-            "schema_version": "text_model_retry_usage_v1", "lease_token": run.lease_token,
-            "terminal_status": run.status, "input_tokens": run.input_tokens,
-            "output_tokens": run.output_tokens,
-            "complete": run.input_tokens is not None and run.output_tokens is not None,
-            "model_call_attempted": True, **details,
-        })
+        audit(
+            db,
+            run.requested_by,
+            "run.text_model.usage",
+            run.run_id,
+            {
+                "schema_version": "text_model_retry_usage_v1",
+                "lease_token": run.lease_token,
+                "terminal_status": run.status,
+                "input_tokens": run.input_tokens,
+                "output_tokens": run.output_tokens,
+                "complete": run.input_tokens is not None and run.output_tokens is not None,
+                "model_call_attempted": True,
+                **details,
+            },
+        )
 
 
 @task_retry_scope
@@ -1369,7 +1407,24 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             routing_db.get(AIRun, run_id)
             if header is not None
             and domain is None
-            and not any((infection_task, rca_task, training_task, training_orphan, deidentification_task, deidentification_orphan, operations_task, operations_orphan, research_task, research_orphan, drug_label_task, satisfaction_task, document_task, change_task))
+            and not any(
+                (
+                    infection_task,
+                    rca_task,
+                    training_task,
+                    training_orphan,
+                    deidentification_task,
+                    deidentification_orphan,
+                    operations_task,
+                    operations_orphan,
+                    research_task,
+                    research_orphan,
+                    drug_label_task,
+                    satisfaction_task,
+                    document_task,
+                    change_task,
+                )
+            )
             else None
         )
         if routing_run is not None:
@@ -1459,11 +1514,13 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
     inventory_run = False
     document_run = False
     coding_run = False
+    phase, feature_key = "prepare", None
     try:
         with database.SessionLocal() as db:
             run = db.get(AIRun, run_id)
             if not run or run.status != "running" or run.lease_token != lease:
                 return
+            feature_key = run.feature_key
             spec, provider, snapshot = _recheck_task(db, run)
             sofa_run = spec.number == 42 and bool(snapshot["payload"]["context"].get("sofa_binding"))
             roster_run = spec.number == 63 and bool(snapshot["payload"]["context"].get("roster_binding"))
@@ -1511,6 +1568,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
                 asset = db.get(AIImageAsset, snapshot["payload"]["context"]["image_source"]["asset_id"])
                 image_files = open_verified_image(asset)
             db.expunge(provider)
+        phase = "inference"
         if audio_file is not None:
             reply = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport, audio=audio_file)
         elif image_files is not None:
@@ -1520,6 +1578,7 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         else:
             reply = await generate(provider, spec, snapshot["task_prompt"], snapshot["payload"], transport=transport)
         result, inputs, outputs = reply
+        phase = "validate_result"
         retry_details = getattr(reply, "retry_details", None)
         pathway_ids = selected_pathway_ids(snapshot["payload"]["context"])
         if spec.key == "treatment_pathway" and pathway_ids and result.sections:
@@ -1580,7 +1639,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         error = (exc.code, exc.message)
     except HTTPException as exc:
         error = ("TASK_NO_LONGER_AUTHORIZED", str(exc.detail))
-    except Exception:
+    except Exception as exc:
+        _log_execution_failure(run_id, feature_key, phase, exc)
         error = ("TASK_EXECUTION_ERROR", "任务处理失败，请联系管理员查看执行状态")
     finally:
         if audio_file is not None:
@@ -1786,7 +1846,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
                     _recheck_task(db, run)
             _record_text_retry_usage(db, run, retry_details)
             db.commit()
-        except Exception:
+        except Exception as exc:
+            _log_execution_failure(run_id, feature_key, "store_result", exc)
             db.rollback()
             if not sofa_run and not roster_run and not bed_run and not surgery_run and not supply_run and not inventory_run and not document_run and not coding_run:
                 raise
@@ -1860,39 +1921,69 @@ def expire_interrupted_runs(db: Session) -> int:
     recovered += expire_interrupted_satisfaction_runs(db)
     recovered += expire_interrupted_drug_label_runs(db)
     deadline = utcnow() - datetime.timedelta(minutes=10)
-    from sqlalchemy import func
+    from sqlalchemy import case, func
 
+    from app.ai.models import AIAuditEvent
     from app.ai.research_variables_run_models import AIResearchVariableRunArtifact
     from app.ai.research_variables_runtime import recover_variable_tasks
     from app.ai.research_variables_task_routing import marker_predicate
+    from app.sql_json import json_extract, json_string, json_valid
 
     recovered += recover_variable_tasks(db, deadline)
-    count = (
-        db.query(AIRun)
+    # Generic tasks start with (0, 0), which is not a provider receipt. A stale
+    # lease may have sent a billable request before the worker disappeared.
+    # Preserve existing partial/nonzero counters and this lease's independent
+    # generic usage record, including a real zero; never inspect native bodies.
+    usage_document = case(
+        (AIAuditEvent.action == "run.text_model.usage", case((json_valid(AIAuditEvent.detail_json) == 1, AIAuditEvent.detail_json), else_="{}")),
+        else_="{}",
+    )
+    usage_lease = json_string(json_extract(usage_document, "$.lease_token"), usage_document, "$.lease_token")
+    usage_schema = json_string(json_extract(usage_document, "$.schema_version"), usage_document, "$.schema_version")
+    has_receipt = (
+        db.query(AIAuditEvent.event_id)
         .filter(
-            AIRun.status == "running",
-            AIRun.start_time < deadline,
-            AIRun.feature_key != "research_extraction",
-            ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)),
-            ~func.coalesce(marker_predicate(db), False),
-            AIRun.feature_key != "drug_label_extraction",
-            AIRun.feature_key != "infection_cluster",
-            ~AIRun.run_id.in_(db.query(AIInfectionRunArtifact.run_id)),
-            AIRun.feature_key != CHANGE_FEATURE,
-            ~operations_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
-            ~AIRun.run_id.in_(db.query(AIOperationsRunArtifact.run_id)),
-            ~training_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
-            ~AIRun.run_id.in_(db.query(AITrainingRunArtifact.run_id)),
-            ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
-            AIRun.feature_key.notin_(["drug_label_extraction", "incident_rca"]),
-            ~AIRun.run_id.in_(db.query(AIRcaEvidenceRunArtifact.run_id)),
-            ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
-            ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
-            ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),
-            ~AIRun.run_id.in_(db.query(AIResearchCohortRunArtifact.run_id)),
-            ~AIRun.run_id.in_(db.query(AIDeidentificationRunSource.run_id)),
+            AIAuditEvent.target == AIRun.run_id,
+            AIAuditEvent.action == "run.text_model.usage",
+            usage_lease == AIRun.lease_token,
+            usage_schema == "text_model_retry_usage_v1",
         )
-        .update({"status": "failed", "error_code": "WORKER_INTERRUPTED", "error_message": "执行进程中断，任务未自动重试，可检查后重新提交", "finish_time": utcnow()}, synchronize_session=False)
+        .exists()
+    )
+    interrupted = db.query(AIRun).filter(
+        AIRun.status == "running",
+        AIRun.start_time < deadline,
+        AIRun.feature_key != "research_extraction",
+        ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)),
+        ~func.coalesce(marker_predicate(db), False),
+        AIRun.feature_key != "drug_label_extraction",
+        AIRun.feature_key != "infection_cluster",
+        ~AIRun.run_id.in_(db.query(AIInfectionRunArtifact.run_id)),
+        AIRun.feature_key != CHANGE_FEATURE,
+        ~operations_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
+        ~AIRun.run_id.in_(db.query(AIOperationsRunArtifact.run_id)),
+        ~training_marker(mysql=db.get_bind().dialect.name in {"mysql", "mariadb"}),
+        ~AIRun.run_id.in_(db.query(AITrainingRunArtifact.run_id)),
+        ~AIRun.run_id.in_(db.query(AIDocumentChangeRunArtifact.run_id)),
+        AIRun.feature_key.notin_(["drug_label_extraction", "incident_rca"]),
+        ~AIRun.run_id.in_(db.query(AIRcaEvidenceRunArtifact.run_id)),
+        ~AIRun.run_id.in_(db.query(AIChargeRunArtifact.run_id)),
+        ~AIRun.run_id.in_(db.query(AISatisfactionRunArtifact.run_id)),
+        ~AIRun.run_id.in_(db.query(AIDrugLabelRunArtifact.run_id)),
+        ~AIRun.run_id.in_(db.query(AIResearchCohortRunArtifact.run_id)),
+        ~AIRun.run_id.in_(db.query(AIDeidentificationRunSource.run_id)),
+    )
+    # Set the pair together before changing status, in this same transaction.
+    # Avoid per-column CASE expressions: MySQL evaluates SET left-to-right.
+    interrupted.filter(AIRun.input_tokens == 0, AIRun.output_tokens == 0, ~has_receipt).update({"input_tokens": None, "output_tokens": None}, synchronize_session=False)
+    count = interrupted.update(
+        {
+            "status": "failed",
+            "error_code": "WORKER_INTERRUPTED",
+            "error_message": "执行进程中断，任务未自动重试，可检查后重新提交",
+            "finish_time": utcnow(),
+        },
+        synchronize_session=False,
     )
     db.commit()
     return count + recovered

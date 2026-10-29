@@ -159,6 +159,7 @@ def retry_delay(value, attempts):
 class _DeadlineStream(httpx.AsyncByteStream):
     def __init__(self, stream, policy, request):
         self.stream, self.policy, self.request = stream, policy, request
+        self.closed = False
 
     async def __aiter__(self):
         try:
@@ -171,7 +172,15 @@ class _DeadlineStream(httpx.AsyncByteStream):
             raise httpx.ReadTimeout("Text provider total deadline exceeded", request=self.request) from exc
 
     async def aclose(self):
-        await self.stream.aclose()
+        if self.closed:
+            return
+        self.closed = True
+        try:
+            async with asyncio.timeout_at(self.policy.deadline):
+                await self.stream.aclose()
+        except TimeoutError as exc:
+            self.policy.stop_reason, self.policy.exhausted = "deadline", True
+            raise httpx.ReadTimeout("Text provider total deadline exceeded", request=self.request) from exc
 
 
 class TextRetryTransport(httpx.AsyncBaseTransport):
@@ -185,6 +194,7 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
         self.stop_reason = "not_started"
         self.deadline = None
         self.lease_check = _LEASE_CHECK.get()
+        self.closed = False
 
     async def handle_async_request(self, request):
         loop = asyncio.get_running_loop()
@@ -249,8 +259,16 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
             raise httpx.ReadTimeout("Text provider total deadline exceeded", request=request) from exc
 
     async def aclose(self):
+        if self.closed:
+            return
+        self.closed = True
         if self.transport is not None:
-            await self.transport.aclose()
+            try:
+                async with asyncio.timeout_at(self.deadline):
+                    await self.transport.aclose()
+            except TimeoutError as exc:
+                self.stop_reason, self.exhausted = "deadline", True
+                raise httpx.ReadTimeout("Text provider total deadline exceeded") from exc
 
 
 def _unknown_receipt(value):

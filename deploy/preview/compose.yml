@@ -11,7 +11,7 @@ x-app: &app
     REDIS_URL: redis://redis:6379/0
     AUTO_CREATE_SCHEMA: "false"
     SCHEDULER_ENABLED: "false"
-    ALLOWED_ORIGINS: http://localhost:51891,http://127.0.0.1:51891
+    ALLOWED_ORIGINS: ${PREVIEW_ALLOWED_ORIGINS:-http://localhost:51891,http://127.0.0.1:51891}
     AI_AUDIO_STORAGE_DIR: /app/private/ai-audio
     AI_ECG_STORAGE_DIR: /app/private/ai-ecg
     AI_IMAGE_STORAGE_DIR: /app/private/ai-images
@@ -134,6 +134,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+        restart: true
     restart: unless-stopped
 
 volumes:

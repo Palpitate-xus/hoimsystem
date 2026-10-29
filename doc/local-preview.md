@@ -21,7 +21,15 @@ python scripts/local_preview.py start
 | API 文档 | http://localhost:51800/docs |
 | API 就绪检查 | http://localhost:51800/health/ready |
 
-页面和 API 默认绑定 `0.0.0.0`，局域网内可使用 `http://开发机IP:51891` 直接访问。`0.0.0.0` 是监听地址，浏览器应填写实际 IP 或域名。数据库、Redis 和模拟模型不发布宿主机端口；需要仅本机访问时，可在 `.local-preview/preview.env` 中设置 `PREVIEW_BIND_ADDRESS=127.0.0.1`。
+页面和 API 默认绑定 `0.0.0.0`。`0.0.0.0` 是监听地址，浏览器应填写实际 IP 或域名。数据库、Redis 和模拟模型不发布宿主机端口；需要仅本机访问时，可在 `.local-preview/preview.env` 中设置 `PREVIEW_BIND_ADDRESS=127.0.0.1`。
+
+局域网访问还需配置可信来源。在首次启动生成的 `.local-preview/preview.env` 中增加以下一行，将示例 IP 换成开发机的实际 IP，再重新执行启动命令：
+
+```dotenv
+PREVIEW_ALLOWED_ORIGINS=http://localhost:51891,http://127.0.0.1:51891,http://192.168.1.10:51891
+```
+
+然后访问 `http://开发机IP:51891`。使用域名、HTTPS 或不同转发端口时，也应把浏览器实际使用的完整来源加入该列表；来源包含协议、主机和端口，不包含路径。仅绑定 `0.0.0.0` 不会自动信任所有来源。页面能打开、登录或保存提示“请求来源不受信任”，通常表示实际访问来源未在列表中；应补充精确来源并重启，保留来源校验。
 
 无法直接访问开发机网络时，也可通过 VS Code 转发 `51891`，或从自己的电脑建立 SSH 转发：
 

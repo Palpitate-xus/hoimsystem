@@ -57,7 +57,7 @@ def main():
     subprocess.run(command + actions[args.action], cwd=ROOT, check=True)
     if args.action == "start":
         print("\nPreview: http://localhost:51891   API docs: http://localhost:51800/docs")
-        print("Default bind: 0.0.0.0. On the local network, replace localhost with this machine's IP address.")
+        print("Default bind: 0.0.0.0. For LAN access, add the exact frontend URL to PREVIEW_ALLOWED_ORIGINS in .local-preview/preview.env.")
         print("Super administrator: super01 / 123456   Doctor: doctor1 / doctor123")
         print("AI uses synthetic simulator replies. Clinical features stay unvalidated; use super-admin preview.")
         print("Stop without deleting demo data: python scripts/local_preview.py stop")

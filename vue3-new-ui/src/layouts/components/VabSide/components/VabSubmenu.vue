@@ -5,7 +5,7 @@
     :popper-append-to-body="false"
   >
     <template #title>
-      <el-icon v-if="item.meta && item.meta.icon" class="vab-fas-icon">
+      <el-icon v-if="item.meta && item.meta.icon" class="vab-fas-icon" aria-hidden="true">
         <component :is="getIconComponent(item.meta.icon)" />
       </el-icon>
       <span>{{ item.meta.title }}</span>

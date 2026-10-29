@@ -52,6 +52,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { ElMessage } from "element-plus";
+import { Location, Phone } from "@element-plus/icons-vue";
 import { getNavigationDepartments, getNavigationFaq, getNavigationRoute } from "@/api/triage";
 import AiAction from "@/components/AIAction/index.vue";
 

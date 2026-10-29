@@ -102,6 +102,7 @@ import { ref, onMounted, computed } from "vue";
 import AiAction from "@/components/AIAction/index.vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import { FirstAidKit, Search } from "@element-plus/icons-vue";
 import { triageSuggest, getTriageKeywords } from "@/api/triage";
 
 const router = useRouter();

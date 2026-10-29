@@ -1,12 +1,13 @@
 <template>
-  <span :title="isFullscreen ? '退出全屏' : '进入全屏'">
-    <!-- 直接使用图标组件，不再包裹在el-icon中 -->
-    <component
-      :is="isFullscreen ? 'FullScreen' : 'FullScreen'"
-      class="nav-icon"
-      @click="click"
-    />
-  </span>
+  <button
+    type="button"
+    class="nav-icon"
+    :aria-label="isFullscreen ? '退出全屏' : '进入全屏'"
+    :title="isFullscreen ? '退出全屏' : '进入全屏'"
+    @click="click"
+  >
+    <component :is="isFullscreen ? 'ScaleToOriginal' : 'FullScreen'" aria-hidden="true" />
+  </button>
 </template>
 
 <script>
@@ -27,7 +28,7 @@ export default {
   mounted() {
     this.init();
   },
-  beforeDestroy() {
+  beforeUnmount() {
     this.destroy();
   },
   methods: {

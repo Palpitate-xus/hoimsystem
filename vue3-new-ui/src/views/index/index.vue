@@ -81,7 +81,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { User, FirstAidKit, Money, Document, Bell, Box, Calendar } from "@element-plus/icons-vue";
+import { User, Money, Document, Bell } from "@element-plus/icons-vue";
 import { ElMessage } from "element-plus";
 import { getNoticeList } from "@/api/admin";
 import { getChargeList } from "@/api/charge";
@@ -141,10 +141,10 @@ const pickPath = (key) => {
 };
 
 const statCards = computed(() => [
-  { key: "todayPatients", label: "今日患者", value: todayStats.value.appointments + todayStats.value.registrations, icon: "User", color: "#409EFF", path: pickPath("todayPatients") },
-  { key: "pendingPrescriptions", label: "待处理处方", value: todayStats.value.pendingPrescriptions, icon: "Document", color: "#67C23A", path: pickPath("pendingPrescriptions") },
-  { key: "todayCharges", label: "今日收费", value: `¥${todayStats.value.charges}`, icon: "Money", color: "#E6A23C", path: pickPath("todayCharges") },
-  { key: "notices", label: "通知公告", value: noticeCount.value, icon: "Bell", color: "#F56C6C", path: pickPath("notices") },
+  { key: "todayPatients", label: "今日患者", value: todayStats.value.appointments + todayStats.value.registrations, icon: User, color: "#409EFF", path: pickPath("todayPatients") },
+  { key: "pendingPrescriptions", label: "待处理处方", value: todayStats.value.pendingPrescriptions, icon: Document, color: "#67C23A", path: pickPath("pendingPrescriptions") },
+  { key: "todayCharges", label: "今日收费", value: `¥${todayStats.value.charges}`, icon: Money, color: "#E6A23C", path: pickPath("todayCharges") },
+  { key: "notices", label: "通知公告", value: noticeCount.value, icon: Bell, color: "#F56C6C", path: pickPath("notices") },
 ]);
 
 const goTo = (path) => {

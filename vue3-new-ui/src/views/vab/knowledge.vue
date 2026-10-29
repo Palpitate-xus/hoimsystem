@@ -6,7 +6,7 @@
           <template #header>
             <div class="card-header">
               <span>知识分类</span>
-              <el-button type="primary" icon="Plus" circle size="small" @click="showAddCategoryDialog" />
+              <el-button type="primary" :icon="Plus" circle size="small" @click="showAddCategoryDialog" />
             </div>
           </template>
           
@@ -20,7 +20,7 @@
           >
             <template #default="{ node, data }">
               <div class="category-node">
-                <el-icon v-if="data.icon"><component :is="data.icon" /></el-icon>
+                <el-icon v-if="data.icon"><component :is="faToElIcon(data.icon)" /></el-icon>
                 <span style="margin-left: 5px">{{ node.label }}</span>
               </div>
             </template>
@@ -344,6 +344,7 @@ import {
   QuestionFilled,
   Plus
 } from "@element-plus/icons-vue";
+import { faToElIcon } from "@/utils/vab";
 
 export default {
   name: "Knowledge",
@@ -355,8 +356,10 @@ export default {
     Document,
     Guide,
     Reading,
-    QuestionFilled,
-    Plus
+    QuestionFilled
+  },
+  setup() {
+    return { Plus };
   },
   data() {
     return {
@@ -561,6 +564,7 @@ export default {
     }
   },
   methods: {
+    faToElIcon,
     handleNodeClick(data) {
       this.currentCategory = data;
       this.currentPage = 1;

@@ -32,13 +32,15 @@
             <div class="right-menu">
               <vab-full-screen @refresh="refreshRoute" />
               <vab-theme class="hidden-md-and-down" />
-              <el-icon
-                :class="{ 'is-pulsing': pulse }"
-                title="重载路由"
+              <button
+                type="button"
+                class="nav-icon"
+                aria-label="刷新页面"
+                title="刷新页面"
                 @click="refreshRoute"
               >
-                <Refresh />
-              </el-icon>
+                <Refresh :class="{ 'is-pulsing': pulse }" aria-hidden="true" />
+              </button>
             </div>
             <vab-avatar />
           </div>
@@ -136,13 +138,13 @@ onBeforeUnmount(() => {
           border-bottom: 0 solid transparent !important;
 
           .el-menu-item,
-          .el-submenu__title {
+          .el-sub-menu__title {
             padding: 0 15px;
           }
 
           @media only screen and (max-width: 767px) {
             .el-menu-item,
-            .el-submenu__title {
+            .el-sub-menu__title {
               padding: 0 8px;
             }
 
@@ -157,8 +159,8 @@ onBeforeUnmount(() => {
             line-height: $base-top-bar-height;
           }
 
-          > .el-submenu {
-            .el-submenu__title {
+          > .el-sub-menu {
+            .el-sub-menu__title {
               height: $base-top-bar-height;
               line-height: $base-top-bar-height;
             }
@@ -173,19 +175,19 @@ onBeforeUnmount(() => {
         &--horizontal {
           .el-menu {
             .el-menu-item,
-            .el-submenu__title {
+            .el-sub-menu__title {
               height: $base-menu-item-height;
               line-height: $base-menu-item-height;
             }
           }
 
-          .el-submenu,
+          .el-sub-menu,
           .el-menu-item {
             &.is-active {
               background-color: $base-color-blue !important;
               border-bottom: 0 solid transparent !important;
 
-              .el-submenu__title {
+              .el-sub-menu__title {
                 border-bottom: 0 solid transparent !important;
               }
             }
@@ -236,15 +238,13 @@ onBeforeUnmount(() => {
         color: rgba($base-color-white, 0.9);
       }
 
-      svg {
-        width: 1em;
-        height: 1em;
-        margin-right: 15px;
-        font-size: $base-font-size-big;
-        color: rgba($base-color-white, 0.9);
-        cursor: pointer;
-        fill: rgba($base-color-white, 0.9);
+      .nav-icon {
+        color: rgba($base-color-white, 0.95);
+
+        &:hover { background: rgba($base-color-white, 0.14); }
       }
+
+      .avatar-dropdown-icon { color: rgba($base-color-white, 0.9); }
 
       button {
         svg {

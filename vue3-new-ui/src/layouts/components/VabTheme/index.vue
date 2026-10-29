@@ -1,7 +1,8 @@
 <template>
   <span v-if="themeBar">
-    <!-- 直接使用图标组件，不再包裹在el-icon中 -->
-    <Brush class="nav-icon" title="主题配置" @click="handleOpenTheme" />
+    <button type="button" class="nav-icon" aria-label="主题配置" title="主题配置" @click="handleOpenTheme">
+      <Brush aria-hidden="true" />
+    </button>
 
     <el-drawer
       v-model="drawerVisible"

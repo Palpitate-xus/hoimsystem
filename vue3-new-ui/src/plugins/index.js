@@ -5,7 +5,7 @@ import "@/config/permission";
 // 不再导入vab-icon
 import VabPermissions from "layouts/Permissions";
 import Vab from "@/utils/vab";
-import { provideGlobalConfig } from "element-plus";
+import { ElIcon, provideGlobalConfig } from "element-plus";
 import zhCn from "element-plus/dist/locale/zh-cn.mjs";
 import { faToElIcon } from "@/utils/vab";
 import { h } from "vue";
@@ -22,7 +22,7 @@ const VabIcon = {
   setup(props) {
     return () => {
       const iconComponent = faToElIcon(props.icon);
-      return h("el-icon", {}, [h(iconComponent)]);
+      return h(ElIcon, { "aria-hidden": "true" }, { default: () => h(iconComponent) });
     };
   },
 };

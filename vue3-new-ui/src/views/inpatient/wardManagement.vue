@@ -10,7 +10,7 @@
               <el-button type="primary" size="small" @click="openWardDialog()">新增病区</el-button>
             </div>
           </template>
-          <el-input v-model="wardKeyword" placeholder="搜索病区" clearable prefix-icon="Search" style="margin-bottom: 15px;" />
+          <el-input v-model="wardKeyword" placeholder="搜索病区" clearable :prefix-icon="Search" style="margin-bottom: 15px;" />
           <el-table :data="filteredWards" size="small" highlight-current-row @current-change="onWardSelect" empty-text="暂无记录">
             <el-table-column prop="name" label="病区名称" show-overflow-tooltip />
             <el-table-column label="床位" width="80">
@@ -133,7 +133,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { OfficeBuilding } from "@element-plus/icons-vue";
+import { OfficeBuilding, Search } from "@element-plus/icons-vue";
 import { getWardList, createWard, updateWard, deleteWard as apiDeleteWard, getBedList, createBed, updateBed, deleteBed as apiDeleteBed } from "@/api/ward";
 import { getDepartmentList } from "@/api/admin";
 import AiAction from "@/components/AIAction/index.vue";

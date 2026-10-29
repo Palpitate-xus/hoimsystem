@@ -3,10 +3,11 @@
     <el-icon
       v-if="routeChildren.meta && routeChildren.meta.icon"
       class="vab-fas-icon"
+      aria-hidden="true"
     >
       <component :is="getIconComponent(routeChildren.meta.icon)" />
     </el-icon>
-    <span>{{ routeChildren.meta.title }}</span>
+    <template #title><span>{{ routeChildren.meta.title }}</span></template>
   </el-menu-item>
 </template>
 

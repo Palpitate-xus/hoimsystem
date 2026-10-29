@@ -696,12 +696,12 @@ export default {
     },
     getCampaignIcon(type) {
       const iconMap = {
-        "discount": "Discount",
-        "reduction": "Coin",
-        "gift": "Present",
-        "seckill": "Lightning"
+        "discount": Discount,
+        "reduction": Coin,
+        "gift": Present,
+        "seckill": Lightning
       };
-      return iconMap[type] || "Discount";
+      return iconMap[type] || Discount;
     },
     getCampaignColor(type) {
       const colorMap = {

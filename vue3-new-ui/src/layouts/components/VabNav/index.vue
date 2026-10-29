@@ -3,11 +3,15 @@
     <el-row :gutter="15">
       <el-col :lg="12" :md="12" :sm="12" :xl="12" :xs="4">
         <div class="left-panel">
-          <component
-            :is="collapse ? 'DArrowRight' : 'DArrowLeft'"
+          <button
+            type="button"
             class="nav-icon"
+            :aria-label="collapse ? '展开菜单' : '收起菜单'"
+            :aria-expanded="!collapse"
             @click="handleCollapse"
-          />
+          >
+            <component :is="collapse ? DArrowRight : DArrowLeft" aria-hidden="true" />
+          </button>
           <vab-breadcrumb class="hidden-xs-only" />
         </div>
       </el-col>
@@ -15,12 +19,9 @@
         <div class="right-panel">
           <vab-full-screen @refresh="refreshRoute" />
           <vab-theme class="hidden-xs-only" />
-          <Refresh
-            :class="{ 'is-pulsing': pulse }"
-            title="重载所有路由"
-            @click="refreshRoute"
-            class="nav-icon"
-          />
+          <button type="button" class="nav-icon" aria-label="刷新页面" title="刷新页面" @click="refreshRoute">
+            <Refresh :class="{ 'is-pulsing': pulse }" aria-hidden="true" />
+          </button>
           <vab-avatar />
         </div>
       </el-col>
@@ -31,7 +32,7 @@
 <script setup>
 import { ref, computed, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
-import { Refresh } from "@element-plus/icons-vue";
+import { Refresh, DArrowLeft, DArrowRight } from "@element-plus/icons-vue";
 
 defineOptions({
   name: "VabNav",
@@ -111,39 +112,6 @@ onBeforeUnmount(() => {
   }
 
   :deep() {
-    svg {
-      width: 1.2em;
-      height: 1.2em;
-      color: rgba(0, 0, 0, 0.7);
-      fill: rgba(0, 0, 0, 0.7) !important;
-      padding: 6px;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-    }
-
-    svg:hover {
-      background: rgba(0, 0, 0, 0.05);
-      color: rgba(0, 0, 0, 0.9);
-      fill: rgba(0, 0, 0, 0.9) !important;
-      transform: scale(1.05);
-    }
-
-    button {
-      svg {
-        margin-right: 0;
-        color: rgba(255, 255, 255, 0.9);
-        background: rgba(0, 122, 255, 0.8);
-        border-color: rgba(0, 122, 255, 0.9);
-        cursor: pointer;
-        fill: rgba(255, 255, 255, 0.9);
-
-        &:hover {
-          background: rgba(0, 122, 255, 0.9);
-          border-color: rgba(0, 122, 255, 1);
-        }
-      }
-    }
-
     .el-badge {
       margin-right: 0;
 

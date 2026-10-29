@@ -87,13 +87,13 @@ const activeMenu = computed(() => {
       .el-menu--collapse {
         border-right: 0;
 
-        .el-submenu__icon-arrow {
+        .el-sub-menu__icon-arrow {
           right: 10px;
           margin-top: -3px;
         }
 
         .el-menu-item,
-        .el-submenu {
+        .el-sub-menu {
           text-align: center;
         }
       }
@@ -110,7 +110,7 @@ const activeMenu = computed(() => {
     }
 
     .el-menu-item,
-    .el-submenu__title {
+    .el-sub-menu__title {
       height: $base-menu-item-height;
       line-height: $base-menu-item-height;
     }

@@ -261,7 +261,7 @@
                 <div class="node-actions">
                   <el-button 
                     type="danger" 
-                    icon="Delete" 
+                    :icon="Delete"
                     circle 
                     @click="removeNode(index)"
                   />
@@ -387,8 +387,10 @@ export default {
     Search,
     Connection,
     Rank,
-    Delete,
     draggable
+  },
+  setup() {
+    return { Delete };
   },
   data() {
     return {

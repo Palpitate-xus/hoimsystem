@@ -16,20 +16,21 @@ const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 // script bytes and expression are pinned; a changed/new selector needs review.
 // These return app menu components or SVG icons, never arbitrary Element Plus widgets.
 const AUDITED_DYNAMIC = /* AUDITED_DYNAMIC */ {
-  "src/layouts/components/VabFullScreen/index.vue|template|isFullscreen ? 'FullScreen' : 'FullScreen'": "ab1f6276222c5d18d7f0d198fecf866aba8fb8613568e50672739258313a13b9",
-  "src/layouts/components/VabNav/index.vue|template|collapse ? 'DArrowRight' : 'DArrowLeft'": "f410326470f15a90386efd1084e826742e6d7c92c41ee6d3c264f71bae910bc7",
+  "src/layouts/components/VabFullScreen/index.vue|template|isFullscreen ? 'ScaleToOriginal' : 'FullScreen'": "473de7ad3bb231a7cf89e7dbfd889c80b75b152f8625917c363f56dcc7aff0d9",
+  "src/layouts/components/VabNav/index.vue|template|collapse ? DArrowRight : DArrowLeft": "41145858fb955b401d395486946408f822aeee710bdfd13ff19a4c65def32e1b",
   "src/layouts/components/VabSide/components/VabMenuItem.vue|template|getIconComponent(routeChildren.meta.icon)": "b34d50edc8414d99d8a96e1016bb8a5d49c1c5419847a5f97a0e68366f445788",
   "src/layouts/components/VabSide/components/VabSideItem.vue|template|menuComponent": "783e4d710e0324a3a0ce7cd0ace917134a78901d15ee39cdb857bd84530e877a",
   "src/layouts/components/VabSide/components/VabSubmenu.vue|template|getIconComponent(item.meta.icon)": "cd03d090402bd4a2686a7cefbf2a712a07af365e0172471dd276da9e82f49d10",
-  "src/layouts/components/VabTabs/index.vue|template|getTabIcon(item)": "ef553196e10f13edf3c1406e083c125fd65fb39cc63627f4e689716ee29b8560",
-  "src/plugins/index.js|render|iconComponent": "289c05adbf45c6c350642daec629dc24a3cf41254b01c45a68cfb43a1574d091",
-  "src/views/index/index.vue|template|item.icon": "d015ee8ee7c58e1fcdef921b5bae3f6043e7a001309d27fafa8d3623b375a9b6",
-  "src/views/vab/campaign.vue|template|getCampaignIcon(row.type)": "14269ba7e23cfc7deff4d04e16b35baad0d25bee18c1b3e5b14007124ec52bca",
-  "src/views/vab/campaign.vue|template|getCampaignIcon(detailCampaign.type)": "14269ba7e23cfc7deff4d04e16b35baad0d25bee18c1b3e5b14007124ec52bca",
-  "src/views/vab/knowledge.vue|template|data.icon": "d09dccddc68ade0332dcbe0d1aae13072dff4f29022a1a9580fb7e40ec48fa33"
+  "src/layouts/components/VabTabs/index.vue|template|getTabIcon(item)": "5fcab77e94236dd674195100491ac3e84dceba48be59f0942723b7a21229c9ef",
+  "src/plugins/index.js|render|iconComponent": "20f6f3e70c4a25a596334482d25ac1124a2f02a4e2ff084042139f0950d23b99",
+  "src/views/index/index.vue|template|item.icon": "951c70548668a81877a8961dd5acb1784c881a4106c2c25b365c6bbe4c1d29a6",
+  "src/views/vab/campaign.vue|template|getCampaignIcon(row.type)": "c6a7def2e64880dffef0ae3def342b0dd31a855946553f313b171d579b646647",
+  "src/views/vab/campaign.vue|template|getCampaignIcon(detailCampaign.type)": "c6a7def2e64880dffef0ae3def342b0dd31a855946553f313b171d579b646647",
+  "src/views/vab/knowledge.vue|template|faToElIcon(data.icon)": "a9dbe73d7f74565e823c1f47c69cd07e78f1dd8113fba0d67a308bab2b9c3987"
 };
 const AUDITED_HELPERS = /* AUDITED_HELPERS */ {
-  "src/utils/vab.js": "196079db00d6631e13c947f4675ec0df598d2a839eb9ba323fd24baa171ae616"
+  "src/utils/vab.js": "a85119da512815798c7fa5ef34ec987997731db79e6bba01ade6875cd8a5f168",
+  "src/utils/icons.js": "f5ece0e45f91087c811a0273454b5f502298c8d5caa098567b8438b374ba8348"
 };
 
 function walk(node, visit) {

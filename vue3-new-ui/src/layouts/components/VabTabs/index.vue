@@ -53,6 +53,7 @@
 
 <script>
 import path from "path";
+import { faToElIcon } from "@/utils/vab";
 import { mapGetters } from "vuex";
 import {
   ArrowDown,
@@ -60,16 +61,6 @@ import {
   Back,
   Right,
   Remove,
-  Document,
-  HomeFilled,
-  User,
-  UserFilled,
-  Setting,
-  TrendCharts,
-  Grid,
-  FolderOpened,
-  List,
-  Odometer,
 } from "@element-plus/icons-vue";
 
 export default {
@@ -80,16 +71,6 @@ export default {
     Back,
     Right,
     Remove,
-    Document,
-    HomeFilled,
-    User,
-    UserFilled,
-    Setting,
-    TrendCharts,
-    Grid,
-    FolderOpened,
-    List,
-    Odometer,
   },
   data() {
     return {
@@ -269,31 +250,7 @@ export default {
       return view;
     },
     getTabIcon(item) {
-      // 将FontAwesome图标映射到Element Plus图标
-      if (item.meta && item.meta.icon) {
-        // 简单的图标名映射，可以根据需要扩展
-        const iconMap = {
-          home: "HomeFilled",
-          user: "User",
-          users: "UserFilled",
-          cog: "Setting",
-          "chart-line": "TrendCharts",
-          table: "Grid",
-          tree: "FolderOpened",
-          code: "Document",
-          list: "List",
-          "tachometer-alt": "Odometer",
-          "times-circle": "CircleClose",
-          "arrow-alt-circle-left": "Back",
-          "arrow-alt-circle-right": "Right",
-          ban: "Remove",
-          // 可以添加更多映射
-        };
-
-        return iconMap[item.meta.icon] || "Document";
-      }
-
-      return null;
+      return item.meta?.icon ? faToElIcon(item.meta.icon) : null;
     },
   },
 };

@@ -119,10 +119,17 @@
     <clinical-training-panel v-else-if="dedicatedPanel==='clinical_training'" :feature="configuredFeature||null" :feature-key="featureKey" :initial-input="props.initialInput" :patient-id="props.patientId" :encounter-ref="props.encounterRef" :pharmaceutical-id="props.pharmaceuticalId" :active="viewActive" />
 
     <template v-if="!dedicatedLifecycle">
+    <section v-if="requestIssue" class="spaced" aria-label="AI请求提示">
+      <el-alert :title="requestIssue.message" type="warning" :closable="false" />
+      <details v-if="requestIssue.details"><summary>技术详情</summary><code>{{ requestIssue.details }}</code></details>
+      <el-button v-if="queryPaused && run || recovery?.runId" :loading="queryLoading" @click="refreshRun">继续查询任务状态</el-button>
+      <el-button v-if="recovery" @click="showRecoveryHistory">查看任务记录</el-button>
+    </section>
     <el-card v-if="run" shadow="never" class="spaced" aria-label="AI任务结果">
       <template #header><div class="result-header"><strong>{{ run.feature_name }}</strong><el-tag>{{ statuses[run.status] || run.status }}</el-tag><el-tag v-if="run.patient_id" type="info">患者 #{{ run.patient_id }}</el-tag><el-tag v-if="run.preview" type="warning">评估预览</el-tag><el-button v-if="busy" link @click="refreshRun">刷新状态</el-button></div></template>
-      <el-alert v-if="busy" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
-      <el-alert v-if="run.status === 'failed'" type="error" :closable="false" :title="run.error_message || '生成失败，请联系管理员检查服务状态'" />
+      <el-alert v-if="busy && !queryPaused" type="info" :closable="false" title="任务已保存，正在等待处理或生成结果。" />
+      <el-alert v-if="runFailure" type="error" :closable="false" :title="runFailure.message" />
+      <details v-if="runFailure?.details"><summary>技术详情</summary><code>{{ runFailure.details }}</code></details>
       <coding-findings v-if="run.feature_key==='drg_evidence_review'" :run="run" :expected-patient-id="patientId" :expected-admission-id="encounterRef||null" :expected-home-id="codingHome" :references="codingInitialReferences||codingSelection" :active="viewActive&&codingAuthorized" @inspect="inspectEvidence" />
       <ai-service-findings :findings="run.tool_findings" @inspect="inspectEvidence" />
       <ai-operational-findings v-if="!run.inventory_findings" :findings="run.operational_findings" @inspect="inspectEvidence" />
@@ -194,8 +201,8 @@
       </template>
     </el-card>
 
-    <el-collapse class="spaced" @change="loadHistory">
-      <el-collapse-item title="最近任务"><el-table :data="history" :empty-text="selected?.scope === 'patient' && !patientId ? '先选择患者查看相应任务' : '当前范围暂无历史任务'"><el-table-column prop="feature_name" label="功能" /><el-table-column prop="patient_id" label="患者ID" width="85" /><el-table-column label="状态" width="90"><template #default="{ row }">{{ statuses[row.status] || row.status }}</template></el-table-column><el-table-column prop="create_time" label="时间" /><el-table-column label="操作" width="80"><template #default="{ row }"><el-button link @click="openRun(row.run_id)">查看</el-button></template></el-table-column></el-table></el-collapse-item>
+    <el-collapse v-model="historyPanels" class="spaced" @change="loadHistory">
+      <el-collapse-item title="最近任务" name="recent"><el-table :data="history" :empty-text="selected?.scope === 'patient' && !patientId ? '先选择患者查看相应任务' : '当前范围暂无历史任务'"><el-table-column prop="feature_name" label="功能" /><el-table-column prop="patient_id" label="患者ID" width="85" /><el-table-column label="状态" width="90"><template #default="{ row }">{{ statuses[row.status] || row.status }}</template></el-table-column><el-table-column prop="create_time" label="时间" /><el-table-column label="操作" width="80"><template #default="{ row }"><el-button link @click="openRun(row.run_id)">查看</el-button></template></el-table-column></el-table></el-collapse-item>
     </el-collapse>
     <el-dialog v-model="contextDialog" :title="needsOperations ? '本次提供给 AI 的运营资料' : '本次提供给 AI 的患者资料'" width="min(1000px, 96vw)">
       <el-alert type="info" :closable="false" title="资料保留时间和状态，缺失信息会单独标记。" />
@@ -241,6 +248,7 @@
 </template>
 
 <script setup>
+import { aiError, aiRequestKey } from "@/utils/aiError.cjs";
 import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import ResearchCohortPanel from '@/components/ai/ResearchCohortPanel.vue';
 import DeidentificationPanel from '@/components/ai/DeidentificationPanel.vue';
@@ -499,6 +507,19 @@ const boundNursingReferences = computed(() => Object.entries(boundNursingLabels)
 const operationsRange = ref([]), operationsPlanRange = ref([]), inventoryDrugs = ref([]), inventoryConsumables = ref([]), serviceOptionsLoading = ref(false);
 const serviceOptions = ref({}), serviceDepartment = ref(null), serviceSurgeryPool=ref(null), serviceWard = ref(null), serviceDoctor = ref(null), serviceDate = ref(""), navigationStart = ref(null), navigationEnd = ref(null);
 const serviceDoctors = computed(() => (serviceOptions.value.doctors || []).filter(item => !serviceDepartment.value || item.department_id === serviceDepartment.value));
+const historyPanels = ref([]);
+const requestIssue = ref(null), queryPaused = ref(false), queryLoading = ref(false), recovery = ref(null);
+const submissionBlocks = new Map();
+const runFailure = computed(() => run.value?.status === 'failed' ? aiError(run.value, '生成失败，请联系管理员检查服务状态。') : null);
+function resetRequestIssue() { requestIssue.value = null; queryPaused.value = false; recovery.value = null; }
+function pauseQuery(error, runId = run.value?.run_id) {
+  const issue = aiError(error, '暂时无法查询任务状态。');
+  queryPaused.value = true;
+  if (runId && recovery.value?.runId !== runId) recovery.value = { runId };
+  requestIssue.value = { ...issue, message: issue.status === 401 || issue.status === 403 ? issue.message : `状态查询暂停：${issue.message}` };
+  if ([401, 403].includes(issue.status)) { run.value = null; recovery.value = null; }
+}
+async function showRecoveryHistory() { historyPanels.value = ['recent']; historyOpen = true; await loadHistory(); }
 const busy = computed(() => ["queued", "running"].includes(run.value?.status));
 let timer = null, pollVersion = 0, formVersion = 0, patientLoadVersion = 0, historyVersion = 0, selectionVersion = 0, historyOpen = false, pathwayOptionsVersion = 0;
 
@@ -579,9 +600,9 @@ function startPolling() {
     try {
       const response = await getAIRun(id);
       if (version !== pollVersion || !requestedRunMatches(response.data,id,supportTicket) || !await acceptSupportRun(response.data, supportTicket) || version !== pollVersion) return;
-      run.value = response.data;
+      run.value = response.data; resetRequestIssue();
       if (busy.value) timer = setTimeout(poll, 2000);
-    } catch { if (version === pollVersion) { if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)clearUnavailableSupport(supportTicket); stopPolling(); } }
+    } catch (error) { if (version === pollVersion) { if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)clearUnavailableSupport(supportTicket); pauseQuery(error, id); stopPolling(); } }
   };
   timer = setTimeout(poll, 1200);
 }
@@ -595,7 +616,7 @@ async function searchPatients(keyword = "") {
   if (props.patientId && !patients.value.some(item => item.patient_id === props.patientId)) patients.value.push({ patient_id: props.patientId, label: `患者 #${props.patientId}` });
 }
 watch(featureKey, async () => {
-  formVersion += 1; stopPolling(); run.value = null; contextData.value = null;
+  resetRequestIssue(); formVersion += 1; stopPolling(); run.value = null; contextData.value = null;
   const featureVersion = formVersion;
   patientId.value = null; encounters.value = []; prescriptions.value = []; encounterRef.value = ""; prescriptionId.value = null;
   if(dedicatedLifecycle.value){question.value="";codingQuery.value="";extraInput.value="";return;}
@@ -668,7 +689,7 @@ watch([needsNews2, () => riskWindowSelection.value?.observation_window_id, () =>
 watch([needsAki, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { akiSelection.value = null; akiReady.value = false; });
 watch([needsQsofa, () => riskWindowSelection.value?.observation_window_id, () => riskWindowSelection.value?.content_hash, riskWindowReady], () => { qsofaSelection.value = null; qsofaReady.value = false; });
 watch([needsCodingEvidence,()=>supportCanonical(codingSelection.value),codingReady,codingHome,()=>supportCanonical(codingInitialReferences.value),needsNativeInventory,()=>supportCanonical(nativeInventorySelection.value),nativeInventoryReady,()=>supportCanonical(nativeInventoryInitialReferences.value),()=>supportCanonical(nativeInventoryScope.value),needsSupply,()=>supportCanonical(supplySelection.value),supplyReady,()=>supportCanonical(supplyInitialReferences.value),()=>supportCanonical(supplyScope.value),needsSurgery,()=>supportCanonical(surgerySelection.value),surgeryReady,()=>supportCanonical(surgeryInitialReferences.value),serviceSurgeryPool,needsBed,()=>JSON.stringify(bedSelection.value),bedReady,()=>JSON.stringify(bedInitialReferences.value),serviceWard,needsRoster,()=>JSON.stringify(rosterSelection.value),rosterReady,()=>JSON.stringify(rosterInitialReferences.value),needsSofa, () => JSON.stringify(sofaSelection.value), sofaReady, () => selected.value?.input_mode, needsQsofa, () => JSON.stringify(qsofaSelection.value), qsofaReady, needsAki, () => JSON.stringify(akiSelection.value), akiReady, needsNews2, () => JSON.stringify(news2Selection.value), news2Ready, () => JSON.stringify(riskWindowSelection.value), riskWindowReady, () => JSON.stringify(forecastSelection.value), forecastReady, featureKey, patientId, encounterRef, prescriptionId, incidentId, pathwayId, audioAssetId, ecgAssetId, imageAssetId, imageOrderId, serviceDepartment, serviceDoctor, serviceDate, navigationStart, navigationEnd, operationsRange, operationsPlanRange, () => inventoryDrugs.value.join(','), () => inventoryConsumables.value.join(','), () => JSON.stringify(props.initialInput)], () => {
-  selectionVersion += 1; supportFailure.value = ""; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidence.value = null; evidenceDialog.value = false; feedbackDialog.value = false;
+  resetRequestIssue(); selectionVersion += 1; supportFailure.value = ""; stopPolling(); run.value = null; contextData.value = null; contextDialog.value = false; evidence.value = null; evidenceDialog.value = false; feedbackDialog.value = false;
 });
 let previewEvidenceVersion=0;
 watch(contextDialog,visible=>{if(!visible){previewEvidenceVersion++;contextData.value=null;evidence.value=null;evidenceDialog.value=false;}},{flush:'sync'});
@@ -784,9 +805,12 @@ function buildTaskInput() {
   }
   return input;
 }
-async function expandQueuedReply(value,request,ticket){
+function queuedReplyRequiresRead(value,ticket){
   const protectedMode=ticket.codingMode||ticket.inventoryMode||ticket.supplyMode||ticket.surgeryMode||ticket.bedMode||ticket.rosterMode||ticket.sofaMode||ticket.mode;
-  if(!protectedMode||value?.coding_findings||value?.inventory_findings||value?.supply_findings||value?.surgery_findings||value?.bed_findings||value?.roster_findings||value?.sofa_findings||value?.sofa_change_findings||value?.support_findings)return value;
+  return protectedMode&&!value?.coding_findings&&!value?.inventory_findings&&!value?.supply_findings&&!value?.surgery_findings&&!value?.bed_findings&&!value?.roster_findings&&!value?.sofa_findings&&!value?.sofa_change_findings&&!value?.support_findings;
+}
+async function expandQueuedReply(value,request,ticket){
+  if(!queuedReplyRequiresRead(value,ticket))return value;
   if(!supportCurrent(ticket))return null;
   if(!supportId(value?.run_id)||value.feature_key!==request.feature_key||!Object.hasOwn(statuses,value.status)||value.patient_id!==(request.patient_id??null)||value.encounter_ref!==(request.encounter_ref??null)||value.requires_human_review!==true||!supportHash(value.context_digest)){
     clearUnavailableSupport(ticket,'排队回执的任务、范围或状态不一致，暂不展示。');return null;
@@ -800,34 +824,52 @@ async function expandQueuedReply(value,request,ticket){
   return response.data;
 }
 async function submit() {
-  if(dedicatedLifecycle.value)return;
+  if(dedicatedLifecycle.value || submitting.value || busy.value)return;
   const input = buildTaskInput(); if (!input) return;
-  submitting.value = true;
+  const request={ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value };
+  const key = aiRequestKey(store.state.user.accessToken, request);
+  if (submissionBlocks.has(key)) { run.value = null; recovery.value = submissionBlocks.get(key); requestIssue.value = { message: recovery.value.runId ? '任务已经创建，请继续查询已有任务。' : '提交结果尚未确认，请先查看任务记录；相同资料暂不重复提交。' }; return; }
+  submitting.value = true; resetRequestIssue(); run.value = null;
   stopPolling(); const selection = selectionVersion, view = pollVersion, supportTicket = captureSupport(true);
+  let acknowledged = false, runId = null;
   try {
-    const request={ feature_key: featureKey.value, patient_id: selected.value.scope === "patient" ? patientId.value : null, encounter_ref: selected.value.scope === "patient" ? encounterRef.value || null : null, input, preview: canPreview.value && preview.value };
-    const response = await createAIRun(request);
+    const response = await createAIRun(request); acknowledged = true;
+    if (typeof response.data?.run_id === 'string' && response.data.run_id) runId = response.data.run_id;
+    const block = { key, runId, ...(queuedReplyRequiresRead(response.data,supportTicket) ? { receipt: response.data, request } : {}) }; submissionBlocks.set(key,block);
     if(selection!==selectionVersion||view!==pollVersion||!supportCurrent(supportTicket))return;
+    recovery.value = block;
     const value=await expandQueuedReply(response.data,request,supportTicket);
-    if (!value||selection !== selectionVersion || view !== pollVersion || !await acceptSupportRun(value, supportTicket) || selection !== selectionVersion || view !== pollVersion) return;
-    run.value = value; startPolling();
-  } catch(failure){
-    if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){if(selection===selectionVersion&&view===pollVersion){historyVersion++;history.value=[];clearUnavailableSupport(supportTicket);}return;}
-    throw failure;
+    if (selection !== selectionVersion || view !== pollVersion) return;
+    if (!value || !await acceptSupportRun(value, supportTicket)) { requestIssue.value = { message: '任务已经提交，当前资料尚未核对通过，请先查询任务记录。' }; return; }
+    if(selection !== selectionVersion || view !== pollVersion)return;
+    submissionBlocks.delete(key); resetRequestIssue(); run.value = value; startPolling();
+  } catch(error) {
+    const issue = aiError(error);
+    if ((acknowledged || issue.uncertain) && !submissionBlocks.has(key)) submissionBlocks.set(key, { key, runId });
+    if(selection!==selectionVersion||view!==pollVersion||!supportCurrent(supportTicket))return;
+    if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){historyVersion++;history.value=[];clearUnavailableSupport(supportTicket);}
+    recovery.value = submissionBlocks.get(key) || null;
+    requestIssue.value = { ...issue, message: [401, 403].includes(issue.status) ? issue.message : runId ? '任务已经创建，状态查询暂停，请继续查询已有任务。' : recovery.value ? '提交结果尚未确认，请先查看任务记录；相同资料暂不重复提交。' : issue.message };
   } finally { submitting.value = false; }
 }
 async function refreshRun() {
-  if(dedicatedLifecycle.value)return;
-  if(!run.value)return;stopPolling();const id=run.value.run_id,selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
-  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||id!==run.value?.run_id||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
-  catch(failure){if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
+  if(dedicatedLifecycle.value || queryLoading.value)return;
+  const target = run.value?.run_id || recovery.value?.runId;
+  if(!target)return;stopPolling();const selection=selectionVersion,view=pollVersion,supportTicket=captureSupport(),block=recovery.value;
+  queryLoading.value = true;
+  try {
+    const value=block?.receipt?await expandQueuedReply(block.receipt,block.request,supportTicket):(await getAIRun(target)).data;
+    if(selection!==selectionVersion||view!==pollVersion||!value||!requestedRunMatches(value,target,supportTicket)||!await acceptSupportRun(value,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;
+    run.value=value;if(block)submissionBlocks.delete(block.key);resetRequestIssue();startPolling();
+  } catch(error) { if(selection!==selectionVersion||view!==pollVersion||!supportCurrent(supportTicket))return;if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)clearUnavailableSupport(supportTicket);pauseQuery(error, target); }
+  finally { queryLoading.value = false; }
 }
 async function openRun(id) {
   if(dedicatedLifecycle.value)return;
   if((codingLifecycle.value&&(!codingAuthorized.value||!codingHistoryScopeReady.value))||(nativeInventoryLifecycle.value&&!nativeInventoryAuthorized.value)||(supplyLifecycle.value&&!supplyAuthorized.value)||(surgeryLifecycle.value&&(!surgeryAuthorized.value||!surgeryCohortValid.value))||(rosterLifecycle.value&&!rosterAuthorized.value)||(bedLifecycle.value&&!bedAuthorized.value))return;
   stopPolling();const selection=selectionVersion,view=pollVersion,supportTicket=captureSupport();
-  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;startPolling();}
-  catch(failure){if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){clearUnavailableSupport(supportTicket);return;}throw failure;}
+  try{const response=await getAIRun(id);if(selection!==selectionVersion||view!==pollVersion||!requestedRunMatches(response.data,id,supportTicket)||!await acceptSupportRun(response.data,supportTicket)||selection!==selectionVersion||view!==pollVersion)return;run.value=response.data;resetRequestIssue();startPolling();}
+  catch(error){if(selection!==selectionVersion||view!==pollVersion||!supportCurrent(supportTicket))return;if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value)clearUnavailableSupport(supportTicket);pauseQuery(error,id);}
 }
 async function cancel() { const ticket=captureSupport(),id=run.value?.run_id;if(!id)return;try{await cancelAIRun(id);if(!supportCurrent(ticket)||run.value?.run_id!==id)return;await refreshRun();}catch(failure){if(codingLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){clearUnavailableSupport(ticket);return;}throw failure;} }
 async function loadHistory(activeNames) {
@@ -845,10 +887,11 @@ async function loadHistory(activeNames) {
     if (version === historyVersion&&supportCurrent(ticket)) history.value = codingLifecycle.value?(response.data||[]).filter(row=>row.feature_key==='drg_evidence_review'&&row.patient_id===ticket.patient&&row.encounter_ref===ticket.admission):(response.data || []);
   } catch(failure) {
     if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){if(version===historyVersion&&supportCurrent(ticket)){history.value=[];stopPolling();clearUnavailableSupport(ticket);}return;}
-    throw failure;
+    if(version===historyVersion&&supportCurrent(ticket))requestIssue.value=aiError(failure,'任务记录暂时无法查询，请稍后再查询。');
   }
 }
 watch([() => JSON.stringify(store.getters["user/permissions"]), () => store.state.user.accessToken,()=>store.state.user.username], () => {
+  resetRequestIssue(); submissionBlocks.clear(); stopPolling(); run.value = null;
   if (!documentDraft.value && !needsForecast.value && !needsRiskWindow.value && !codingLifecycle.value && !supportLifecycle.value && !sofaLifecycle.value&&!rosterLifecycle.value&&!bedLifecycle.value&&!surgeryLifecycle.value&&!supplyLifecycle.value&&!nativeInventoryLifecycle.value) return;
   codingSelection.value=null;codingReady.value=false;codingHome.value=null;codingInputKey.value++;
   nativeInventorySelection.value=null;nativeInventoryReady.value=false;nativeInventoryScope.value=null;nativeInventoryInputKey.value++;
@@ -906,7 +949,7 @@ onMounted(async () => {
   try { const response = await getAIFeatures(); if (!viewActive.value||initialSelection!==selectionVersion||initialCredentials !== JSON.stringify([store.state.user.accessToken,store.getters["user/permissions"]])) return; features.value = (response.data || []).filter(item => !props.featureKeys.length || props.featureKeys.includes(item.key)); featureKey.value = features.value.some(item => item.key === props.initialFeature) ? props.initialFeature : features.value[0]?.key || ""; }
   finally { loading.value = false; }
 });
-onActivated(() => { viewActive.value = true; if (busy.value) startPolling(); });
+onActivated(() => { viewActive.value = true; if (busy.value && !queryPaused.value) startPolling(); });
 onDeactivated(() => { viewActive.value = false;codingSelection.value=null;codingReady.value=false;codingHome.value=null;codingInputKey.value++;nativeInventorySelection.value=null;nativeInventoryReady.value=false;nativeInventoryScope.value=null;nativeInventoryInputKey.value++;supplySelection.value=null;supplyReady.value=false;supplyScope.value=null;supplyInputKey.value++;surgerySelection.value=null;surgeryReady.value=false;surgeryInputKey.value++;bedSelection.value=null;bedReady.value=false;bedInputKey.value++;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;sofaSelection.value=null;sofaReady.value=false; selectionVersion += 1; stopPolling(); if(codingLifecycle.value||supportLifecycle.value||sofaLifecycle.value||rosterLifecycle.value||bedLifecycle.value||surgeryLifecycle.value||supplyLifecycle.value||nativeInventoryLifecycle.value){historyVersion++;run.value=null;contextData.value=null;contextDialog.value=false;evidence.value=null;evidenceDialog.value=false;feedbackDialog.value=false;history.value=[];} });
 onBeforeUnmount(() => { viewActive.value = false;codingSelection.value=null;codingReady.value=false;codingHome.value=null;codingInputKey.value++;nativeInventorySelection.value=null;nativeInventoryReady.value=false;nativeInventoryScope.value=null;nativeInventoryInputKey.value++;supplySelection.value=null;supplyReady.value=false;supplyScope.value=null;supplyInputKey.value++;surgerySelection.value=null;surgeryReady.value=false;surgeryInputKey.value++;bedSelection.value=null;bedReady.value=false;bedInputKey.value++;rosterSelection.value=null;rosterReady.value=false;rosterInputKey.value++;sofaSelection.value=null;sofaReady.value=false; selectionVersion += 1; historyVersion += 1; formVersion += 1; pathwayOptionsVersion += 1; stopPolling(); });
 </script>

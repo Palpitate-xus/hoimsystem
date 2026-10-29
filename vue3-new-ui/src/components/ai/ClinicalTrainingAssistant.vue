@@ -21,8 +21,9 @@
     <el-button v-if="session.role.value==='super_admin'" :disabled="!configured||!v.selected||!v.objective||v.busy" @click="generate(true)">预览讲解任务</el-button>
     <el-button :disabled="v.busy" @click="history()">查看讲解记录</el-button>
     <p v-if="v.error" role="alert">{{v.error}}</p>
-    <table v-if="v.history"><tbody><tr v-for="row in v.history.items" :key="row.run_id"><td>{{row.run_id}} {{row.status}}</td><td><el-button :disabled="v.busy" @click="openRun(row.run_id)">查看本次讲解</el-button></td></tr></tbody></table>
-    <template v-if="v.run"><p aria-label="教学任务当前短状态">任务{{v.run.run_id}}：{{v.run.status}}；{{v.run.receipt_pending?'尚待原在途调用真实回执':v.run.usage?'已有实际独立用量回执':'尚无用量回执'}}。</p><el-button :disabled="v.busy||v.run.parts_state!=='available'" @click="openParts">查看讲解反馈</el-button><el-button v-if="session.role.value==='super_admin'&&['queued','running'].includes(v.run.status)" :disabled="v.busy" @click="cancel">停止本次任务</el-button><p v-if="v.run.binding===null">当前只能查看任务状态；无权读取的练习或反馈不会恢复显示。</p></template>
+    <table v-if="v.history"><tbody><tr v-for="row in v.history.items" :key="row.run_id"><td>{{row.run_id}} {{states[row.status]||'状态待核对'}}</td><td><el-button :disabled="v.busy" @click="openRun(row.run_id)">查看本次讲解</el-button></td></tr></tbody></table>
+    <template v-if="v.run"><p aria-label="教学任务当前短状态">任务{{v.run.run_id}}：{{states[v.run.status]||'状态待核对'}}；{{v.run.receipt_pending?'尚待原在途调用真实回执':v.run.usage?'已有实际独立用量回执':'尚无用量回执'}}。</p><el-button :disabled="v.busy||v.run.parts_state!=='available'" @click="openParts">查看讲解反馈</el-button><el-button v-if="session.role.value==='super_admin'&&['queued','running'].includes(v.run.status)" :disabled="v.busy" @click="cancel">停止本次任务</el-button><p v-if="v.run.binding===null">当前只能查看任务状态；无权读取的练习或反馈不会恢复显示。</p></template>
+    <template v-if="failure"><p role="alert">{{failure.message}}</p><details v-if="failure.details"><summary>技术详情</summary><code>{{failure.details}}</code></details><el-button :disabled="v.busy" @click="openRun(v.run.run_id)">重新查询任务</el-button></template>
     <template v-if="v.partsOpen&&v.parts">
      <el-button @click="closeParts">关闭当前反馈</el-button>
      <ClinicalTrainingFindings :metadata="v.run" :parts="v.parts" :active="active" :config-revision="configRevision" @invalidate="clear()"/>
@@ -33,6 +34,8 @@
  </section>
 </template>
 <script setup>
+import{computed}from'vue';import{aiError}from'@/utils/aiError.cjs';
+const states={queued:'排队中',running:'生成中',succeeded:'讲解已生成',failed:'生成失败',cancelled:'已取消'};
 import ClinicalTrainingPractice from'./ClinicalTrainingPractice.vue';import ClinicalTrainingFindings from'./ClinicalTrainingFindings.vue';import{useClinicalTrainingAssistant}from'./useClinicalTrainingAssistant';import{trainingTaskObjectives as objectives}from'@/api/ai/clinicalTrainingTasks';
-const props=defineProps({active:{type:Boolean,default:true},initialReferences:{type:Object,default:null},initialObjective:{type:String,default:''},configRevision:{type:[String,Number],default:null}}),emit=defineEmits(['selection','run-change','invalidate']);const{v,session,authorized,configured,ready,configuration,select,practiceSelection,generate,history,openRun,openParts,closeParts,cancel,feedback,clear}=useClinicalTrainingAssistant(props,emit);defineExpose({openRun,clear});
+const props=defineProps({active:{type:Boolean,default:true},initialReferences:{type:Object,default:null},initialObjective:{type:String,default:''},configRevision:{type:[String,Number],default:null}}),emit=defineEmits(['selection','run-change','invalidate']);const{v,session,authorized,configured,ready,configuration,select,practiceSelection,generate,history,openRun,openParts,closeParts,cancel,feedback,clear}=useClinicalTrainingAssistant(props,emit);const failure=computed(()=>v.run?.status==='failed'?aiError(v.run,'AI讲解未能生成，请核对任务记录或联系管理员。'):null);defineExpose({openRun,clear});
 </script><style scoped>section{display:grid;gap:12px}table{width:100%}label{display:grid;gap:8px}</style>

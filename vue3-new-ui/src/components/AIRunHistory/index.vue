@@ -45,7 +45,8 @@
             <el-descriptions-item label="发起用户ID">{{ detail.requested_by }}</el-descriptions-item><el-descriptions-item label="患者ID">{{ detail.patient_id || '未关联患者' }}</el-descriptions-item>
             <el-descriptions-item label="发起时间">{{ detail.create_time }}</el-descriptions-item><el-descriptions-item label="Prompt / 模型配置版本">v{{ detail.prompt_version }} / v{{ detail.provider_revision }}</el-descriptions-item>
           </el-descriptions>
-          <el-alert v-if="detail.error_message" type="error" :closable="false" :title="detail.error_message" class="spaced" />
+          <el-alert v-if="traceFailure" type="error" :closable="false" :title="traceFailure.message" class="spaced" />
+          <details v-if="traceFailure?.details"><summary>技术详情</summary><code>{{traceFailure.details}}</code></details>
           <el-alert v-if="!rcaAudit&&!detail.snapshot_complete" type="info" :closable="false" title="旧任务按实际留存内容展示，部分执行快照字段未保存。" class="spaced" />
           <el-tabs v-model="detailTab" class="spaced">
             <el-tab-pane label="结果与引用" name="result">
@@ -89,6 +90,7 @@
 </template>
 
 <script setup>
+import {aiError} from "@/utils/aiError.cjs";
 import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, defineAsyncComponent, shallowRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, toRaw, watch } from "vue";
 import { useStore } from "vuex";
@@ -138,6 +140,7 @@ const ResearchVariableFindings=defineAsyncComponent(()=>import("@/components/ai/
 const props = defineProps({ features: { type: Array, default: () => [] }, active: { type: Boolean, default: true } });
 const store=useStore(),roles=computed(()=>store.getters['user/permissions']||[]),allowed=computed(()=>props.active&&typeof store.state.user.accessToken==='string'&&store.state.user.accessToken.trim().length>0&&typeof store.state.user.username==='string'&&store.state.user.username.trim().length>0&&Array.isArray(roles.value)&&roles.value.every(role=>typeof role==='string')&&roles.value.includes('super_admin'));
 const auth=()=>supportCanonical([props.active,store.state.user.accessToken,store.state.user.username,roles.value]);
+const traceFailure=computed(()=>detail.value?.error_message?aiError(detail.value):null);
 const states = { queued: "排队中", running: "生成中", succeeded: "待业务复核", failed: "失败", cancelled: "已取消" };
 const outcomes = { accepted: "采纳", rejected: "驳回", modified: "修改后采纳" };
 const rows = ref([]), loading = ref(false), page = ref(1), total = ref(0), filters = ref({ feature_key: "", status: "", outcome: "", requested_by: undefined, patient_id: undefined, department_id: undefined, surgery_pool_id:'',surgery_scenario_id:'',supply_item_kind:'',supply_item_id:undefined,supply_series_id:'',inventory_item_kind:'',inventory_item_id:undefined,inventory_scenario_id:'',coding_case_id:'',charge_case_id:'',document_original_id:'',satisfaction_case_id:'',drug_label_source_binding_id:'',document_change_scope_id:'',operations_case_id:'',rca_evidence_case_id:'',research_variable_batch_id:'' });

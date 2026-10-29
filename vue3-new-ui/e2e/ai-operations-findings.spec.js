@@ -12,3 +12,19 @@ test('closing citation while real digest is pending cannot reopen its private te
 for(const status of [403,409])test('current Source '+status+' on raw reread clears old draft and all raw text',async({page})=>{const s=await installOperationsTaskUI(page);await openOperationsTask(page,harness,{role:'super_admin',auditOnly:true});await ready(page);s.deny=status;await page.getByRole('button',{name:'查看任务技术详情',exact:true}).click();await expect(page.getByRole('heading',{name:'待人工核实的模型草稿'})).toHaveCount(0);await expect(page.getByLabel('input_json',{exact:true})).toHaveCount(0);await expect(page.getByRole('region',{name:'完整运维材料任务核对与草稿'}).getByRole('alert')).toBeVisible();});
 test('tampered result or wrong Case binding cannot become a ready result',async({page})=>{const s=await installOperationsTaskUI(page);s.tamper=({path,value})=>{if(path.endsWith('/parts/result')){value.observations[0].evidence[0].quote+='modified';return value;}};await openOperationsTask(page,harness);await expect(page.getByRole('alert')).toHaveText('完整材料、原始Prompt、实际用量或引用无法核对');await expect(page.getByRole('heading',{name:'待人工核实的模型草稿'})).toHaveCount(0);});
 test('ordinary cannot turn an explicit audit-only request into a Trace read',async({page})=>{const s=await installOperationsTaskUI(page);await openOperationsTask(page,harness,{role:'admin',auditOnly:true});await page.waitForTimeout(100);expect(s.seen).toEqual([]);await expect(page.getByRole('heading',{name:'待人工核实的模型草稿'})).toHaveCount(0);});
+
+
+test('actual failed operation task explains its saved cause and refreshes only the same task',async({page})=>{
+ const packet=require('./fixtures/operations-support-packets.cjs').loadOperationsPackets('task-lifecycle-v5');
+ const metadataRow=packet.rows.find(r=>r.stage==='actual_provider_503_failed'&&r.method==='GET'&&r.status===200&&/tasks\/[^/]+$/.test(r.path));
+ const metadata=packet.data(metadataRow),seen=[];
+ await page.route('**/api/**',async route=>{const q=route.request(),path=new URL(q.url()).pathname;seen.push([q.method(),path]);const stage=path.includes('/tasks/')?'actual_provider_503_failed':'original_flow';const row=packet.rows.find(r=>r.stage===stage&&r.method===q.method()&&r.path===path&&r.status===200);if(!row)throw Error('Unexpected actual failed task '+path);await route.fulfill({status:200,contentType:'application/json',body:row.body,headers:row.parts_wire?{'X-AI-Parts-Wire':row.parts_wire}:{}});});
+ await page.goto(harness.origin);
+ await page.evaluate(metadata=>{const p=window.__operationsProbe;p.scope.references={operations_case_id:metadata.binding.operations_case_id,objective:metadata.binding.objective};p.scope.runId=metadata.run_id;},metadata);
+ await expect(page.getByLabel('运维任务状态')).toContainText('生成失败');
+ await expect(page.getByRole('alert')).toHaveText(metadata.error_message);
+ await page.getByRole('button',{name:'重新核对当前任务',exact:true}).click();
+ await expect(page.getByLabel('运维任务状态')).toContainText('生成失败');
+ await expect(page.getByRole('heading',{name:'待人工核实的模型草稿',exact:true})).toHaveCount(0);
+ expect(seen.every(row=>row[0]==='GET')).toBe(true);
+});

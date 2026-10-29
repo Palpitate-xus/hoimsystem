@@ -28,7 +28,9 @@ const resolve = (dir) => path.join(__dirname, dir);
 // 定义一个模式变量，避免冲突
 const mode = process.argv[2] === "build" ? "production" : "development";
 // Production styles load as CSS assets; development keeps live style updates.
-const styleLoader = mode === "production" ? CssExtractRspackPlugin.loader : "style-loader";
+const styleLoader = mode === "production"
+  ? { loader: CssExtractRspackPlugin.loader, options: { publicPath: "../" } }
+  : "style-loader";
 
 /**
  * @type {Configuration}

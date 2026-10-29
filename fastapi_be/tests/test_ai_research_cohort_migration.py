@@ -27,7 +27,7 @@ def test_frozen_standalone_migration_up_down_up_preserves_all_existing_ddl_and_r
     old = [t for name, t in Base.metadata.tables.items() if name not in new]
     Base.metadata.create_all(engine, tables=old)
     with engine.begin() as conn:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987654,'synthetic-research','admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=987654, username='synthetic-research', user_role='admin'))
         conn.execute(text("INSERT INTO hoimsystem_patient(patient_id,name) VALUES(987654,'隔离合成有限研究成员')"))
         before = conn.execute(text("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")).all()
         for action in ("upgrade", "downgrade", "upgrade"):

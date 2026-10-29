@@ -41,7 +41,7 @@ def test_up_down_up_preserves_every_old_ddl_row_and_matches_actual_orm_schema():
     Base.metadata.create_all(engines[0], tables=old)
     Base.metadata.create_all(engines[1])
     with engines[0].begin() as conn, engines[1].connect() as expected:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987651,'synthetic-variable','admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=987651, username='synthetic-variable', user_role='admin'))
         conn.execute(text("INSERT INTO hoimsystem_patient(patient_id,name) VALUES(987651,'隔离合成变量基础')"))
         before = conn.execute(text("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")).all()
         for action in ("upgrade", "downgrade", "upgrade"):

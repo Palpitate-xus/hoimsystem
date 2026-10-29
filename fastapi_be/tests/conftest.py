@@ -284,10 +284,20 @@ def settle_prescription_charges(prescription_id) -> None:
 
 
 @pytest.fixture
-def auth_headers():
+def auth_headers(db_session):
+    """Sign the current fixture identity without opening a second transaction.
+
+    StaticPool shares one SQLite connection. Closing a separate signing Session
+    would roll back a caller's uncommitted source/gate/provider fixture rows.
+    Production login likewise passes its already authenticated User directly.
+    """
+    from types import SimpleNamespace
+
     from app.routers.user import create_access_token
 
     def _auth_headers(username: str) -> dict[str, str]:
-        return {"accesstoken": create_access_token(username)}
+        user = db_session.query(User).filter(User.username == username).first()
+        identity = user if user is not None else SimpleNamespace(username=username, user_id=0, auth_subject="")
+        return {"accesstoken": create_access_token(username, user=identity)}
 
     return _auth_headers

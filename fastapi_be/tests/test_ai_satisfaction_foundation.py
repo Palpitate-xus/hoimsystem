@@ -40,7 +40,7 @@ def test_additive_up_down_up_preserves_all_old_rows_ddl_and_matches_models(tmp_p
     Base.metadata.create_all(engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in tables])
     names = set(inspect(engine).get_table_names())
     with engine.begin() as conn:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(90701,'synthetic-review','super_admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=90701, username='synthetic-review', user_role='super_admin'))
         conn.execute(text("INSERT INTO hoimsystem_review(review_id,score,comment) VALUES(90702,-2,'未伪造成有效满意度')"))
         old = snapshot(conn, names)
     for action in ("upgrade", "downgrade", "upgrade"):

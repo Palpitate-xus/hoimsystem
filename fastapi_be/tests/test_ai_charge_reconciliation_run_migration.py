@@ -37,7 +37,7 @@ def test_actual_artifact_upgrade_downgrade_upgrade_preserves_all_existing_ddl_an
     Base.metadata.create_all(engine, tables=[t for t in Base.metadata.sorted_tables if t.name != table.name])
     names = set(inspect(engine).get_table_names())
     with engine.begin() as connection:
-        connection.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(90691,'charge_artifact_seed','super_admin')"))
+        connection.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=90691, username='charge_artifact_seed', user_role='super_admin'))
         connection.execute(text("INSERT INTO hoimsystem_patient(patient_id,name) VALUES(90692,'原有合成收费患者🙂')"))
         original = snapshot(connection, names)
     for action in ("upgrade", "downgrade", "upgrade"):

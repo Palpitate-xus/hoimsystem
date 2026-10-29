@@ -46,7 +46,7 @@ def test_actual_frozen_migration_up_down_up_preserves_every_preceding_ddl_and_ro
     old = [table for name, table in Base.metadata.tables.items() if name not in new]
     Base.metadata.create_all(engine, tables=old)
     with engine.begin() as conn:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987653,'synthetic-deid-task','admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=987653, username='synthetic-deid-task', user_role='admin'))
         conn.execute(text("INSERT INTO hoimsystem_patient(patient_id,name) VALUES(987653,'合成迁移原行😀')"))
         before_ddl = conn.execute(text("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")).all()
         before_rows = {table.name: conn.execute(table.select()).all() for table in old}

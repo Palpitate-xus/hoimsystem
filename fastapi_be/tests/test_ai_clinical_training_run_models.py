@@ -174,7 +174,7 @@ def test_actual_incremental_run_up_down_up_preserves_all_prior_registered_tables
             table.to_metadata(old)
     old.create_all(engine)
     with engine.begin() as connection:
-        connection.execute(text("INSERT INTO hoimsystem_users (user_id,username,password,user_role) VALUES (72001,'synthetic-training-run-migration','synthetic-only','super_admin')"))
+        connection.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=72001, username='synthetic-training-run-migration', password='synthetic-only', user_role='super_admin'))
         connection.execute(text("INSERT INTO hoimsystem_ai_training_write_gate (gate_id,revision) VALUES (1,1)"))
 
     def proof():

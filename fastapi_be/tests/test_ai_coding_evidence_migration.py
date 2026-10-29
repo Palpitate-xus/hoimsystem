@@ -32,7 +32,7 @@ def test_actual_additive_up_down_up_preserves_every_legacy_ddl_and_row(tmp_path)
     Base.metadata.create_all(engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in TABLES])
     names = set(inspect(engine).get_table_names())
     with engine.begin() as c:
-        c.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(90671,'synthetic-inventory','pharmacist')"))
+        c.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=90671, username='synthetic-inventory', user_role='pharmacist'))
         c.execute(text("INSERT INTO hoimsystem_pharmaceutical(pharmaceutical_id,name,stock,status) VALUES(90672,'原目录与批次可不符',19,0)"))
         c.execute(text("INSERT INTO hoimsystem_consumable(consumable_id,name,stock,unit,status) VALUES(90673,'原无批次耗材',0,'套',0)"))
         original = snapshot(c, names)

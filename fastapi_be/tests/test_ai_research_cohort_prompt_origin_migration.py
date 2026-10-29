@@ -32,7 +32,7 @@ def test_full_research_artifact_incremental_chain_up_down_up_preserves_prior_ddl
     new = {model.__tablename__ for model in RESEARCH_COHORT_RUN_MODELS}
     Base.metadata.create_all(engine, tables=[table for name, table in Base.metadata.tables.items() if name not in new])
     with engine.begin() as conn:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987652,'synthetic-prompt-origin','admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=987652, username='synthetic-prompt-origin', user_role='admin'))
         before = conn.execute(text("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")).all()
         for phase in ("upgrade", "downgrade", "upgrade"):
             steps = ((original, "upgrade"), (origin, "upgrade")) if phase == "upgrade" else ((origin, "downgrade"), (original, "downgrade"))

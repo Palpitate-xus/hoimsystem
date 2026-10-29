@@ -48,7 +48,7 @@ def test_actual_incremental_up_down_up_preserves_preexisting_ddl_rows_and_matche
     with engine.begin() as conn:
         old_migration.op = Operations(MigrationContext.configure(conn))
         old_migration.upgrade()
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987652,'synthetic-deid-dispatch','admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=987652, username='synthetic-deid-dispatch', user_role='admin'))
         conn.execute(text("INSERT INTO hoimsystem_patient(patient_id,name) VALUES(987652,'合成增量迁移原行🧪')"))
 
         def ddl():

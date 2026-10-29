@@ -211,7 +211,7 @@ def test_incremental_frozen_migration_up_down_up_preserves_all_prior_source_and_
     old = [table for name, table in Base.metadata.tables.items() if name not in new]
     Base.metadata.create_all(engine, tables=old)
     with engine.begin() as conn:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(987653,'synthetic-research-artifact','admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=987653, username='synthetic-research-artifact', user_role='admin'))
         before = conn.execute(text("SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%' ORDER BY type,name")).all()
         for action in ("upgrade", "downgrade", "upgrade"):
             migration.op = Operations(MigrationContext.configure(conn))

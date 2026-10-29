@@ -40,7 +40,7 @@ def test_additive_real_up_down_up_preserves_all_existing_table_definitions_and_s
     Base.metadata.create_all(engine, tables=[t for t in Base.metadata.sorted_tables if t.name not in TABLES])
     old_names = set(inspect(engine).get_table_names())
     with engine.begin() as c:
-        c.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(90661,'old-inventory-user','pharmacist')"))
+        c.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=90661, username='old-inventory-user', user_role='pharmacist'))
         c.execute(text("INSERT INTO hoimsystem_pharmaceutical(pharmaceutical_id,name,stock,price,status) VALUES(90662,'原药品',73,12.34,0)"))
         c.execute(text("INSERT INTO hoimsystem_consumable(consumable_id,name,stock,unit,status) VALUES(90663,'原耗材',19,'套',0)"))
         original = snapshot(c, old_names)

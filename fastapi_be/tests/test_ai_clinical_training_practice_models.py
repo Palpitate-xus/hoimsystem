@@ -88,7 +88,7 @@ def test_actual_submission_migration_up_down_up_preserves_all_registered_old_ddl
             table.to_metadata(old)
     old.create_all(engine)
     with engine.begin() as connection:
-        connection.execute(text("INSERT INTO hoimsystem_users (user_id,username,password,user_role) VALUES (71001,'synthetic-training-practice-migration','synthetic-only','super_admin')"))
+        connection.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=71001, username='synthetic-training-practice-migration', password='synthetic-only', user_role='super_admin'))
         connection.execute(text("INSERT INTO hoimsystem_ai_training_write_gate (gate_id,revision) VALUES (1,1)"))
 
     def proof():

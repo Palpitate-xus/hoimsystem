@@ -29,7 +29,7 @@ def test_actual_single_additive_up_down_up_preserves_all_previous_ddl_and_rows(t
     Base.metadata.create_all(engine, tables=[row for row in Base.metadata.sorted_tables if row.name != table.name])
     names = set(inspect(engine).get_table_names())
     with engine.begin() as conn:
-        conn.execute(text("INSERT INTO hoimsystem_users(user_id,username,user_role) VALUES(90771,'synthetic-satisfaction-artifact','super_admin')"))
+        conn.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=90771, username='synthetic-satisfaction-artifact', user_role='super_admin'))
         conn.execute(text("INSERT INTO hoimsystem_review(review_id,score,comment) VALUES(90772,-1,'原异常评分及原评论未被任务artifact改写')"))
         prior = snapshot(conn, names)
     for action in ("upgrade", "downgrade", "upgrade"):

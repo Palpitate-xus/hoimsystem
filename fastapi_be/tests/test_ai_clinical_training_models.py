@@ -116,7 +116,7 @@ def test_actual_additive_sqlite_migration_up_down_up_keeps_all_old_ddl_and_rows(
             table.to_metadata(old)
     old.create_all(engine)
     with engine.begin() as connection:
-        connection.execute(text("INSERT INTO hoimsystem_users (user_id,username,password,user_role) VALUES (70001,'synthetic-training-migration','synthetic-only','super_admin')"))
+        connection.execute(Base.metadata.tables["hoimsystem_users"].insert().values(user_id=70001, username='synthetic-training-migration', password='synthetic-only', user_role='super_admin'))
     def proof():
         with engine.connect() as connection:
             return {name: (connection.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name=:name"), {"name": name}).scalar_one(), connection.execute(text('SELECT * FROM "' + name + '"')).all()) for name in sorted(old.tables)}

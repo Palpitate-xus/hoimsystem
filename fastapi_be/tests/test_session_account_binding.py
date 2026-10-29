@@ -173,6 +173,17 @@ def test_username_only_test_helper_signs_real_binding_and_unknown_user_remains_i
     assert denied.value.status_code == 401
 
 
+def test_auth_headers_preserves_uncommitted_source_fixture_transaction(db_session, auth_headers):
+    user = User(username="pending-" + uuid.uuid4().hex[:10], user_role="patient")
+    db_session.add(user)
+    db_session.flush()
+    identifier = user.user_id
+    token = auth_headers(user.username)["accesstoken"]
+    assert db_session.query(User).filter(User.user_id == identifier).count() == 1
+    assert resolve_access_token(token, db_session).user_id == identifier
+    db_session.rollback()
+
+
 def _migration():
     path = Path(__file__).parents[1] / "alembic/versions/20261029_session_account_binding.py"
     spec = importlib.util.spec_from_file_location("session_binding_migration", path)

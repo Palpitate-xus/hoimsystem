@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -171,3 +172,15 @@ def test_command_exit_and_saved_summary_follow_real_report_coverage_even_when_sc
     saved = json.loads((output / "summary.json").read_text())
     assert saved["status"] == ("passed" if outcome == "clean" else "failed")
     assert saved["python_locks"] == 1
+
+
+def test_upgrade_without_explicit_write_mode_cannot_modify_locks(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["lock_dependencies.py", "--upgrade"])
+
+    def unexpected_write(**kwargs):
+        pytest.fail("check mode must not write dependency locks")
+
+    monkeypatch.setattr(locks, "update", unexpected_write)
+    with pytest.raises(SystemExit) as caught:
+        locks.main()
+    assert caught.value.code == 2

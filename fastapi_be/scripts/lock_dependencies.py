@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,10 +23,12 @@ def inputs():
     return sorted(path for path in ROOT.glob("requirements*.txt") if path.name != "requirements-model-constraints.txt")
 
 
-def compile_lock(path):
+def compile_lock(path, *, upgrade=False):
     destination = path.with_suffix(".lock")
     command = ["uv", "pip", "compile", path.name, "--python-version", "3.12", "--python-platform", "x86_64-unknown-linux-gnu", "--generate-hashes", "--no-annotate", "--no-header", "--output-file", destination.name]
     command += ["--default-index", "https://pypi.org/simple"]
+    if upgrade:
+        command.append("--upgrade")
     if path.name not in {"requirements.txt", "requirements-build.txt"}:
         command += ["--constraints", "requirements.lock"]
     if path.name in MODEL_INPUTS:
@@ -43,11 +46,11 @@ def compile_lock(path):
     print(f"Locked {path.name}", flush=True)
 
 
-def update():
+def update(*, upgrade=False):
     if not shutil.which("uv"):
         raise SystemExit("Install uv before regenerating the lock files.")
-    compile_lock(ROOT / "requirements-build.txt")
-    compile_lock(ROOT / "requirements.txt")
+    compile_lock(ROOT / "requirements-build.txt", upgrade=upgrade)
+    compile_lock(ROOT / "requirements.txt", upgrade=upgrade)
     groups = {}
     for path in inputs():
         if path.name in {"requirements-build.txt", "requirements.txt"}:
@@ -57,7 +60,7 @@ def update():
     # Identical rule-service inputs share one resolution; each Dockerfile still
     # consumes the lock with its own service name.
     with ThreadPoolExecutor(max_workers=3) as pool:
-        list(pool.map(compile_lock, [group[0] for group in groups.values()]))
+        list(pool.map(partial(compile_lock, upgrade=upgrade), [group[0] for group in groups.values()]))
     for group in groups.values():
         for path in group[1:]:
             shutil.copyfile(group[0].with_suffix(".lock"), path.with_suffix(".lock"))
@@ -84,9 +87,12 @@ def check():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--update", action="store_true", help="Resolve versions and regenerate hashes")
+    parser.add_argument("--upgrade", action="store_true", help="With --update, select the latest versions allowed by the requirement constraints")
     args = parser.parse_args()
+    if args.upgrade and not args.update:
+        parser.error("--upgrade requires --update")
     if args.update:
-        update()
+        update(upgrade=args.upgrade)
     check()
 
 

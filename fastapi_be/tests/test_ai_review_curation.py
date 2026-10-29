@@ -321,7 +321,7 @@ def test_changed_or_withdrawn_text_is_removed_from_future_model_context(mutation
     bundle = feedback_context(db_session, seed_data)
     assert bundle.data["reviewed_feedback_excerpts"]["items"] == []
     assert all("已审核脱敏评价片段" != evidence["title"] for evidence in bundle.evidence)
-    assert any("不能生成投诉主题" in text for text in bundle.data["missing_data"])
+    assert any("当前范围暂无已审核的评价摘录" in text for text in bundle.data["missing_data"])
 
 
 def configure_feedback(db_session, seed_data):

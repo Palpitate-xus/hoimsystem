@@ -1,5 +1,5 @@
 # 第一阶段：构建前端
-FROM public.ecr.aws/docker/library/node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS builder
+FROM public.ecr.aws/docker/library/node:26-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 AS builder
 
 WORKDIR /app
 ARG VUE_APP_LOCAL_PREVIEW=false

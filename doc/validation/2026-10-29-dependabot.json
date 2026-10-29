@@ -8,8 +8,39 @@
       "moderate": 3
     },
     "details_available": false,
-    "status": "awaiting_package_manifest_and_ghsa_details",
-    "authenticated_alert_access": false
+    "status": "awaiting_open_alert_details",
+    "authenticated_alert_access": false,
+    "provided_closed_fixed_alert_numbers": [
+      23,
+      41,
+      56,
+      15,
+      14,
+      13,
+      55,
+      49,
+      72,
+      8,
+      6,
+      73,
+      83,
+      82,
+      74,
+      70,
+      66,
+      39,
+      38,
+      22,
+      50,
+      76,
+      59,
+      63
+    ],
+    "provided_truncated_alert_numbers": [
+      61
+    ],
+    "provided_open_alert_numbers": [],
+    "user_evidence_reviewed_at": "2026-10-29T07:23:22.498126+00:00"
   },
   "compared_origin": "5d7bc95a99c177545f302abeb78eef0373546aec",
   "compared_local": "619268fbcca3dff54afdb2efdb5f4f2e34c3075c",
@@ -210,5 +241,37 @@
     "fastapi_be/scripts/audit_dependencies.py": "a2df77474ea6b7ecb9efc8912f042e938f534923f4d392eb08020cd9554a00e0",
     "fastapi_be/scripts/lock_dependencies.py": "dd51bf6a5d2b5c33456b141fd9572c405c2c68a05752baca4b89687728e0caa0",
     "fastapi_be/tests/test_dependency_audit.py": "f4816126f530f0d783c78eaed77c0decddd1ab1efe0c7aadd460cdf2dcaf56b4"
-  }
+  },
+  "provided_alert_package_versions": {
+    "@babel/plugin-transform-modules-systemjs": [
+      "7.29.8"
+    ],
+    "axios": [
+      "1.21.0"
+    ],
+    "brace-expansion": [
+      "5.0.12"
+    ],
+    "fast-uri": [
+      "3.1.9"
+    ],
+    "follow-redirects": [
+      "1.16.1"
+    ],
+    "form-data": [
+      "4.0.6"
+    ],
+    "immutable": [
+      "5.1.9"
+    ],
+    "minimatch": [
+      "10.2.5"
+    ],
+    "mockjs": [],
+    "nanoid": [
+      "3.3.18"
+    ],
+    "serialize-javascript": []
+  },
+  "current_pnpm_lock_present": false
 }

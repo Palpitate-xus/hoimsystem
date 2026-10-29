@@ -2,6 +2,23 @@
 
 收到的 GitHub 推送输出报告默认分支存在 12 条漏洞：9 条 high、3 条 moderate。本机没有读取仓库安全告警的认证，尚待取得包名、依赖文件路径和 GHSA/CVE 明细逐条定位。
 
+随后提供的列表中，24 条完整条目均为 `Closed · Fixed`，未包含 Open 状态；最后的 #61 被截断，无法读取其状态。已修复条目编号为 #23、#41、#56、#15、#14、#13、#55、#49、#72、#8、#6、#73、#83、#82、#74、#70、#66、#39、#38、#22、#50、#76、#59、#63。待核对的范围是页面 `Open` 或 `is:open` 筛选下的记录。[GitHub 状态筛选说明](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-alerts-filters)。
+
+当前锁文件对应版本如下；旧 `pnpm-lock.yaml` 已删除。
+
+| 包 | 当前版本 |
+| --- | --- |
+| axios | 1.21.0 |
+| follow-redirects | 1.16.1 |
+| form-data | 4.0.6 |
+| immutable | 5.1.9 |
+| minimatch | 10.2.5 |
+| nanoid | 3.3.18 |
+| @babel/plugin-transform-modules-systemjs | 7.29.8 |
+| brace-expansion | 5.0.12 |
+| fast-uri | 3.1.9 |
+| mockjs、serialize-javascript | 当前锁中均不存在 |
+
 ## 对照结果
 
 Git 远端默认分支为 `master`，检查时指向 `5d7bc95a99c177545f302abeb78eef0373546aec`。与本轮开始的本地 `619268fbcca3dff54afdb2efdb5f4f2e34c3075c` 比较，19 份 Python requirements 输入、18 份哈希锁、锁清单及前端依赖清单/锁文件均相同。既有依赖安全更新已包含在远端历史中。

@@ -24,8 +24,8 @@ const AUDITED_DYNAMIC = /* AUDITED_DYNAMIC */ {
   "src/layouts/components/VabTabs/index.vue|template|getTabIcon(item)": "5fcab77e94236dd674195100491ac3e84dceba48be59f0942723b7a21229c9ef",
   "src/plugins/index.js|render|iconComponent": "20f6f3e70c4a25a596334482d25ac1124a2f02a4e2ff084042139f0950d23b99",
   "src/views/index/index.vue|template|item.icon": "951c70548668a81877a8961dd5acb1784c881a4106c2c25b365c6bbe4c1d29a6",
-  "src/views/vab/campaign.vue|template|getCampaignIcon(row.type)": "c6a7def2e64880dffef0ae3def342b0dd31a855946553f313b171d579b646647",
-  "src/views/vab/campaign.vue|template|getCampaignIcon(detailCampaign.type)": "c6a7def2e64880dffef0ae3def342b0dd31a855946553f313b171d579b646647",
+  "src/views/vab/campaign.vue|template|getCampaignIcon(row.type)": "aee9877eadedd00e41e503c9273a68cafe2ed164bd0ee2dd2f3c2ddbb896b007",
+  "src/views/vab/campaign.vue|template|getCampaignIcon(detailCampaign.type)": "aee9877eadedd00e41e503c9273a68cafe2ed164bd0ee2dd2f3c2ddbb896b007",
   "src/views/vab/knowledge.vue|template|faToElIcon(data.icon)": "a9dbe73d7f74565e823c1f47c69cd07e78f1dd8113fba0d67a308bab2b9c3987"
 };
 const AUDITED_HELPERS = /* AUDITED_HELPERS */ {

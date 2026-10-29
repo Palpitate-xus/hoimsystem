@@ -11,6 +11,7 @@ import {
   tokenName,
 } from "@/config";
 import store from "@/store";
+import eventBus from "@/utils/eventBus";
 import qs from "qs";
 import router from "@/router";
 import { isArray } from "@/utils/validate";
@@ -37,6 +38,10 @@ const handleCode = (code, msg) => {
     case noPermissionCode:
       store.dispatch("user/resetAccessToken");
       router.push({ path: "/login" }).catch(() => {});
+      break;
+    case 403:
+      eventBus.emit("access-denied");
+      ElMessage.error(msg || "当前账号没有此项操作权限");
       break;
     default:
       ElMessage.error(msg || `后端接口${code}异常`);

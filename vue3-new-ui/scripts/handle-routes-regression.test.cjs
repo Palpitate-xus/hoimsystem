@@ -160,3 +160,13 @@ test('original role filtering remains the intersection of real ancestor/child me
   assert.ok(!doctor.includes('//ai/manage'));
 });
 
+
+test('effective policy removes denied route names and empty parent menus without mutating defaults', () => {
+  const { filterAsyncRoutes } = implementation();
+  const routes = [{ name: 'parent', path: '/clinical', meta: { permissions: ['doctor'] }, children: [{ name: 'read', path: 'read' }, { name: 'write', path: 'write' }] }];
+  const initial = JSON.stringify(routes);
+  assert.deepEqual(plain(filterAsyncRoutes(routes, ['doctor'], ['write']))[0].children.map(row => row.name), ['read']);
+  assert.deepEqual(plain(filterAsyncRoutes(routes, ['doctor'], ['read', 'write'])), []);
+  assert.deepEqual(plain(filterAsyncRoutes(routes, ['doctor'], ['parent'])), []);
+  assert.equal(JSON.stringify(routes), initial);
+});

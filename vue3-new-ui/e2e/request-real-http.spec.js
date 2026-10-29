@@ -271,3 +271,19 @@ test("non-HTTP targets and URL userinfo are rejected before creating a native re
   expect(harness.requests).toEqual([]);
   expect(harness.sinkRequests).toEqual([]);
 });
+
+test('real HTTP 403 preserves authentication and rejects once without retrying or replaying the denied write', async ({ page }) => {
+  const result = await page.evaluate(async () => {
+    const { request, effects, state } = window.__requestRegression;
+    const statuses = [];
+    for (const method of ['get', 'post']) {
+      try { await request({ url: '/always-error-forbidden', method, params: { status: 403 }, data: { patient_id: 1 } }); }
+      catch (error) { statuses.push(error.response?.status); }
+    }
+    const echo = await request({ url: '/echo' });
+    return { statuses, dispatches: effects.dispatches, routes: effects.routes, token: state.user.accessToken, nextToken: echo.data.token };
+  });
+  expect(result).toEqual({ statuses: [403, 403], dispatches: [], routes: [], token, nextToken: token });
+  expect(harness.count('GET', '/api/always-error-forbidden')).toBe(1);
+  expect(harness.count('POST', '/api/always-error-forbidden')).toBe(1);
+});

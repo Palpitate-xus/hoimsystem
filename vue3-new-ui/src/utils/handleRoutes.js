@@ -79,7 +79,7 @@ function hasPermission(permissions, route) {
  * @param permissions
  * @returns {[]}
  */
-export function filterAsyncRoutes(routes, permissions) {
+export function filterAsyncRoutes(routes, permissions, deniedNames = []) {
   // 处理无效参数
   if (!routes || !Array.isArray(routes)) {
     return []
@@ -91,12 +91,13 @@ export function filterAsyncRoutes(routes, permissions) {
 
   const finallyRoutes = []
   routes.forEach((route) => {
-    if (!route) return
+    if (!route || deniedNames.includes(route.name)) return
 
     const item = { ...route }
     if (hasPermission(permissions, item)) {
       if (item.children && Array.isArray(item.children)) {
-        item.children = filterAsyncRoutes(item.children, permissions)
+        item.children = filterAsyncRoutes(item.children, permissions, deniedNames)
+        if (!item.children.length) return
       }
       finallyRoutes.push(item)
     }

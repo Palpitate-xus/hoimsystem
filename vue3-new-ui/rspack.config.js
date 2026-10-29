@@ -302,6 +302,18 @@ module.exports = {
           reuseExistingChunk: true,
           priority: 17,
         },
+        // These exact inert records occurred in multiple production chunks.
+        // Share the existing module bytes; keep their decoding and source locks.
+        publicRecordsShared: {
+          name: "public-records-shared",
+          test: /[\\/]src[\\/]api[\\/](?:publicInterface(?:Extension)?TextPool|ai[\\/](?:infectionClusterFixed|clinicalTraining(?:Task|Source)Policy|operationsSupportFixed))\.json$/,
+          chunks: "async",
+          minChunks: 2,
+          minSize: 0,
+          minSizeReduction: 0,
+          reuseExistingChunk: true,
+          priority: 17,
+        },
         schemaDataDecoderShared: {
           name: "schema-data-decoder-shared",
           test: /[\\/]src[\\/]api[\\/](?:schemaDataCodec|staticDeflate|schemaDataDocument|schemaDataHash|publicInterfaceText|publicInterfaceExtensionText)\.cjs$/,

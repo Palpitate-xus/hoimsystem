@@ -372,6 +372,8 @@
       v-model="detailDialogVisible" 
       title="活动详情"
       width="1000px"
+      @opened="initCharts"
+      @closed="disposeCharts"
     >
       <el-row :gutter="20">
         <el-col :span="16">
@@ -655,14 +657,8 @@ export default {
       return this.campaigns.filter(campaign => campaign.status === "ended");
     }
   },
-  mounted() {
-    // 初始化图表
-    this.initCharts();
-  },
   beforeUnmount() {
-    // 销毁图表实例
-    if (this.conversionChart) this.conversionChart.dispose();
-    if (this.salesChart) this.salesChart.dispose();
+    this.disposeCharts();
   },
   methods: {
     handleTabChange(tab) {
@@ -886,7 +882,14 @@ export default {
         this.availableProducts = [];
       }
     },
+    disposeCharts() {
+      this.conversionChart?.dispose();
+      this.salesChart?.dispose();
+      this.conversionChart = this.salesChart = null;
+    },
     initCharts() {
+      if (!this.$refs.conversionChart || !this.$refs.salesChart) return;
+      this.disposeCharts();
       // 转化率图表
       this.conversionChart = echarts.init(this.$refs.conversionChart);
       this.conversionChart.setOption(this.getConversionChartOption());

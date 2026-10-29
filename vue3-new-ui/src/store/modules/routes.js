@@ -30,11 +30,13 @@ const actions = {
    * @param {*} permissions
    * @returns
    */
-  async setRoutes({ commit }, permissions) {
+  async setRoutes({ commit, rootGetters }, permissions) {
     //根据permissions做路由筛选
-    let accessedRoutes = filterAsyncRoutes(asyncRoutes, permissions)
+    const registeredRoutes = filterAsyncRoutes(asyncRoutes, permissions)
+    const denied = rootGetters['user/authorization']?.denied_route_names || []
+    const accessedRoutes = filterAsyncRoutes(registeredRoutes, permissions, denied)
     commit('setRoutes', accessedRoutes)
-    return accessedRoutes
+    return registeredRoutes
   },
   /**
   
@@ -42,7 +44,7 @@ const actions = {
    * @param {*} { commit }
    * @returns
    */
-  async setAllRoutes({ commit }) {
+  async setAllRoutes({ commit, rootGetters }) {
     try {
       let { data } = await getRouterList()
       if (!data || !Array.isArray(data)) {
@@ -51,7 +53,7 @@ const actions = {
       }
 
       const accessedRoutes = convertRouter(data)
-      commit('setAllRoutes', accessedRoutes)
+      commit('setAllRoutes', filterAsyncRoutes(accessedRoutes, rootGetters['user/permissions'], rootGetters['user/authorization']?.denied_route_names || []))
       return accessedRoutes
     } catch (error) {
       console.error('获取路由列表失败', error)

@@ -77,6 +77,8 @@ npm run check:bundle
 - 变量和函数使用 camelCase
 - 优先使用 `<script setup>` 语法
 
+路由 `meta.icon` 使用 Element Plus 的 PascalCase 名称，并在 `src/utils/icons.js` 中显式导入。动态配置通过 `resolveIcon`（兼容入口 `faToElIcon`）获取组件；模板和 `icon`、`prefix-icon` 属性绑定导入的组件对象。顶部图标操作使用带可访问名称的按钮。添加菜单后运行 `tests/iconResolution.test.cjs` 与 `e2e/icon-navigation.spec.js`，检查展开、收起和横向布局。
+
 ### 2.3 页面与提示文案
 
 页面优先展示筛选条件、业务数据和操作。菜单、面包屑及标签已标明模块时，省去重复的介绍横幅。

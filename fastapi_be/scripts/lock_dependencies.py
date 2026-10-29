@@ -73,6 +73,8 @@ def check():
     actual_inputs = {path.name: sha(path) for path in [*inputs(), ROOT / "requirements-model-constraints.txt"]}
     if actual_inputs != manifest["inputs"]:
         raise SystemExit("Requirement inputs changed; regenerate and audit the dependency locks.")
+    if set(manifest["locks"]) != {path.with_suffix(".lock").name for path in inputs()}:
+        raise SystemExit("Dependency lock manifest must cover every requirement environment exactly once.")
     changed = [name for name, digest in manifest["locks"].items() if not (ROOT / name).is_file() or sha(ROOT / name) != digest]
     if changed:
         raise SystemExit("Dependency lock content changed: " + ", ".join(changed))

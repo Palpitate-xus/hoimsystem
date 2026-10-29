@@ -35,6 +35,7 @@ def bounded_frame(value):
 
 
 def configuration(db, actor, *, preview, exclusive=False):
+    from app.access_control import enforce_feature_permission
     from app.ai.catalog import CATALOG_VERSION, FEATURE_BY_KEY
     from app.ai.governance import provider_feature_issues, validate_endpoint
     from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider
@@ -42,6 +43,7 @@ def configuration(db, actor, *, preview, exclusive=False):
     from app.dependencies import VALID_USER_ROLES
     from app.models import User
 
+    enforce_feature_permission(db, actor, FEATURE, fresh=True)
     if type(preview) is not bool or type(exclusive) is not bool:
         raise HTTPException(422, "培训预览与配置锁标记须为明确布尔值")
     if preview and actor.user_role != "super_admin":

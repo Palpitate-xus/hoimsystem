@@ -47,11 +47,13 @@ def roles_for(raw):
 
 def configuration(db, actor, *, preview, exclusive=False):
     """Current Config -> Provider -> immutable Prompt; never credentials or Source."""
+    from app.access_control import enforce_feature_permission
     from app.ai.catalog import CATALOG_VERSION, FEATURE_BY_KEY
     from app.ai.governance import provider_feature_issues, validate_endpoint
     from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider
     from app.config import settings
 
+    enforce_feature_permission(db, actor, FEATURE, fresh=True)
     if type(preview) is not bool or type(exclusive) is not bool:
         raise HTTPException(422, "运维预览和配置锁标记须为实际布尔值")
     if actor.user_role not in OPERATIONS_SOURCE_ROLES:

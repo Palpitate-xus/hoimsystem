@@ -42,9 +42,12 @@ def current_configuration(db, user, *, preview, require_credentials=False):
     operation and still before any private Task TEXT. A valid config grants no
     such purposes. Config roles intersect the fixed catalog and Source roles.
     """
+    from app.access_control import enforce_feature_permission
+
     if type(preview) is not bool or type(require_credentials) is not bool:
         raise HTTPException(422, "预览与实际凭据检查须明确布尔值")
     actor = lock_research_write(db, user, allowed_roles=VARIABLE_SOURCE_ROLES)
+    enforce_feature_permission(db, actor, FEATURE_KEY, fresh=True)
     spec = FEATURE_BY_KEY[FEATURE_KEY]
     config = current_research_rows(db.query(AIFeatureConfig).filter_by(feature_key=FEATURE_KEY)).one_or_none()
     if config is None or config.provider_id is None:

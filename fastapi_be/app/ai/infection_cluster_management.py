@@ -11,7 +11,10 @@ from app.ai.models import AIFeatureConfig
 
 
 def authorize_feature(db, user):
+    from app.access_control import enforce_feature_permission
+
     actor = profiles._start(db, user, roles=source_input.SOURCE_ROLES)
+    enforce_feature_permission(db, actor, profiles.KEY, fresh=True)
     config = current(db.query(AIFeatureConfig).filter_by(feature_key=profiles.KEY), shared=True).one_or_none()
     if config is not None and actor.user_role not in profiles._roles(config):
         raise HTTPException(403, "当前角色不在78固定角色与实际配置的交集中")

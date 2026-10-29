@@ -43,7 +43,10 @@ from app.models import Doctor, Patient, User
 
 def authorized_feature(db: Session, user: User, key: str) -> tuple[FeatureSpec, AIFeatureConfig | None]:
     """Intersect configured authorization with the fixed capability role boundary."""
+    from app.access_control import enforce_feature_permission
+
     spec = get_spec(key)
+    enforce_feature_permission(db, user, key, fresh=True)
     if spec.number == 78:
         from app.ai.infection_cluster_management import authorize_feature
 
@@ -57,6 +60,9 @@ def authorized_feature(db: Session, user: User, key: str) -> tuple[FeatureSpec, 
 
 def check_configuration(db: Session, user: User, spec: FeatureSpec, config: AIFeatureConfig | None, preview: bool) -> AIProvider:
     """Keep preview, deployment, validation and patient-data authorization distinct."""
+    from app.access_control import enforce_feature_permission
+
+    enforce_feature_permission(db, user, spec.key, fresh=True)
     if preview and user.user_role != "super_admin":
         raise HTTPException(403, "仅超级管理员可预览尚未启用的能力")
     if not config or not config.provider_id:

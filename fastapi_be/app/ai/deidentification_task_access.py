@@ -44,8 +44,10 @@ def is_deidentification_run(db, run):
 
 
 def role_configuration(db, actor):
+    from app.access_control import enforce_feature_permission
     from app.ai.models import AIFeatureConfig
 
+    enforce_feature_permission(db, actor, "deidentification", fresh=True)
     config = current_research_rows(db.query(AIFeatureConfig).filter_by(feature_key="deidentification"), shared=True).one_or_none()
     try:
         roles = json.loads(config.allowed_roles_json) if config is not None else None

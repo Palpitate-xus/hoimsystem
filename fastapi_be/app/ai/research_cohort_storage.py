@@ -49,10 +49,12 @@ def _roles(raw):
 
 
 def _configuration(db, actor, *, preview):
+    from app.access_control import enforce_feature_permission
     from app.ai.catalog import CATALOG_VERSION
     from app.ai.models import AIFeatureConfig, AIPromptVersion, AIProvider
     from app.config import settings
 
+    enforce_feature_permission(db, actor, FEATURE, fresh=True)
     config = current_research_rows(db.query(AIFeatureConfig).filter_by(feature_key=FEATURE), shared=True).one_or_none()
     if config is None:
         raise HTTPException(409, "请先配置科研功能并启用模型。")

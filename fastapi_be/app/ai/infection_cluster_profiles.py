@@ -484,7 +484,10 @@ def configuration(db, user, *, management=False):
 
 def execution_configuration(db, user, *, preview=False):
     """Current local activation only. Caller must independently authorize Source."""
+    from app.access_control import enforce_feature_permission
+
     actor = _start(db, user, roles=source_input.SOURCE_ROLES)
+    enforce_feature_permission(db, actor, KEY, fresh=True)
     config = current(db.query(AIFeatureConfig).filter_by(feature_key=KEY), shared=True).one_or_none()
     selection = current(db.query(AIInfectionLocalSelection).filter_by(feature_key=KEY), shared=True).one_or_none()
     _coupled(db, config, selection)

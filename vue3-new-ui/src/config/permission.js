@@ -18,7 +18,8 @@ async function updateRoutes() {
   (routes || []).forEach(route => router.addRoute(route));
 }
 let refreshing;
-function refreshAccess() {
+function refreshAccess(event) {
+  if (event?.token && event.token !== store.getters['user/accessToken']) return;
   if (!store.getters['user/accessToken'] || !store.getters['user/authorization'] || refreshing) return refreshing;
   const token = store.getters['user/accessToken'];
   refreshing = store.dispatch('user/refreshAuthorization').then(async snapshot => {

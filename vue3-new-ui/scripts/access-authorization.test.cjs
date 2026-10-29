@@ -102,3 +102,9 @@ test('legacy role-only sessions do not start a new authorization transport on a 
   guard.callbacks.get('clinical-event')({ type: 'access.policy_changed' });
   assert.deepEqual(guard.dispatches, []);
 });
+
+test('an access-denied notification from a previous stream token cannot refresh a replacement login', () => {
+  const guard = guardHarness();
+  assert.equal(guard.callbacks.get('access-denied')({ token: 'stale-stream-token', status: 403 }), undefined);
+  assert.deepEqual(guard.dispatches, []);
+});

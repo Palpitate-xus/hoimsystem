@@ -52,7 +52,9 @@ class ClinicalEventStream {
         signal: this.controller.signal,
       });
       if (response.status === 401 || response.status === 403) {
+        if (this.token !== token) return;
         this.stop();
+        eventBus.emit("access-denied", { token, status: response.status, source: "clinical-event-stream" });
         return;
       }
       if (!response.ok || !response.body) throw new Error(`event stream HTTP ${response.status}`);

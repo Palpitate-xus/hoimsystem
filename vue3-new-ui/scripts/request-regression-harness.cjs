@@ -14,10 +14,10 @@ const root = path.resolve(__dirname, "..");
 const digest = bytes => createHash("sha256").update(bytes).digest("hex");
 
 async function bundleHarness(directory, requestSource) {
-  await fs.writeFile(path.join(directory, "effects.js"), `export const effects={messages:[],dispatches:[],routes:[],loadingOpened:0,loadingClosed:0}; export const state={user:{accessToken:""}};`);
+  await fs.writeFile(path.join(directory, "effects.js"), `export const effects={messages:[],dispatches:[],routes:[],accessDenied:[],loadingOpened:0,loadingClosed:0}; export const state={user:{accessToken:""}};`);
   await fs.writeFile(path.join(directory, "store.js"), `import {effects,state} from "./effects"; export default {state,dispatch(name){effects.dispatches.push(name);if(name==="user/resetAccessToken")state.user.accessToken="";return Promise.resolve();}};`);
   await fs.writeFile(path.join(directory, "router.js"), `import {effects} from "./effects"; export default {push(value){effects.routes.push(value);return Promise.resolve();}};`);
-  await fs.writeFile(path.join(directory, "element.js"), `import {effects} from "./effects";export const ElMessage={error(message){effects.messages.push(String(message));}};export const ElLoading={service(){effects.loadingOpened++;return {close(){effects.loadingClosed++;}};}};`);
+  await fs.writeFile(path.join(directory, "element.js"), `import {effects} from "./effects";export const ElNotification=()=>{};export const ElMessage={error(message){effects.messages.push(String(message));}};export const ElLoading={service(){effects.loadingOpened++;return {close(){effects.loadingClosed++;}};}};`);
   const source = name => JSON.stringify(path.join(root, "src", name));
   await fs.writeFile(path.join(directory, "entry.js"), `
 import axios from "axios";
@@ -27,7 +27,10 @@ import * as nursing from ${source("api/nursing.js")};
 import * as imports from ${source("api/dataImportExport.js")};
 import * as config from "@/config";
 import {effects,state} from "./effects";
-window.__requestRegression={request,ai,nursing,imports,config,effects,state,axiosVersion:axios.VERSION,nativeAdapter:axios.getAdapter(request.defaults.adapter).adapterName};
+import {clinicalEventStream} from "@/utils/clinicalEvents";
+import eventBus from "@/utils/eventBus";
+eventBus.on("access-denied",event=>{if(event)effects.accessDenied.push(event)});
+window.__requestRegression={request,ai,nursing,imports,config,effects,state,clinicalEventStream,eventBus,axiosVersion:axios.VERSION,nativeAdapter:axios.getAdapter(request.defaults.adapter).adapterName};
 `);
   const compiler = rspack({
     mode: "development", target: "web", devtool: false, context: root,
@@ -55,7 +58,7 @@ window.__requestRegression={request,ai,nursing,imports,config,effects,state,axio
 
 async function startRequestHarness({ requestSource = path.join(root, "src/utils/request.js") } = {}) {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), "hoim-request-regression-"));
-  let server, sink;
+  let server, sink, streamStatus = 403;
   const requests = [], sinkRequests = [], counts = new Map(), timers = new Set();
   try {
     await bundleHarness(directory, requestSource);
@@ -105,6 +108,7 @@ async function startRequestHarness({ requestSource = path.join(root, "src/utils/
       const send = (status, value, headers = {}) => {
         if (!response.destroyed) { response.writeHead(status, { "Content-Type": "application/json", "Cache-Control": "no-store", ...headers }); response.end(JSON.stringify(value)); }
       };
+      if (parsed.pathname === "/api/events/stream") { send(streamStatus, { code: streamStatus, msg: "synthetic stream access rejected" }); return; }
       if (parsed.pathname.includes("/network-retry") && counts.get(key) === 1) { request.socket.destroy(); return; }
       if (parsed.pathname.includes("/retry") && counts.get(key) <= Number(parsed.searchParams.get("failures") || 2)) {
         send(Number(parsed.searchParams.get("status") || 503), { code: 503, msg: "synthetic transient failure" }, { "Retry-After": parsed.searchParams.get("retry_after") || "0" }); return;
@@ -140,7 +144,8 @@ async function startRequestHarness({ requestSource = path.join(root, "src/utils/
       sinkOrigin: `http://127.0.0.1:${sink.address().port}`,
       requests, sinkRequests,
       count: (method, pathname) => counts.get(method.toUpperCase() + " " + pathname) || 0,
-      clear: () => { requests.length = 0; sinkRequests.length = 0; counts.clear(); },
+      clear: () => { requests.length = 0; sinkRequests.length = 0; counts.clear(); streamStatus = 403; },
+      setStreamStatus: status => { if (![401, 403].includes(status)) throw new Error("Invalid synthetic stream status"); streamStatus = status; },
       installedAxios: require("axios/package.json").version,
       lockedAxios: JSON.parse(await fs.readFile(path.join(root, "package-lock.json"), "utf8")).packages["node_modules/axios"].version,
       async close() {

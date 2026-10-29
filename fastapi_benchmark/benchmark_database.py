@@ -45,6 +45,8 @@ def validate_benchmark_url(database_url: str, *, destructive: bool = False) -> U
             "Destructive PostgreSQL initialization requires "
             f"BENCHMARK_RESET_CONFIRM={RESET_CONFIRMATION}"
         )
+    if url.drivername in {"postgres", "postgresql"}:
+        url = url.set(drivername="postgresql+psycopg2")
     return url
 
 

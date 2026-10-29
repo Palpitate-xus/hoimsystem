@@ -2,9 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import settings
+from app.database_url import normalize_database_url
 
 
 def build_engine_options(database_url: str) -> dict:
+    database_url = normalize_database_url(database_url)
     options = {
         "pool_pre_ping": True,
         "pool_recycle": settings.DB_POOL_RECYCLE_SECONDS,

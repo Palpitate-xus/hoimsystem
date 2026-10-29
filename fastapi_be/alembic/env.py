@@ -11,6 +11,7 @@ from alembic import context
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from app.config import settings
+from app.database_url import normalize_database_url
 from app.models import Base
 
 # this is the Alembic Config object
@@ -24,8 +25,8 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 # CLI/部署脚本可以显式注入目标 URL；普通 ``alembic`` 命令仍读取应用配置。
-if not config.get_main_option("sqlalchemy.url"):
-    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
+database_url = normalize_database_url(config.get_main_option("sqlalchemy.url") or settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:

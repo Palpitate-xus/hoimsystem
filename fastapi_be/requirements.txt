@@ -4,7 +4,7 @@ uvicorn[standard]>=0.54.0,<0.55
 uvicorn-worker==0.4.0
 gunicorn>=26.2.0,<27
 # PostgreSQL URLs use the psycopg2 driver installed below; 2.1 defaults to psycopg 3.
-sqlalchemy>=2.0.55,<2.1
+sqlalchemy>=2.1.6,<2.2
 pymysql>=1.2.3,<2
 psycopg2-binary>=2.9.13,<3
 cryptography>=50.0.2,<51

@@ -2,11 +2,23 @@ import sys
 from pathlib import Path
 
 import pytest
+from sqlalchemy import create_engine
 
 BENCHMARK_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BENCHMARK_DIR))
 
 import benchmark_database  # noqa: E402
+
+
+@pytest.mark.parametrize("scheme", ["postgres", "postgresql"])
+def test_benchmark_connections_keep_the_installed_psycopg2_driver(scheme):
+    url = benchmark_database.validate_benchmark_url(scheme + "://benchmark:synthetic-only@localhost/hoimsystem_benchmark")
+    engine = create_engine(url)
+    try:
+        assert engine.dialect.driver == "psycopg2"
+        assert engine.dialect.dbapi.__name__ == "psycopg2"
+    finally:
+        engine.dispose()
 
 
 def test_postgresql_target_requires_exact_database_and_reset_confirmation(monkeypatch):

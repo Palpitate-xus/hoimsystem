@@ -10,6 +10,7 @@ from sqlalchemy import MetaData, Table, create_engine, inspect, select
 
 from alembic import command
 from app.config import settings
+from app.database_url import normalize_database_url
 from app.models import Base
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +26,7 @@ def migrate(database_url: str | None = None) -> str:
     unknown legacy schema is never silently stamped as current.
     """
 
-    url = database_url or settings.DATABASE_URL
+    url = normalize_database_url(database_url or settings.DATABASE_URL)
     engine = create_engine(url)
     try:
         tables = set(inspect(engine).get_table_names())

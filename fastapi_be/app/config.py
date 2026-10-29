@@ -3,6 +3,9 @@ import warnings
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import URL
+
+from app.database_url import normalize_database_url
 
 DEFAULT_ALLOWED_ORIGINS = "http://localhost:8091,http://127.0.0.1:8091,http://localhost:8080,http://127.0.0.1:8080"
 
@@ -77,11 +80,20 @@ class Settings(BaseSettings):
         # 如果没有设置 DATABASE_URL，则用分项配置拼接；开发环境无配置时回退到 SQLite
         if not self.DATABASE_URL:
             if self.DB_USER and self.DB_PASSWORD and self.DB_NAME:
-                self.DATABASE_URL = f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+                self.DATABASE_URL = URL.create(
+                    "postgresql+psycopg2",
+                    username=self.DB_USER,
+                    password=self.DB_PASSWORD,
+                    host=self.DB_HOST,
+                    port=int(self.DB_PORT),
+                    database=self.DB_NAME,
+                ).render_as_string(hide_password=False)
             elif self.is_production:
                 raise ValueError("生产环境必须设置 DATABASE_URL 或完整的数据库连接分项配置")
             else:
                 self.DATABASE_URL = "sqlite:///./test.db"
+
+        self.DATABASE_URL = normalize_database_url(self.DATABASE_URL)
 
         if self.is_production:
             normalized_database_url = self.DATABASE_URL.lower().strip()

@@ -322,7 +322,7 @@ def main(argv=None):
 
     started = dt.datetime.now(dt.UTC)
     begin = time.monotonic()
-    engine = create_engine(database_url, pool_pre_ping=True)
+    engine = create_engine(validate_benchmark_url(database_url), pool_pre_ping=True)
     try:
         probe = Acceptance(host, engine, models, hash_password, args.concurrency)
         for scenario in [probe.booking, probe.registrations, probe.payments, probe.admissions, probe.dispensing, probe.medication_administration]:

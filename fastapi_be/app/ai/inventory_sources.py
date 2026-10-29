@@ -86,7 +86,7 @@ def attach_inventory_sources(db, departments, start, end, bundle, add, values):
         for row in batches[:200]
     ]
     fields["batch_rows_truncated"] = len(batches) > 200
-    fields["batch_note"] = "批次状态0在用、1冻结；效期标记仅表示日期早于本次业务日，不替代既有药房规则。药品无批次记录时批次合计保持未知，不作零值或完整覆盖判断"
+    fields["batch_note"] = "批次状态0在用、1冻结，效期按本次业务日判断。无批次记录的药品显示为未知。"
     ledger = PharmaceuticalStockLedger
     day = func.date(ledger.create_time)
     state = case((ledger.transaction_type.in_(["inbound", "outbound", "return", "adjustment"]), ledger.transaction_type), else_="unknown")

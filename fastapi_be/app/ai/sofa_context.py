@@ -31,7 +31,7 @@ def selection(references):
     if not isinstance(references, dict) or set(references) - REFERENCE_KEYS - {"question"} or len(REFERENCE_KEYS & references.keys()) != 1:
         raise HTTPException(422, "SOFA仅接受一件日评估或一件变化核实引用，不接受混用、原量、分数或临床事实覆盖")
     if "question" in references and (not isinstance(references["question"], str) or len(references["question"]) > 12000):
-        raise HTTPException(422, "SOFA问题须为最多12000字文本，不能替代原件或医生声明")
+        raise HTTPException(422, "SOFA问题最多12000字。")
     key = next(iter(REFERENCE_KEYS & references.keys()))
     try:
         identifier = canonical_uuid(references[key])

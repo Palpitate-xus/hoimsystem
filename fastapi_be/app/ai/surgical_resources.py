@@ -80,7 +80,7 @@ def attach_surgical_resources(db, departments, start, end, values, bundle, add):
                 [row.application_id, department, row.surgery_name, row.surgery_code, row.surgery_level, row.anesthesia_type, row.scheduled_date, row.status] for row, department in applications[:200]
             ],
             "truncated": len(applications) > 200,
-            "definition_note": "住院申请仅按同患者住院关联的科室定范围；无住院关联时使用申请医生科室。状态0待审批、1已批准、2已排台、3已完成、4已取消，未定日期不等于可直接排台。不提供患者、住院标识或诊断文本",
+            "definition_note": "科室按同患者的关联住院确定；无住院关联时采用申请医生科室。状态0待审批、1已批准、2已排台、3已完成、4已取消。未定日期需先确认手术时间。",
         },
     )
 
@@ -139,7 +139,7 @@ def attach_surgical_resources(db, departments, start, end, values, bundle, add):
             "truncated": len(planned) > 200,
             "malformed_assistant_lists": malformed,
             "unresolved_staff_references": unknown_staff,
-            "definition_note": "排台与申请须同患者；状态0待手术、1手术中、2已完成、3已取消。原起止字段可能为实际执行记录，不当作已确认预约时段、切皮时间或时长预测。人员关联只表示记录的分工，不证明资质或可用性；手术室原名称不等于独立资源目录",
+            "definition_note": "状态0待手术、1手术中、2已完成、3已取消。起止时间保留原字段，请核对预约时段、人员资质和资源可用时间。",
         },
     )
     eligible = [
@@ -167,7 +167,7 @@ def attach_surgical_resources(db, departments, start, end, values, bundle, add):
             "checked_intervals": len(eligible),
             "uncheckable_or_inactive_schedules": min(len(planned), 200) - len(eligible),
             "truncated": len(conflicts) > 100,
-            "definition_note": "只检查所载清单中申请状态1/2且排台状态0/1、起止完整正序且开始日期符合原排台日期的区间。共享账号合并识别跨医生/护士分工，未解析引用不推测。不跨授权科室或截断边界判断，无线索不代表可行排台；原时间缺可靠时区时不转换",
+            "definition_note": "核对已批准申请和活动排台中起止完整、时间正序的区间；跨医生和护士共用账号时按同一人员检查。未解析关联和超出访问范围的记录单列为缺项，时区未知时保留原时间。",
         },
     )
     historical_rows = schedules(start, end)

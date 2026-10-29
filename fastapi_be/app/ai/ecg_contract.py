@@ -27,7 +27,7 @@ class ECGLead(BaseModel):
         except (InvalidOperation, ValueError) as exc:
             raise ValueError("原增益须为明确的有限正数") from exc
         if self.name not in LEADS or self.missing_samples:
-            raise ValueError("该模型只接受实际标准12导联且无缺失采样，不替代导联或补值")
+            raise ValueError("模型要求标准12导联和完整采样，请核对上传记录。")
         return self
 
 

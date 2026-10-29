@@ -5,7 +5,7 @@ from app.models import AdverseEventRca
 
 def attach_incident_sources(db, selected, bundle, add):
     event = selected.get("adverse_event_id")
-    bundle.data["scope_note"] = "仅明确所选的同患者不良事件及关联RCA；事件无就诊外键，不根据上报日期推断属于某次门诊或住院。原文为记录陈述，不等于经调查证实"
+    bundle.data["scope_note"] = "所选患者的不良事件及关联RCA，尚未关联具体就诊。"
     if event is None:
         bundle.data["missing_data"].append("请明确选择本患者的不良事件标识；未自动读取其他事件或整份病史")
         return
@@ -21,7 +21,7 @@ def attach_incident_sources(db, selected, bundle, add):
             "report_time": event.report_time,
             "recorded_status": event.status,
             "recorded_handle_result": event.handle_result,
-            "definition_note": "严重度1轻度、2中度、3重度；状态0待处理、1处理中、2已闭环，其他值保持未知。上报时间不等于发生时间，已闭环不等于根因和责任已获独立核实",
+            "definition_note": "严重度1轻度、2中度、3重度；状态0待处理、1处理中、2已闭环。事件发生时间和调查核实信息待补充。",
         },
         event.report_time,
     )
@@ -52,7 +52,7 @@ def attach_incident_sources(db, selected, bundle, add):
         for row in rows[:6]
     ]
     if len(rows) > 6:
-        bundle.data["truncated_sources"].append({"source": "incident_rca_records", "limit": 6, "note": "其余关联RCA未纳入，不代表没有其他调查记录"})
+        bundle.data["truncated_sources"].append({"source": "incident_rca_records", "limit": 6, "note": "其余关联RCA未纳入，请缩小查询范围。"})
     bundle.data["missing_data"].append("尚无独立的事件发生时刻、就诊归属、证据核验或根因审批状态；须把上报陈述、已保存分析、候选假设与已证实事实分别说明，不自动定责或写回整改结论")
     if not rows:
-        bundle.data["missing_data"].append("所选事件尚无已保存RCA，不据此编造根因、调查经过或已实施整改")
+        bundle.data["missing_data"].append("所选事件暂无RCA记录。")

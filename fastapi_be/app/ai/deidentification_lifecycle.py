@@ -165,7 +165,7 @@ def manual_updates(actor, header, request):
 
 def governance_updates(actor, header, request, *, revoke):
     if actor.user_role != "super_admin" and not (revoke and actor.user_id == header["created_by"]):
-        raise HTTPException(403, "仅当前Super技术治理或原作者停止，不构成临床或导出许可")
+        raise HTTPException(403, "仅超级管理员或原作者可停止任务。")
     if header["revision"] != request.expected_revision or header["content_hash"] != request.expected_content_hash or header["status"] not in ({"draft", "published"} if revoke else {"draft"}):
         raise HTTPException(409, "明确技术CAS或原件状态已改变")
     if revoke:

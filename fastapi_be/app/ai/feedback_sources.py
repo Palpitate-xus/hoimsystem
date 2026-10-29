@@ -24,7 +24,7 @@ def attach_feedback_sources(db, departments, start, end, bundle, add):
             "mean_recorded_score": summary[3],
             "withheld_comment_record_count": summary[4] if summary[0] else 0,
             "out_of_range_score_record_count": summary[5] if summary[0] else 0,
-            "definition_note": "仅同患者、同医生、关联可核实的就诊评价；有挂号关联时使用其科室，无挂号关联时使用医生当前科室，后者不代表历史科室。评分原范围1至5，缺失或越界不进入均值。计数是评价行和关联就诊数，不是独立患者数、总体满意率或全体就诊分母；原评论不发送给模型，已审核片段另列",
+            "definition_note": "评价范围为所选患者及医生。有挂号关联时采用该次就诊科室，其余采用医生当前科室。评分范围1至5，均值排除缺失和越界值；分别统计评价条数和关联就诊数。模型接收已审核的摘录。",
         },
     )
     day = func.date(Review.review_time)
@@ -50,9 +50,9 @@ def attach_feedback_sources(db, departments, start, end, bundle, add):
         "scope_note": "仅所选科室和原评价日期范围内、原文与就诊关联仍匹配的已发布审核版本。最多核对60条最新发布候选后纳入20条，非全部评论或完整投诉工单；未审核原文不发送，不以审核代替事实调查",
     }
     if not excerpts:
-        bundle.data["missing_data"].append("现有评分并非完整投诉工单；未取得本次范围内当前有效的逐条审核脱敏版本，未提供原文，不能生成投诉主题聚类或典型原文引述")
+        bundle.data["missing_data"].append("当前范围暂无已审核的评价摘录，无法生成主题或引用原文。")
     if stale:
         bundle.data["missing_data"].append("部分已发布摘录的原评价、关联或文本校验已失效，已排除，不能据缺失断言不存在相关反馈")
     if truncated:
         bundle.data["truncated_sources"].append({"source": "reviewed_feedback_excerpts", "limit": 20, "note": "已审核片段候选或纳入清单已截断，仅描述所载片段，不外推总体主题占比"})
-    bundle.data["missing_data"].append("缺少全体可评价就诊分母、应答率、经核实的投诉事实与流程调查；所载评分和审核片段不代表全体患者满意度，不用于推定因果或个人责任")
+    bundle.data["missing_data"].append("尚未提供全体就诊总数、应答率和流程调查。")

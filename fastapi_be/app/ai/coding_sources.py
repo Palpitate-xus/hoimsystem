@@ -39,7 +39,7 @@ def attach_coding_sources(db, user, spec, patient, encounter, bundle, add, selec
     bundle.data["medical_record_homes"] = [add("medical-record-home:" + row.home_id, "病案首页原始记录", {name: getattr(row, name) for name in fields}, row.update_time) for row in homes]
     bindings = db.query(HomeIcdBinding).filter(HomeIcdBinding.home_id.in_(ids)).order_by(HomeIcdBinding.binding_id).limit(101).all()
     if len(bindings) > 100:
-        bundle.data["truncated_sources"].append({"source": "首页编码绑定", "limit": 100, "note": "编码清单未完整纳入，不能据此判断无其他编码"})
+        bundle.data["truncated_sources"].append({"source": "首页编码绑定", "limit": 100, "note": "仅加载部分编码，请缩小查询范围。"})
     dictionaries = {}
     for kind, model in (("diagnosis", Icd10Diagnosis), ("operation", Icd10Operation)):
         codes = {row.icd_code for row in bindings[:100] if row.kind == kind}

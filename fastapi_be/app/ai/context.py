@@ -426,7 +426,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         "encounter": None,
         "current_confirmed_diagnoses": [],
         "missing_data": [],
-        "scope_note": "按近期记录和明确所选资料构建的有限快照，不代表完整病史；所选资料不等同于本次就诊资料",
+        "scope_note": "资料范围：近期记录及本次所选资料；就诊归属按原记录显示。",
         "truncated_sources": [],
         "diagnosis_reviews": [],
         "selected_sources": {key: (source_refs or {})[key] for key in selected},
@@ -438,7 +438,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
         if chosen:
             rows = [chosen, *[item for item in rows if getattr(item, primary_key) != getattr(chosen, primary_key)]]
         if len(rows) > limit:
-            bundle.data["truncated_sources"].append({"source": label, "limit": limit, "note": "其余记录未纳入，不能据此断言无其他结果"})
+            bundle.data["truncated_sources"].append({"source": label, "limit": limit, "note": "其余记录未纳入本次资料，请缩小查询范围。"})
         return rows[:limit]
 
     if encounter:
@@ -492,7 +492,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
             "snapshot_time": bundle.data["snapshot_time"],
             "selected_sources": {"image_asset_id": asset.asset_id, "imaging_order_id": asset.imaging_order_id},
             "image_source": source,
-            "scope_note": "仅所选单帧原像素及技术参数，不代表完整序列、容积或整次检查；像素保持原行列坐标，不推测解剖方向。头标签未传给模型，但像素仍可能包含身份信息，不能声称匿名化。申请未保存就诊关联，不能按日期推定。登记校验不证明临床诊断质量",
+            "scope_note": "资料范围：所选单帧像素及技术参数，坐标采用原始行列。请核对原图中的身份信息；申请尚未关联就诊。",
             "missing_data": ["未提供经核实的采集时年龄及人群适用信息；不能以当前年龄或标签猜测", *([] if asset.recorded_at else ["原采集时间未知，不以上传时刻代替"])],
         }
         return bundle
@@ -522,7 +522,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
             "snapshot_time": bundle.data["snapshot_time"],
             "selected_sources": {"ecg_asset_id": asset.asset_id},
             "ecg_source": source,
-            "scope_note": "只提供所选原波形与经文件校验的技术声明，不加载无关病史或把文字报告当原信号。导联顺序、缺失值和单位保留；文件校验不证明患者身份、设备校准或生理/诊断质量。采样位置相对原记录，不代表诊疗发生时刻",
+            "scope_note": "资料范围：所选心电波形、导联、采样率、单位及缺失采样。采样位置从记录起点计时。",
             "missing_data": [
                 "未提供经核实的采集时年龄、人群及临床适用信息，专用模型须核对其验证范围；不能以当前年龄或未审核头注释补写",
                 *([] if asset.recorded_at else ["未记录带时区的原始采集时间，头时钟不自动升级为诊疗时刻"]),
@@ -541,7 +541,7 @@ def patient_snapshot(db: Session, user: User, spec: FeatureSpec, patient_id: int
             "snapshot_time": bundle.data["snapshot_time"],
             "selected_sources": {"audio_asset_id": asset.asset_id},
             "audio_source": source,
-            "scope_note": "仅所选原录音及其技术元数据；未加载无关病史。原音频可能含直接标识，不能保证匿名化。分段时间以解码音频为参考，不代表临床发生时刻；说话人标签不证明真实身份和职业",
+            "scope_note": "资料范围：所选录音及技术参数，分段时间从音频起点计时。",
             "missing_data": ["未取得经核实的说话人身份映射，角色保持未知", *([] if asset.recorded_at else ["未记录原录音发生时间，不以登记或上传时间代替"])],
         }
         return bundle

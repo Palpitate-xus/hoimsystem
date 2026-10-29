@@ -152,7 +152,7 @@ def attach_procedural_sources(db, user, spec, patient, encounter, bundle, add, s
             {
                 **{name: getattr(row, name) for name in fields},
                 "legacy_zero_ambiguous_fields": [name for name in ("blood_loss", "urine_output", "fluid_input") if getattr(row, name) == 0],
-                "provenance_note": "旧字段存在默认0，不能据此确认未出血、无尿或未输液；原表未提供独立签署审核状态",
+                "provenance_note": "旧字段的0值来自默认值，出血、尿量和输液量需核对原记录；当前缺少独立签署信息。",
             },
             row.create_time,
         )

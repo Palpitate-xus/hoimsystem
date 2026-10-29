@@ -55,7 +55,7 @@ def _configuration(db, actor, *, preview):
 
     config = current_research_rows(db.query(AIFeatureConfig).filter_by(feature_key=FEATURE), shared=True).one_or_none()
     if config is None:
-        raise HTTPException(409, "科研功能尚未配置；来源授权不等于启用模型")
+        raise HTTPException(409, "请先配置科研功能并启用模型。")
     roles = _roles(config.allowed_roles_json)
     if actor.user_role != "super_admin" and actor.user_role not in roles:
         raise HTTPException(403, "当前身份不在科研功能明确允许角色中")

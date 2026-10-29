@@ -40,7 +40,7 @@ def parse_draft_json(raw, source):
 def model_input(source, question=None):
     source = checked_source(source)
     if source["external_model_use"] != "recorded_permitted":
-        raise HTTPException(403, "项目未明确记录模型处理许可；纯协议不替代当前逐患者授权")
+        raise HTTPException(403, "项目尚未配置模型处理许可。")
     try:
         if question is not None and (type(question) is not str or len(question) > 2000 or len(question.encode("utf-8")) > 8000):
             raise ValueError("A bounded scalar question is required")

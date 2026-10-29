@@ -31,7 +31,7 @@ def selection(values):
     if not isinstance(values, dict) or set(values) - {"roster_plan_id", "question"} or "roster_plan_id" not in values:
         raise HTTPException(422, "本地排班仅接受一件受审计划引用及可选本地问题，不接受其他来源、约束或原量覆盖")
     if "question" in values and (not isinstance(values["question"], str) or len(values["question"]) > 12000):
-        raise HTTPException(422, "排班问题须为最多12000字文本，不能替代原声明")
+        raise HTTPException(422, "排班问题最多12000字。")
     try:
         return facts.canonical_id(values["roster_plan_id"])
     except (ValueError, TypeError, AttributeError) as exc:

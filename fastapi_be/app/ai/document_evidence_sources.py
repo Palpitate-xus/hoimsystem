@@ -301,7 +301,7 @@ def create_candidate(db, user, values):
     if not original.eligible or (original.content_hash, original.governance_hash) != (request.original.content_hash, request.original.governance_hash):
         raise HTTPException(409, "请选择当前已发布且完整绑定的原文版本")
     if request.end > original.snapshot.codepoint_length or original.snapshot.text[request.start : request.end] != request.quote:
-        raise HTTPException(422, "候选引文不等于原文Unicode codepoint半开区间，不接受修改或推测")
+        raise HTTPException(422, "候选引用与原文指定区间不一致。")
     snapshot = c.CandidateImmutable(schema_version="document_span_candidate_immutable_v1", candidate_id=str(uuid.uuid4()), created_by=actor.user_id, recorded_at=c.utc_text(utcnow()), proposal=request)
     row = AIDocumentSpanCandidate(
         candidate_id=snapshot.candidate_id,

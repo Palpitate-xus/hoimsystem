@@ -44,7 +44,7 @@ def selection(values):
     if type(values["horizon_days"]) is not int or values["horizon_days"] not in {7, 14}:
         raise HTTPException(422, "床位预测期须为实际整数7或14个完整业务日")
     if "question" in values and (not isinstance(values["question"], str) or len(values["question"]) > 12000):
-        raise HTTPException(422, "床位预测问题须为最多12000字文本，不能替代已审核原件")
+        raise HTTPException(422, "床位预测问题最多12000字。")
     try:
         return facts.canonical_id(values["bed_series_id"]), values["horizon_days"]
     except (ValueError, TypeError, AttributeError) as exc:

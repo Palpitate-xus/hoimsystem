@@ -224,7 +224,7 @@ def create_assessment(db, user, values):
         raise HTTPException(422, "Scale1须无Scale2声明；Scale2须由医生完整记录独立临床决定")
     doctor = clinical_qualification(db, actor, req.patient_id, req.admission_id) if req.spo2_scale == 2 else None
     if req.spo2_scale == 2 and doctor is None:
-        raise HTTPException(403, "Scale2须有真实Doctor身份及本次住院临床照护关系；管理权限不等于临床签署资格")
+        raise HTTPException(403, "Scale 2须由本次住院的照护医生确认。")
     window = observation_windows.snapshot_current(db, actor, req.window_id)
     if window["patient_id"] != req.patient_id or window["admission_id"] != req.admission_id or window["content_hash"] != req.expected_window_hash:
         raise HTTPException(409, "所选窗口不属于原患者/住院或摘要已变化")

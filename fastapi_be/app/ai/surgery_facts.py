@@ -994,7 +994,7 @@ def _clinical_care(db, actor, application, *, signer_doctor_id=None, locking=Fal
     if actor.user_role == "super_admin" and signer_doctor_id is None:
         return
     if not doctors:
-        raise HTTPException(403, "运营或超级管理员身份不能替代真实医师及患者照护关系")
+        raise HTTPException(403, "请由具备本次患者照护关系的医生填写。")
     # Lock exact care-grant and schedule rows used by the existing care policy.
     current_query(db.query(AIPatientGrant).filter_by(user_id=actor.user_id, patient_id=application.patient_id).order_by(AIPatientGrant.grant_id), locking=locking).all()
     current_query(db.query(SurgerySchedule).filter_by(application_id=application.application_id).order_by(SurgerySchedule.schedule_id), locking=locking).all()

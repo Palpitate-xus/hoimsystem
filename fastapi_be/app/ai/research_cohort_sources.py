@@ -319,7 +319,7 @@ def create_scope(db, user, values):
         # Admin clinical bypass is intentionally excluded. Super may register
         # supplied project originals, but cannot collect clinical rows by role.
         if actor.user_role != "super_admin" and not all(actual_care_or_grant(db, actor, patient) for patient in request.patient_ids):
-            raise HTTPException(403, "登记所列患者须有实际care或限时grant访问依据；管理员角色不替代该依据")
+            raise HTTPException(403, "登记患者需有照护关系或有效的限时访问授权。")
         payload = request.model_dump()
         if not _declared_parents_current(db, payload):
             raise HTTPException(404, "明确声明的真实患者或项目用户父件不存在")

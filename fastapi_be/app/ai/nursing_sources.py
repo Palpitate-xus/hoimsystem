@@ -106,7 +106,7 @@ def recorded_score_check(row):
         detail = json.loads(row.get("detail_json") or "null")
         total, _ = compute_manual_score(row["score_type"], detail)
     except (ValueError, TypeError, KeyError):
-        result.update(state="invalid_components", note="原分项不满足该版本的完整人工输入契约，不作为可复核工具总数")
+        result.update(state="invalid_components", note="评估分项与当前版本要求不一致，暂无法复核总分。")
         return result
     result["calculated_total"] = total
     if type(row.get("total_score")) is not int or total != row["total_score"]:
@@ -176,5 +176,5 @@ def attach_nursing_review(bundle):
             }
         )
     for row in data.get("nursing_plans", []):
-        review["plans"].append({**row, "explicitly_selected": row["source_id"].split(":", 1)[1] == selected.get("nursing_plan_id"), "status_note": "原计划内容与状态不代表实际护理执行或疗效"})
+        review["plans"].append({**row, "explicitly_selected": row["source_id"].split(":", 1)[1] == selected.get("nursing_plan_id"), "status_note": "以下为护理计划和记录状态，执行情况请查看护理执行记录。"})
     data["nursing_source_review"] = review

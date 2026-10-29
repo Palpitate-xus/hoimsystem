@@ -43,7 +43,7 @@ def _fixed_role(actor):
     from app.ai.catalog import FEATURE_BY_KEY
 
     if actor.user_role not in FEATURE_BY_KEY[FEATURE].default_roles:
-        raise HTTPException(403, "当前身份不在本功能固定业务角色中；项目授权不替代功能权限")
+        raise HTTPException(403, "当前角色无权使用此功能。")
 
 
 def _technical_access(db, user, run_id, *, audit_only=False):

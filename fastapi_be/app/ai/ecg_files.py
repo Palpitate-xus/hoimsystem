@@ -307,5 +307,5 @@ def signal_window(stream, metadata, start, count, max_points, names=None):
         "display_unit": "mV",
         "decimated": end - start > max_points,
         "leads": result,
-        "scope_note": "显示值由原增益/基线和单位换算；概览保留极值并断开缺失区间，不能替代全部原始采样，需缩小窗口检查细节。格式校验不代表生理信号质量或诊断已验证",
+        "scope_note": "显示值按增益、基线和原单位换算。概览保留极值，缺失区间断开显示；缩小窗口可查看逐点采样。",
     }

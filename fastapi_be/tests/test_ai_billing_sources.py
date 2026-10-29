@@ -78,7 +78,7 @@ def test_only_executed_with_actual_time_and_without_any_charge_link_are_review_c
     assert review["raw_product"] == "10.005"
     assert review["stored_amount"] == "10.01"
     assert review["amount_comparison"] == "raw_product_differs"
-    assert any("不能据此断言未执行" in text for text in review["findings"])
+    assert any("关联医嘱缺少执行状态或实际执行时间" in text for text in review["findings"])
     assert all(source_id in {item["source_id"] for item in bundle.evidence} for row in results["checks"] for source_id in row["source_ids"])
     db_session.refresh(charges[0])
     db_session.refresh(charges[1])

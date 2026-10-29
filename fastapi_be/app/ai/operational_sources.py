@@ -180,7 +180,7 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         "snapshot_time": utcnow().replace(tzinfo=datetime.UTC).isoformat(),
         "missing_data": [],
         "truncated_sources": [],
-        "scope_note": "仅授权范围内的原始记录汇总和已保存统计；未核实外部数据导入完整性，未记录日不等于已验证零业务量，当前记录状态不回推为历史状态",
+        "scope_note": "按授权范围汇总当前记录，缺少记录的日期显示为未知。",
     }
 
     def add(key: str, title: str, fields: dict, *, store=True):
@@ -263,7 +263,7 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
             {
                 "columns": ["date", "current_record_status", "record_count"],
                 "rows": [[str(date), status, count] for date, status, count in rows],
-                "status_note": "保留当前原记录状态；-1为未知状态。仅计有实际记录时间的原始行，不等于实际到诊或历史状态回放",
+                "status_note": "仅统计有实际记录时间的行，状态-1表示未知。",
             },
         )
 
@@ -282,7 +282,7 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
         active = db.query(func.count(Admission.admission_id)).filter(Admission.status == 1)
         if departments is not None:
             active = active.filter(Admission.department_id.in_(departments))
-        add("current_active_admissions", "当前在院状态记录数", {"record_count": active.scalar() or 0, "definition_note": "当前状态为在院的入院记录数，不等于历史在院人数或核实后的实占床位"})
+        add("current_active_admissions", "当前在院状态记录数", {"record_count": active.scalar() or 0, "definition_note": "统计当前状态为在院的入院记录条数。"})
         query = (
             db.query(Ward.ward_id, Ward.name, Ward.department_id, Ward.bed_count, Ward.status, Bed.status, func.count(Bed.bed_id))
             .outerjoin(Bed)
@@ -313,7 +313,7 @@ def operational_context(db, user: User, spec: FeatureSpec, values: dict) -> Cont
             {
                 "wards": list(wards.values())[:100],
                 "status_definitions": {"0": "空闲", "1": "占用", "2": "禁用", "3": "预订"},
-                "definition_note": "病区停用时其中空闲床不作为可用床；配置床数与加载床行数分别保留。空闲状态计数不等于已确认可收治名额，不代替人员、设备或感染隔离资质",
+                "definition_note": "停用病区中的空闲床已排除；分别显示配置床数和已登记床数。收治前需确认人员、设备和隔离条件。",
             },
         )
     return bundle

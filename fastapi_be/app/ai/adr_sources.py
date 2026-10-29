@@ -22,7 +22,7 @@ def attach_adr_sources(db, user, spec, patient, bundle, add, selected, bounded):
         "reaction_id",
     )
     bundle.data["adr_sources"] = {
-        "scope_note": "本患者的有限ADR上报及明确所选记录，不代表完整药物安全史。原记录未注明对应就诊、给药执行和症状发生时刻，不按上报时间推定药后起病、用药顺序或本次住院归属。人工确认/排除为原系统记录，不等同因果证实；药物过敏须独立核实，不自动新增或删除过敏记录",
+        "scope_note": "所选患者的ADR上报记录。对应就诊、给药执行和症状发生时间尚未记录；药物过敏请另行核实。",
         "encounter_assignment": "not_recorded",
         "administration_link": "not_recorded",
         "symptom_onset_time": "not_recorded",

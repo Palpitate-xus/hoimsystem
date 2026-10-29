@@ -100,11 +100,11 @@ def setup_reports(db, configs: dict, *, user=None) -> dict:
             issues.append(
                 {
                     "code": "TRAINING_VALIDATION_REQUIRED" if spec.number == 80 else "OPTIMIZATION_VALIDATION_REQUIRED" if optimization else "PREDICTION_VALIDATION_REQUIRED",
-                    "message": "培训AI反馈尚未完成明确教学范围验证；课程发布和本地评分不代表模型反馈效果验证"
+                    "message": "请完成教学反馈的适用范围验证。"
                     if spec.number == 80
-                    else "运营优化尚未完成指定目标与范围的验证；原件审核、约束算例和服务能力核对不代替实际业务验证"
+                    else "请完成运营优化的目标与适用范围验证。"
                     if optimization
-                    else "运营预测尚未完成指定目标与范围的验证；历史覆盖确认和服务能力检查不代替预测效果验证",
+                    else "请完成运营预测的目标与适用范围验证。",
                 }
             )
         if config and config.validation_status == "suspended":
@@ -115,6 +115,6 @@ def setup_reports(db, configs: dict, *, user=None) -> dict:
             "ready": not issues,
             "issues": issues,
             "checked_at": now,
-            "scope_note": "基础依赖检查；实际执行仍按患者、科室、问题和资料范围核验，不代表模型联通测试或临床效果验证",
+            "scope_note": "检查功能配置及基础依赖。",
         }
     return reports

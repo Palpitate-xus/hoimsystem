@@ -264,7 +264,7 @@ def stage_dispatch(db, user, value):
     # the original specific claim must then match before any protected BODY.
     storage._before_bodies(db, user, claim.run_id, execution=True)
     if claim_from_headers(db, phase_header(db, claim.run_id), storage.run_header(db, claim.run_id)) != claim:
-        raise HTTPException(409, "本次dispatch并非原实际claim主键和租约；未读取正文")
+        raise HTTPException(409, "任务领取信息与当前租约不匹配。")
     loaded = storage.load_artifact(db, user, claim.run_id, execution=True)
     run, artifact = loaded[:2]
     if run.status != "running" or artifact.dispatch_event_id is not None or artifact.usage_event_id is not None:

@@ -374,7 +374,7 @@ def _extend_laboratory_snapshot(db, snapshot, *, patient_id, admission_id, start
             "检验仅来自明确原住院、人工核实UTC采样时刻和来源命名空间、原审核及项目映射的受控登记，不证明全量检验齐全",
             "检验available_at为服务器核实登记后可用时刻，不是历史LIS发布时间；旧原始无时区时钟不自动认作UTC",
             "检验数量是数据库已存精确Decimal值，不能证明最初输入词法或小数尾零；定性结果保持原文字，不强转数字",
-            "未自动换算检验单位、选择冲突结果、计算NEWS2/KDIGO或风险概率；来源与映射审核不构成模型适用性或临床验证",
+            "检验结果按原单位显示，冲突项需逐项核对。",
         ]
     )
     snapshot["content_hash"] = content_hash(snapshot)
@@ -456,7 +456,7 @@ def observation_context(db, user, patient_id, admission_id, references):
     if not isinstance(references, dict) or not references.get("observation_window_id") or set(references) - {"observation_window_id", "question"}:
         raise HTTPException(422, "风险输入须仅选择原住院冻结观测窗，不接受其他原资料或自由JSON")
     if "question" in references and (not isinstance(references["question"], str) or len(references["question"]) > 12000):
-        raise HTTPException(422, "风险问题须为最多12000字文本，不作为原窗口测量事实")
+        raise HTTPException(422, "风险问题最多12000字。")
     authorize_scope(db, user, patient_id, admission_id)
     snapshot = snapshot_current(db, user, references["observation_window_id"])
     if snapshot["patient_id"] != patient_id or snapshot["admission_id"] != admission_id:

@@ -62,7 +62,7 @@ def attach_pathway_sources(db, user, spec, patient, encounter, bundle, add, sele
         if state is not None:
             rows.append((row, state))
         else:
-            bundle.data["missing_data"].append("部分入径记录的住院关联无法核实或超出当前授权范围，未加载；有限记录不代表完整路径史")
+            bundle.data["missing_data"].append("部分入径记录未加载：住院关联待核实或超出访问范围。")
     ids = {row.pathway_id for row, _ in rows}
     if chosen_id is not None:
         ids.add(chosen_id)

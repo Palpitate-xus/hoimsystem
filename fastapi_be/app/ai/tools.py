@@ -37,7 +37,7 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
                 "source_kind": source["kind"],
                 "clinical_score_calculated": False,
                 "complete_handover_provided": False,
-                "scope_note": "仅整理明确选择的单条原支持资料；未载资料不构成正常、无治疗、完整交班或SOFA",
+                "scope_note": "资料范围为所选单条支持记录。",
             }
         }, []
     if spec.number == 42 and context.data.get("qsofa_source"):
@@ -120,7 +120,7 @@ def business_tools(db: Session, spec: FeatureSpec, user: User, patient_id: int |
                 "automatic_unit_conversion": False,
                 "dose_evaluations": dose_evaluations,
                 "unit_mapping_validation": "仅在处方与规则原始单位完全一致时比较；按处方行检查，不推测按需频次或跨行成分累计量",
-                "coverage_note": "未匹配到剂量规则时不代表剂量合适；命中范围也不代表覆盖全部用药风险",
+                "coverage_note": "未匹配剂量规则的药品需人工核对剂量。",
             }
             for evaluation in dose_evaluations:
                 evidence.append(

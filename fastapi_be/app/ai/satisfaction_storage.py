@@ -259,7 +259,7 @@ def guard_satisfaction_run_id(db, user, run_id, *, audit_only=False):
         if actor.user_role != "super_admin" and owner != actor.user_id:
             raise HTTPException(403, "没有读取该评价任务的权限")
         if audit_only and actor.user_role != "super_admin":
-            raise HTTPException(403, "冻结任务审计仅限当前超级管理员，不能替代新执行授权")
+            raise HTTPException(403, "历史任务审计仅供超级管理员访问。")
 
     def configured_roles():
         if actor.user_role == "super_admin":
@@ -312,7 +312,7 @@ def authorize_run_scope(db, user, run, *, execution=False, audit_only=False):
     from app.ai.satisfaction_write_guard import lock_satisfaction_write
 
     if audit_only and execution:
-        raise HTTPException(403, "冻结任务审计不能替代新执行授权")
+        raise HTTPException(403, "当前账号没有本次任务的执行权限。")
     identifier = _run_identifier(run)
     if not guard_satisfaction_run_id(db, user, identifier, audit_only=audit_only):
         raise HTTPException(409, "评价任务缺少持久原件锚点，未降级读取")

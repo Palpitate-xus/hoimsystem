@@ -100,7 +100,7 @@ def attach_consultation_sources(db, user, spec, patient, encounter, bundle, add,
                     "review_identity_recorded": row.reviewer_id is not None and row.review_time is not None,
                     "encounter_assignment": "not_recorded",
                     "explicitly_selected": selected.get("mdt_id") is not None and selected["mdt_id"].mdt_id == row.mdt_id,
-                    "definition_note": "原初步诊断不作为本次确认诊断；结果字段可能在未完成或退回状态下已有内容，保留原状态，不作最终意见。原表未记录实际会诊时刻、个体参会确认及结果签署/诊断复核，完成标记不等同已核验治疗方案",
+                    "definition_note": "所选记录包含初步诊断、会诊状态及结果。实际会诊时间、参会确认和结果签署信息尚未记录。",
                 },
                 row.review_time or row.create_time,
             )

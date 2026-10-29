@@ -25,11 +25,11 @@ def attach_hourly_demand(db, departments, start, end, bundle, add):
             "columns": ["date", "recorded_hour", "current_record_status", "record_count"],
             "rows": [[str(date), clock, status, count] for date, clock, status, count in sorted(rows[:1000], key=lambda row: (str(row[0]), row[1], row[2]))],
             "truncated": len(rows) > 1000,
-            "definition_note": "按数据库原始记录钟点汇总，未提供可靠历史时区时不转换；当前记录状态不回推到过去。无记录小时不补零，不等于已核实到诊需求或完整训练数据",
+            "definition_note": "按原记录时间汇总当前周期数据，缺少记录的小时显示为未知。",
         },
     )
     if len(rows) > 1000:
-        bundle.data["truncated_sources"].append({"source": "recorded_hourly_registrations", "limit": 1000, "note": "小时序列已截断，请缩小范围，不作为完整训练序列"})
+        bundle.data["truncated_sources"].append({"source": "recorded_hourly_registrations", "limit": 1000, "note": "小时序列仅加载部分记录，请缩小范围。"})
 
 
 def planning_window(values):
@@ -69,7 +69,7 @@ def attach_roster_sources(db, departments, values, bundle, add):
             ],
             "truncated": len(rows) > 200,
             "planning_window": [str(start), str(end)],
-            "definition_note": "仅当前周期排班所关联医生，非完整人员清单；档案职称不等于已核验岗位资质，时段编码没有可靠起止钟点时不换算工时。共享号源不是按日期独立的容量，已批加号不重复叠加",
+            "definition_note": "人员范围为当前周期排班中的医生。请核对岗位资质；工时采用已记录的起止时间，共享号源按排班库存统计。",
         },
     )
     request = ScheduleChangeRequest

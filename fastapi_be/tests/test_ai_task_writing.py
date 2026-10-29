@@ -19,7 +19,9 @@ def test_every_generic_text_task_gets_task_appropriate_writing_guidance():
         assert "危急值、红旗或禁止级规则时先呈现" in prompt
         assert "warnings 只写本次确有依据" in prompt
         assert "missing_data 逐项说明实际缺少什么" in prompt
-        assert "不为控制长度省略事实或伪称覆盖完整" in prompt
+        assert "逐项核查、已知危险、必要条件和引用按实际需要完整展开" in prompt
+        assert "影响结论的条件和不确定性写入具体判断，并说明原因" in prompt
+        assert "不为假想质疑追加免责式限定" in prompt
     assert "药学核查" in exported["prescription_draft"]
     assert "住院护理表达" in exported["handover_summary"]
     assert "患者沟通" in exported["patient_report_explanation"]

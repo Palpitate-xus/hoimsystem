@@ -160,7 +160,7 @@ def create_link(db, user, values):
     actor, parents, budget = lock_originals(db, user, [request.original.original_id])
     original = parents[request.original.original_id][1]
     if not original.eligible or request.original != original_ref(original) or original.snapshot.text[request.span.start : request.span.end] != request.span.quote:
-        raise HTTPException(409, "原件已变化、未确认发布或引文并非完整逐字范围")
+        raise HTTPException(409, "原文已变更、尚未发布或引用区间不匹配。")
     target = target_snapshot(db, request.target, budget)
     if target.state != "current" or c.e.digest(target) != request.expected_target_hash:
         raise HTTPException(409, "实际目标不是刚审阅的当前完整版本")

@@ -113,8 +113,8 @@ def appointment_candidates(db, values: dict, *, today: datetime.date | None = No
         "window_end": str(max(dates)),
         "excluded_approved_stops": excluded_stops,
         "truncated": len(schedules) > 200,
-        "missing_data": [] if candidates else ["当前筛选未取得可展示的排班候选；不代表其他时间没有号源"],
-        "scope_note": "与现有预约列表相同的明日至第6日窗口；余量来自每条周期排班的共享库存，并非按日期独立存储。已审批加号已计入库存，不重复叠加；已审批停诊按医生当日范围排除。候选不锁号，实际预约须通过原流程重新校验身份、资格、余量及重复预约。时段保留原编码，未推测具体钟点。",
+        "missing_data": [] if candidates else ["当前筛选范围暂无可预约排班。"],
+        "scope_note": "号源范围为明日至第6日。余量按周期排班共享库存统计，已包含获批加号；已停诊医生的当日排班已排除。预约时重新检查剩余号源、资格和重复预约。",
         "changes_written": [],
     }, evidence
 

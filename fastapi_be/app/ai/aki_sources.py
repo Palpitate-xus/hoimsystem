@@ -397,7 +397,7 @@ def create_assessment(db, user, values):
     clinical = requires_clinical_review(req)
     doctor = clinical_qualification(db, actor, req.patient_id, req.admission_id) if clinical else None
     if clinical and doctor is None:
-        raise HTTPException(403, "肌酐用途、推定基线或RRT临床声明须真实Doctor资格和本次原住院临床照护关系；管理权不能替代")
+        raise HTTPException(403, "请由本次住院的照护医生确认肌酐用途、基线和RRT情况。")
     window = snapshot_current(db, actor, req.window_id)
     if window["schema_version"] != "inpatient_window_v2" or window["patient_id"] != req.patient_id or window["admission_id"] != req.admission_id or window["content_hash"] != req.expected_window_hash:
         raise HTTPException(409, "AKI须明确绑定当前原患者/住院的v2受控观测窗及摘要")

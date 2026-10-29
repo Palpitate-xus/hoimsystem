@@ -109,7 +109,7 @@ def qsofa_context(db, user, patient_id, admission_id, references):
     ):
         raise HTTPException(422, "qSOFA仅接受明确原住院窗口和医生当前回顾核实的评估引用，不接受客户端测量或临床事实覆盖")
     if "question" in references and (not isinstance(references["question"], str) or len(references["question"]) > 12000):
-        raise HTTPException(422, "qSOFA问题须为最多12000字文本，不能替代原量或医生核实")
+        raise HTTPException(422, "qSOFA问题最多12000字。")
     current = authorize_assessment(db, user, patient_id, admission_id, references["qsofa_assessment_id"], window_id=references["observation_window_id"])
     source = QsofaSource.model_validate(current["specialist_source"]).model_dump(mode="json")
     frozen = frozen_assessment_projection(current)

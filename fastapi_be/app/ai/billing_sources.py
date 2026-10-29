@@ -83,7 +83,7 @@ def attach_billing_sources(db, user, spec, patient, encounter, bundle, add, sele
         .all()
     )
     if len(unlinked) > 20:
-        bundle.data["truncated_sources"].append({"source": "已记录执行且未保存收费关联的医嘱", "limit": 20, "note": "仅列待核对候选；不构成应收费或应补费判断"})
+        bundle.data["truncated_sources"].append({"source": "已记录执行且未保存收费关联的医嘱", "limit": 20, "note": "请核对候选执行记录与记账明细。"})
     unlinked_ids = {row.order_id for row in unlinked[:20]}
     all_orders = {row.order_id: row for row in [*linked, *unlinked[:20]]}
     execution_summary = {}
@@ -153,7 +153,7 @@ def billing_reconciliation(context: dict) -> dict:
         elif order is None:
             findings.append("所记关联医嘱未能在所选住院中核实")
         elif not any(item["status"] == 1 and item["records_with_actual_time"] for item in order.get("execution_summary", [])):
-            findings.append("关联医嘱缺少同时具备已执行状态和实际时间的记录，不能据此断言未执行")
+            findings.append("关联医嘱缺少执行状态或实际执行时间。")
         if amount_comparison == "raw_product_differs":
             findings.append("原始数量乘单价与保存金额不同，需核实计价、精度和舍入口径")
         elif amount_comparison == "unknown":

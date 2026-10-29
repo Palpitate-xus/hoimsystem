@@ -4,7 +4,6 @@
     <p v-if="busy" role="status">正在核对完整原件、冻结任务和逐字跨度…</p>
     <el-alert v-else-if="error" :title="error" type="error" :closable="false" />
     <template v-else-if="checked">
-      <el-alert :title="coverage" type="warning" :closable="false" />
       <p>{{ auditOnly ? '超级管理员冻结审计：不声明来源当前仍可执行。' : '已比对当前范围与完整冻结原件。' }}</p>
       <dl class="facts">
         <dt>任务状态</dt><dd>{{ states[checked.run.status] }}</dd>
@@ -12,38 +11,39 @@
         <dt>输入 / 输出 token</dt><dd>{{ token(checked.run.usage_receipt.input_tokens) }} / {{ token(checked.run.usage_receipt.output_tokens) }}</dd>
         <dt>实际模型调用</dt><dd>{{ attempted(checked.run.usage_receipt.model_call_attempted) }}</dd>
       </dl>
-      <p>只比较明确的两件原文与有限目标集合；未提供全院规则覆盖。逐字相交不是已确认影响，未相交也不是无影响。</p>
+      <p>请选择两份原文及待核对的规则范围。</p>
       <template v-if="checked.result">
-        <p>本次提出 {{ changes.length }} 项待核问题。</p><details><summary>任务摘要原文</summary><p class="summary">{{ checked.result.result.summary }}</p></details>
-        <p v-if="!changes.length">未返回核对问题；这不表示没有变化或已完成全文检查。</p>
+        <p>本次提出 {{ changes.length }} 项待核问题。</p><details><summary>任务摘要原文</summary><p class="summary" v-if="noticeText(checked.result.result.summary)">{{ noticeText(checked.result.result.summary) }}</p></details>
+        <p v-if="!changes.length">本次未返回核对问题。</p>
         <article v-for="(change,index) in changes" :key="index" class="question">
           <h4>待人工核实问题 {{ index + 1 }}</h4>
           <p>{{ change.review_note }}</p><p>{{ change.clarification_question }}</p>
           <div v-for="side in ['baseline','candidate']" :key="side">
             <strong>{{ side === 'baseline' ? '基准原文' : '候选原文' }}</strong>
-            <p v-if="!change[side + '_spans'].length">本项未引用这一侧；不能据此推断全文不存在对应内容。</p>
+            <p v-if="!change[side + '_spans'].length">本项未引用此版本的内容。</p>
             <figure v-for="(span,ordinal) in change[side + '_spans']" :key="ordinal">
               <figcaption>原文引文</figcaption><details><summary>引文位置</summary><p>Unicode codepoint [{{ span.start }}, {{ span.end }})</p></details><pre>{{ span.quote }}</pre>
             </figure>
           </div>
-          <p v-if="!change.link_overlaps.length">本问题未产生逐字相交记录；这不表示院内规则无影响。</p>
+          <p v-if="!change.link_overlaps.length">本问题暂无逐字相交记录。</p>
           <ul v-else><li v-for="overlap in change.link_overlaps" :key="overlap.link.link_id">
             {{ overlap.link.target.kind }} · {{ overlap.link.target.target_id }} · {{ overlap.link.current ? '已审核且当前关联' : '未获当前关联确认' }} · {{ overlap.link.within_declared_scope ? '声明范围内' : '声明范围外，仅保留证据' }} · 目标状态 {{ overlap.target.state }}
           </li></ul>
         </article>
       </template>
-      <p v-else>本状态没有已接受的问题正文。取消或失败不代表模型未调用；以上用量保留实际已知值与未知值。</p>
+      <p v-else>尚无结果正文，调用和用量情况见上方记录。</p>
       <el-button @click="evidenceOpen = !evidenceOpen">{{ evidenceOpen ? '收起完整证据' : '查看完整院内证据' }}</el-button>
       <section v-if="evidenceOpen" class="evidence">
         <h4>冻结的两件完整原文</h4>
         <div v-for="side in ['baseline','candidate']" :key="side"><strong>{{ side === 'baseline' ? '基准原文' : '候选原文' }}</strong><pre>{{ checked.source.document_change_source[side].text }}</pre></div>
-        <h4>完整私有目标与治理原件</h4><p>以下院内证据不作为提供方输入；执行只发送经核对的公开原文投影。</p><pre>{{ privateEvidence }}</pre>
+        <h4>完整私有目标与治理原件</h4><p>以下为院内证据，模型接收的资料见“公开输入”。</p><pre>{{ privateEvidence }}</pre>
       </section>
     </template>
   </el-card>
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import {computed,onBeforeUnmount,onDeactivated,ref,shallowRef,watch} from 'vue';
 import {useStore} from 'vuex';
 import {verifyDocumentChangeRun,documentChangeCoverageNote,documentChangeRunStates} from '@/api/ai/documentChangeResults';

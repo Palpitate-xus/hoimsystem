@@ -1,7 +1,7 @@
 <template>
   <section class="document-change-input" aria-label="双原文比较范围选择">
     <el-alert title="只选择已审核的有限比较范围，生成结果仍是未核实的问题草稿" type="info" :closable="false" />
-    <p class="note">两件原文、已登记关联和直接知识发布都保留原样。版本关系是人工声明，不自动替代原文、修改规则或证明临床影响。</p>
+    <p class="note">版本关系由审核人登记，请核对两份原文及其关联。</p>
     <el-alert v-if="!allowed" title="仅当前超级管理员可以读取和选择完整原文范围" type="warning" :closable="false" />
     <el-alert v-else-if="!referencesValid" title="比较范围引用须仅含规范的 document_change_scope_id，不接受患者、就诊或其它输入" type="warning" :closable="false" />
     <template v-else>
@@ -19,7 +19,7 @@
         <p>候选：{{ record.snapshot.inventory.candidate_original.snapshot.metadata.title }} · {{ record.snapshot.inventory.candidate_original.snapshot.metadata.version }}</p>
         <p>完整依赖 {{ publicSource.member_count }} 项；关联 {{ publicSource.rule_links.length }} 条；直接知识发布 {{ publicSource.publications.length }} 项。</p>
         <p>声明范围内目标 {{ publicSource.targets.filter(t=>t.within_declared_scope).length }} 项，范围外保留目标 {{ publicSource.targets.filter(t=>!t.within_declared_scope).length }} 项；全院盘点未提供。</p>
-        <p>完整私有原件及公开投影已逐字段核对。登记容量不保证完整模型报文可装入预算，生成前仍需服务器另检。</p>
+        <p>已核对原件及模型输入，生成前会检查请求大小。</p>
       </div>
     </template>
   </section>

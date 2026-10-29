@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医生管理" description="维护医生档案信息，支持新增、编辑和删除操作" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增医生</el-button>

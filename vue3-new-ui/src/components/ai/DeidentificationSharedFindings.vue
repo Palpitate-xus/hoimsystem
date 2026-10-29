@@ -1,6 +1,6 @@
 <template>
  <section aria-label="共享病例去标识任务完整分件">
-  <p>候选需人工核查；没有候选也不代表没有标识风险。采用修改和导出前还需复核。</p>
+  <p>请核对标识候选，确认修改后再导出。</p>
   <p v-if="!allowed" role="status">当前会话不可读取，旧原文、问题和候选已清除。</p>
   <template v-else>
    <el-button :disabled="busy||!validId" @click="load">查看本次结果</el-button><el-button @click="close">关闭并清除本次任务正文</el-button>
@@ -12,9 +12,9 @@
     <el-button v-if="['queued','running'].includes(metadata.status)&&metadata.finish_time===null" :disabled="busy" @click="cancel">停止接收本次任务</el-button>
    </template>
    <template v-if="bundle?.parts">
-    <details><summary>来源与任务核验详情</summary><p aria-label="共享去标识完整核验范围">已核对当前授权的四份独立原UTF8正文、完整所选来源、唯一公开投影、冻结Prompt/Provider/执行锚、原始三项JSON和服务器结果；服务端Audit回执不是浏览器独立数据库审计。</p></details>
-    <p>所选 {{ source.documents.length }} 个完整文字字段；未选正文、全量姓名字典及组合风险不代表已经覆盖。{{ auditOnly?'超级管理员本次临床审计也经过当前项目与逐患者用途校验。':'' }}</p>
-    <p v-if="result" aria-label="共享去标识部分候选">模型返回 {{ result.candidate_count }} 条未审核部分候选；零候选也不表示没有标识风险。</p><p v-else>当前没有已接收的模型候选结果。</p>
+    <details><summary>来源与任务核验详情</summary><p aria-label="共享去标识完整核验范围">已核对所选来源、原文、模型输入和任务版本。</p></details>
+    <p>所选 {{ source.documents.length }} 个文字字段。{{ auditOnly?'超级管理员本次临床审计也经过当前项目与逐患者用途校验。':'' }}</p>
+    <p v-if="result" aria-label="共享去标识部分候选">模型返回 {{ result.candidate_count }} 条待审核候选。</p><p v-else>当前没有已接收的模型候选结果。</p>
     <el-table v-if="result?.draft.candidates.length" :data="visibleCandidates" aria-label="共享去标识待核对候选">
      <el-table-column label="类别"><template #default="{row}">{{ categories[row.category] }}</template></el-table-column>
      <el-table-column label="原文位置"><template #default="{row}">[{{ row.start }}, {{ row.end }})</template></el-table-column><el-table-column prop="review_note" label="模型待核查说明"/>

@@ -3,7 +3,7 @@
     <el-alert v-if="!v.authorized" title="仅当前超级管理员可管理原文证据，请核对登录权限" type="info" :closable="false" />
     <p v-if="v.error" role="alert">{{ v.error }}</p>
     <template v-if="v.authorized">
-      <el-alert title="原文与条款人工审核基座" description="来源与版本是提交方声明，不代表官方来源或临床已验证。可在业务助手明确生成条款草稿并逐条保存；批准候选不会自动发布知识。" type="info" :closable="false" />
+      <el-alert title="原文与条款人工审核基座" description="登记原文和版本，在业务助手生成条款草稿；逐条审核后可保存为知识候选。" type="info" :closable="false" />
       <p>支持直接输入文字或上传 txt、md 原文；候选条款须人工审核。</p><details><summary>资料核验详情</summary><p>仅UTF8 txt、md或直接文字；原文≤4MiB。Unicode codepoint半开区间 [开始,结束)，保留BOM、CRLF、emoji与组合字符。每段知识原UTF8≤65535字节，超限整段拒绝。</p></details>
       <el-button type="primary" :disabled="v.busy||!v.options" @click="v.openOriginal">登记原文草稿</el-button><el-button :loading="v.loading" @click="v.refresh">刷新原件目录</el-button>
       <p v-if="v.notice" role="status">{{ v.notice }}</p>

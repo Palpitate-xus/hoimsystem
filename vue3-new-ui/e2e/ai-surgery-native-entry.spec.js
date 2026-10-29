@@ -85,7 +85,7 @@ test('生产原申请专业资料入口只绑定实际application，Super技术�
 
 test('生产Super按需加载原资料与完整场景治理，撤销原件可审计且不供新选择', async ({ page }) => {
   const state = await setup(page); await page.goto('/#/ai/manage');
-  await expect(page.getByRole('heading', { name: 'AI 管理中心', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'AI 管理导航', exact: true })).toBeVisible();
   expect(state.reads.some(r => r.path.includes('/surgery-sources') || r.path.includes('/surgery-scenarios'))).toBe(false);
   await selectManagementTab(page, '手术原资料与资源治理');
   await choose(page, '明确手术资源池', business.pool.payload.name + ' · #' + business.identity.department_id);

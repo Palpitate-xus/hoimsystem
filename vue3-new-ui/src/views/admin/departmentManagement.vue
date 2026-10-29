@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="科室管理" description="维护医院科室信息，配置科室主任和所属院区" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增科室</el-button>

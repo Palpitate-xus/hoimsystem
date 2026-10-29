@@ -3,9 +3,9 @@
     <h4>本次原始业务资料</h4>
     <p>{{ findings.scope === 'department' ? '所属科室范围' : findings.source_domain === 'inventory' ? '所选库存品种范围' : '全院范围' }} · {{ findings.since }} 至 {{ findings.until }}</p>
     <p>资料读取时刻：{{ findings.snapshot_time || '旧任务未留存' }}；任务结果保留本次读取的资料版本。</p>
-    <p>{{ findings.scope_note }}</p>
+    <p v-if="noticeText(findings.scope_note)">{{ noticeText(findings.scope_note) }}</p>
     <p v-if="findings.department_names?.length">科室：{{ findings.department_names.join('、') }}</p>
-    <p v-for="(item, index) in findings.missing_data || []" :key="'missing-' + index" class="data-gap">{{ item }}</p>
+    <p v-for="(item, index) in noticeList(findings.missing_data || [])" :key="'missing-' + index" class="data-gap">{{ item }}</p>
     <p v-if="findings.truncated_sources?.length" class="data-gap">本次有资料截断，请缩小日期、科室或品种范围，不能把部分清单当作完整序列。</p>
     <template v-if="findings.feedback_rating_summary">
       <h4>已记录评价评分</h4><p>{{ findings.feedback_rating_summary.definition_note }}</p>
@@ -20,7 +20,7 @@
       <el-button link @click="$emit('inspect', findings.feedback_rating_summary.source_id)">查看评分汇总依据</el-button>
     </template>
     <template v-if="findings.reviewed_feedback_excerpts">
-      <h4>本次已审核反馈片段</h4><p>{{ findings.reviewed_feedback_excerpts.scope_note }}</p>
+      <h4>本次已审核反馈片段</h4><p v-if="noticeText(findings.reviewed_feedback_excerpts.scope_note)">{{ noticeText(findings.reviewed_feedback_excerpts.scope_note) }}</p>
       <p>纳入 {{ findings.reviewed_feedback_excerpts.included_excerpt_count ?? '未知' }} 条；当前候选中因来源校验失效而排除 {{ findings.reviewed_feedback_excerpts.excluded_changed_source_count ?? '未知' }} 条。</p>
       <p v-if="findings.reviewed_feedback_excerpts.truncated" class="data-gap">审核片段清单有截断，仅描述本次所载片段，不外推总体主题占比。</p>
       <p v-if="!findings.reviewed_feedback_excerpts.items?.length">本次范围没有当前有效的审核文本。</p>
@@ -34,7 +34,7 @@
       <el-collapse-item v-for="section in series" :key="section.key" :title="section.title" :name="section.key">
         <p>{{ section.data.definition_note || section.data.status_note }}</p>
         <p v-if="section.data.planning_window">计划区间：{{ section.data.planning_window.join(' 至 ') }}</p>
-        <p v-if="section.key === 'surgical_recorded_overlaps'">可检查原区间数：{{ section.data.checked_intervals ?? '未知' }}；未检查或非活动排台数：{{ section.data.uncheckable_or_inactive_schedules ?? '未知' }}。没有线索不代表排台可行。</p>
+        <p v-if="section.key === 'surgical_recorded_overlaps'">可检查原区间数：{{ section.data.checked_intervals ?? '未知' }}；未检查或非活动排台数：{{ section.data.uncheckable_or_inactive_schedules ?? '未知' }}。</p>
         <p v-if="section.data.missing_dates?.length">未汇总日期 {{ section.data.missing_dates.length }} 天，保持缺失，未补零。</p>
         <el-table :data="section.rows" max-height="300" empty-text="本次范围未取得相应原始记录">
           <el-table-column v-for="column in section.data.columns" :key="column" :label="labels[column] || column" min-width="110"><template #default="{ row }">{{ row[column] ?? '未知' }}</template></el-table-column>
@@ -52,7 +52,7 @@
       <el-button link @click="$emit('inspect', findings.ward_capacity.source_id)">查看床位状态依据</el-button>
     </template>
     <template v-if="findings.supply_inventory">
-      <h4>所选品种的原始库存</h4><p>{{ findings.supply_inventory.scope_note }}</p>
+      <h4>所选品种的原始库存</h4><p v-if="noticeText(findings.supply_inventory.scope_note)">{{ noticeText(findings.supply_inventory.scope_note) }}</p>
       <el-table v-if="findings.supply_inventory.drugs?.length" :data="findings.supply_inventory.drugs" max-height="280">
         <el-table-column prop="name" label="药品" min-width="150" /><el-table-column label="目录库存原计数" width="130"><template #default="{ row }">{{ row.catalog_stock ?? '未知' }}</template></el-table-column>
         <el-table-column label="批次库存合计" width="130"><template #default="{ row }">{{ row.all_batch_stock_sum ?? '未知' }}</template></el-table-column>
@@ -69,6 +69,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed } from "vue";
 const props = defineProps({ findings: { type: Object, default: null } });
 defineEmits(["inspect"]);

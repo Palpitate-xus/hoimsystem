@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="抢救记录" description="按患者记录抢救时间轴、操作和用药，形成可追溯的急救过程" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="急诊患者"><el-select v-model="form.triage_id" filterable placeholder="选择分诊记录" style="width: 220px"><el-option v-for="item in triages" :key="item.triage_id" :label="`${item.patient_name}（${item.triage_level_text}）`" :value="item.triage_id" /></el-select></el-form-item>

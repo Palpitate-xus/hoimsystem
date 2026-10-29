@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方点评" description="对处方用药合理性进行专业点评" />
     <el-card>
       <div class="page-toolbar">
         <el-input v-model="keyword" placeholder="搜索处方" clearable class="page-search-input" />

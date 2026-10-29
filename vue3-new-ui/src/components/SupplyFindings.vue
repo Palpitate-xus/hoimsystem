@@ -9,13 +9,13 @@
       <p>参数为明确审核分数：数量 α {{ exact(source.parameters.alpha_size) }}；间隔 α {{ exact(source.parameters.alpha_interval) }}；发生概率 β {{ exact(source.parameters.beta_occurrence) }}。Prompt仅作溯源。</p>
       <el-button @click="emit('inspect',source.source_id)">核对本次完整物资原量依据</el-button>
       <template v-if="analysis">
-        <p>每种完整回测使用28个滚动原点，{{ analysis.planned_pair_count }} 个重叠原点—步长误差，涉及 {{ analysis.distinct_planned_target_dates }} 个不同目标日期；它们不是独立样本。当前原件回顾不保证当时已经可得，也不提供未来区间或运营效果验证。</p>
+        <p>每种完整回测使用28个滚动原点，{{ analysis.planned_pair_count }} 个重叠原点—步长误差，涉及 {{ analysis.distinct_planned_target_dates }} 个不同目标日期，部分日期对应多个预测起点。</p>
         <el-tabs v-model="targetIndex" aria-label="三个独立已记录数量目标">
           <el-tab-pane v-for="(t,i) in analysis.targets" :key="t.target" :name="String(i)" :label="targetNames[t.target]">
             <p>{{ targetNames[t.target] }}：{{ t.status==='complete'?'完整原量':'资料未知，未生成该目标预测' }}；符合原目标的日原件 {{ t.eligible_day_count }}/{{ source.days.length }}。</p>
             <p>完整目标原量总和 {{ exact(t.observed_sum) }}；同审核单位的已知部分和 {{ exact(t.known_observed_sum) }}；末日原量 {{ raw(t.last_day_value) }}。</p>
-            <p v-if="t.last_eligible_observation">最近符合目标的原量 {{ t.last_eligible_observation.date }}：{{ t.last_eligible_observation.value }}（{{ t.last_eligible_observation.source_id }}）；它不替代未知末日。</p>
-            <p>已选原件中，明确部分或全日供应约束标记 {{ t.stock_constrained_days }} 日，显式 unknown 供应约束标记 {{ t.stock_constraint_unknown_days }} 日。这两个计数不覆盖没有原件的日期，不能据零推定全期间已核清供应。</p>
+            <p v-if="t.last_eligible_observation">最近符合目标的原量 {{ t.last_eligible_observation.date }}：{{ t.last_eligible_observation.value }}（{{ t.last_eligible_observation.source_id }}）。</p>
+            <p>已选原件中，明确部分或全日供应约束标记 {{ t.stock_constrained_days }} 日，显式 unknown 供应约束标记 {{ t.stock_constraint_unknown_days }} 日。</p>
             <p v-if="t.target_gate_reasons.length">目标级缺项：{{ t.target_gate_reasons.join('；') }}。</p>
             <el-table v-if="t.missing_days.length" :data="t.missing_days.slice((missingPage-1)*20,missingPage*20)" aria-label="物资目标逐日缺项"><el-table-column prop="date" label="日期"/><el-table-column prop="source_id" label="原件引用"/><el-table-column label="缺项"><template #default="{row}">{{ row.reasons.join('；') }}</template></el-table-column></el-table>
             <el-pagination v-if="t.missing_days.length>20" v-model:current-page="missingPage" :page-size="20" :total="t.missing_days.length" layout="prev,pager,next,total" />

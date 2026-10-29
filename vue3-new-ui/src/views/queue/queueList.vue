@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="候诊队列" description="管理患者候诊队列，执行叫号和过号操作" />
     <el-card>
       <div class="page-toolbar">
         <el-input

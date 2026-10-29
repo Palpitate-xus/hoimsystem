@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="物资设备管理" description="设备台账、维修保养、高值耗材追溯和资产盘点" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="设备台账" name="equipment">
         <div class="page-toolbar"><el-button type="primary" @click="equipmentDialog = true">新增设备</el-button></div>

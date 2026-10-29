@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方管理" description="开具处方、查看处方状态和药品明细" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">开处方</el-button>

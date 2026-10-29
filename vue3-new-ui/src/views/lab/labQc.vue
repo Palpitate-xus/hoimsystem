@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="检验质控管理" description="质控品数据录入、结果判定和趋势图查看" />
     <el-row :gutter="16" style="margin-bottom: 16px"><el-col :span="8"><el-card><div class="metric-label">质控总数</div><div class="metric-value">{{ summary.total }}</div></el-card></el-col><el-col :span="8"><el-card><div class="metric-label">不通过</div><div class="metric-value danger">{{ summary.failed }}</div></el-card></el-col><el-col :span="8"><el-card><div class="metric-label">通过率</div><div class="metric-value">{{ summary.pass_rate }}%</div></el-card></el-col></el-row>
     <el-card style="margin-bottom: 16px"><template #header><span>质控趋势图</span></template><div ref="chartRef" class="qc-chart"></div></el-card>
     <el-card>

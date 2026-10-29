@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医保与费用控制" description="医保目录、结算、慢病登记、DRG/DIP 自动分组和费用预警" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="医保目录" name="catalog">
         <el-table :data="catalog" border empty-text="暂无目录">

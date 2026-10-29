@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="临床路径" description="管理临床路径方案和患者入径记录" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增路径</el-button>

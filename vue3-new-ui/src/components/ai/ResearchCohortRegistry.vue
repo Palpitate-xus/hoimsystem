@@ -23,7 +23,7 @@
    <template v-if="v.detail">
     <p>原件 {{ v.detail.source_record_id }}；状态 {{ states[v.detail.status] }}；版本 {{ v.detail.revision }}。</p>
     <template v-if="v.detail.original">
-     <p>完整声明和治理关系已核对；本项状态{{ v.detail.eligible?'符合登记条件':'尚未符合登记条件' }}，不等同实际患者读取或模型调用授权。</p>
+     <p>完整声明和治理关系已核对；本项状态{{ v.detail.eligible?'符合登记条件':'尚未符合登记条件' }}。患者资料访问和模型调用权限分别配置。</p>
      <el-button @click="v.showOriginal=!v.showOriginal">{{ v.showOriginal?'收起完整登记原文':'显式展开完整登记原文' }}</el-button>
      <div v-if="v.showOriginal" aria-label="完整登记原文">
       <template v-if="kind==='scope'"><p>项目编号：{{ v.detail.original.payload.protocol_key }}；标题：{{ v.detail.original.payload.title }}</p><p>完整目的：</p><pre>{{ v.detail.original.payload.purpose }}</pre><p>明确患者：{{ v.detail.original.payload.patient_ids.join('、') }}；明确用户：{{ v.detail.original.payload.proposed_user_ids.join('、') }}</p><p>数据范围：{{ v.detail.original.payload.data_families.map(value=>families[value]).join('、') }}；使用用途：{{ v.detail.original.payload.permitted_uses.map(value=>uses[value]).join('、') }}</p><p>记录日期 {{ v.detail.original.payload.record_window.date_from }} 至 {{ v.detail.original.payload.record_window.date_to }}；历史日期的原时区未知。</p><p>外部模型处理：{{ outbound[v.detail.original.payload.external_model_use] }}</p><pre>{{ v.detail.original.payload.external_model_use_basis }}</pre><p>授权声明：</p><pre>{{ v.detail.original.payload.authorization_basis }}</pre></template>

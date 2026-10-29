@@ -4,13 +4,13 @@
     <el-select :model-value="modelValue || null" :disabled="locked || uploading || loading" clearable filterable aria-label="待判读原始心电" placeholder="选择已登记的成对WFDB记录" style="width: 100%" @update:model-value="$emit('update:modelValue', $event || '')">
       <el-option v-for="item in assets" :key="item.asset_id" :value="item.asset_id" :disabled="item.status !== 'ready'" :label="`心电 ${item.asset_id.slice(0,8)} · ${item.signal_metadata.channels}导联 · ${(item.signal_metadata.duration_ms / 1000).toFixed(3)}秒 · ${statuses[item.status]}`" />
     </el-select>
-    <p>{{ options.scope_note || '原文件按当前患者及原就诊诊疗范围共享；上传与预览不调用模型。' }}</p>
+    <p v-if="noticeText(options.scope_note || '原文件按当前患者及原就诊诊疗范围共享；上传与预览不调用模型。')">{{ noticeText(options.scope_note || '原文件按当前患者及原就诊诊疗范围共享；上传与预览不调用模型。') }}</p>
     <template v-if="selected">
       <p>原就诊：{{ selected.encounter_ref || '未记录，不按日期推定' }}；采集时间：{{ selected.recorded_at || '未记录，不以登记时间代替' }}。原导联：{{ selected.signal_metadata.leads.map(lead => lead.name).join('、') }}。</p>
       <p v-if="!hasSamples" class="data-gap">全部采样均为缺失标记，可核查原记录，不能创建候选判读任务。</p>
       <el-button :disabled="uploading" @click="viewVisible = true">查看所选原波形</el-button><el-button v-if="selected.can_withdraw" type="warning" :disabled="uploading" @click="withdraw">撤回所选原心电</el-button>
     </template>
-    <p v-if="truncated">只显示近期50项，可选择明确原就诊缩小范围，不能据此断言没有其他心电记录。</p>
+    <p v-if="truncated">显示最近50项心电记录，可按就诊筛选。</p>
     <p v-if="locked">本次固定原始记录，登记其他文件请从未绑定原记录的工作台进入。</p>
     <el-collapse v-if="!locked"><el-collapse-item title="登记成对原始心电文件">
       <p>当前支持单文件16位小端WFDB，需有明确导联、采样率、样本数、增益/基线/单位和校验字段；不接受报告截图、URL、压缩包或用文字代替原信号。</p>
@@ -26,6 +26,7 @@
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getAIEcgAsset, getAIEcgAssets, getAIEcgOptions, uploadAIEcg, withdrawAIEcg } from "@/api/ai";

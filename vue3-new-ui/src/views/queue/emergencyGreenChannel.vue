@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="绿色通道" description="对急危重症患者记录先救治后付费申请、审批和关闭过程" />
     <el-card v-if="canApply">
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="急诊患者"><el-select v-model="form.triage_id" filterable placeholder="选择绿色通道分诊记录" style="width: 240px"><el-option v-for="item in triages" :key="item.triage_id" :label="`${item.patient_name}（${item.triage_level_text}）`" :value="item.triage_id" /></el-select></el-form-item>

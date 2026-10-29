@@ -25,9 +25,9 @@
       <el-form-item label="原容量依据类型"><el-select v-model="draft.basis_kind" aria-label="原容量依据类型" placeholder="明确已观察原区间或独立未来场景"><el-option label="已观察的原可运营容量区间" value="observed_operational_capacity" /><el-option label="明确待审核的未来容量场景" value="reviewed_future_scenario" /></el-select></el-form-item>
       <el-form-item v-for="[key,label] in [['start_at','原容量区间开始UTC'],['end_at','原容量区间结束UTC']]" :key="key" :label="label"><el-input v-model="draft[key]" :aria-label="label" :placeholder="clockHint" /></el-form-item>
       <el-form-item v-if="draft.basis_kind==='observed_operational_capacity'" label="原容量实际观察完成UTC"><el-input v-model="draft.observed_at" aria-label="原容量实际观察完成UTC" :placeholder="clockHint" /></el-form-item>
-      <p v-if="draft.basis_kind==='reviewed_future_scenario'">未来场景没有实际未来观察钟点，原observed_at保存为null；原准备条件仍须明确，不表示已观察到未来事实。即时可收治名额也不能作为未来观察或容量。</p>
+      <p v-if="draft.basis_kind==='reviewed_future_scenario'">未来容量采用情景值，请填写准备条件；观察时间留空。</p>
       <count-field v-model="counts.operational_total_beds" label="原可运营物理总床数" :disabled="disabled" />
-      <p>总床数包含已占用的可运营床。下面的即时可收治空余名额有独立观察时刻和准备条件，不作为总床数、预测输入容量或额外床池。</p>
+      <p>总床数包含已占用的可运营床。即时可收治名额请另行填写观察时间和准备条件。</p>
       <count-field v-model="counts.immediate_admittable_slots" label="原即时可收治空余名额" :allow-known="draft.basis_kind==='observed_operational_capacity'" :disabled="disabled" />
       <el-form-item v-if="counts.immediate_admittable_slots.state==='known'&&draft.basis_kind==='observed_operational_capacity'" label="原即时名额实际观察UTC"><el-input v-model="draft.immediate_slots_observed_at" aria-label="原即时名额实际观察UTC" :placeholder="clockHint" /></el-form-item>
       <el-form-item v-for="[key,label] in [['staff_readiness','本来源原人员就绪声明'],['equipment_readiness','本来源原设备就绪声明'],['isolation_applicability','本来源原隔离适用声明']]" :key="key" :label="label"><el-select v-model="draft[key]" :aria-label="label" placeholder="保留原confirmed/not_confirmed/unknown"><el-option v-for="(text,state) in reviews" :key="state" :label="text" :value="state" /></el-select></el-form-item>

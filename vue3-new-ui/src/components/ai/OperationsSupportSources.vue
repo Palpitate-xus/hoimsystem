@@ -5,7 +5,7 @@
   <template v-else>
    <div><el-button @click="v.changeTab('cases')">材料集目录</el-button><el-button @click="v.changeTab('releases')">审核版本目录</el-button><el-button v-if="v.canGovern" @click="v.changeTab('originals')">受控原件目录</el-button><el-button :loading="v.busy" @click="v.refresh">读取当前目录</el-button><el-button v-if="v.canGovern" @click="v.beginOriginal">登记完整原件</el-button></div>
    <p role="alert" v-if="v.error">{{v.error}}</p>
-   <p v-if="v.directory">第{{v.directory.page}}页，每页{{v.directory.size}}项；共{{v.directory.total}}个技术目录项。目录分页不代表材料截断。</p>
+   <p v-if="v.directory">第{{v.directory.page}}页，每页{{v.directory.size}}项；共{{v.directory.total}}项资料。</p>
    <table v-if="v.directory"><thead><tr><th>明确版本</th><th>状态</th><th>完整读取</th></tr></thead><tbody><tr v-for="row in v.directory.items" :key="row.case_id||row.release_id||row.original_id">
     <td>{{row.case_id||row.release_id||row.original_id}}</td><td>{{row.status||'当前正文不可读'}}</td><td><el-checkbox v-if="v.tab==='releases'" :model-value="v.selected.includes(row.release_id)" :disabled="!row.source_accessible||v.busy" @change="value=>v.toggle(row,value)">纳入材料集</el-checkbox><el-button :disabled="v.busy" @click="v.inspect(row)">核对本条完整来源</el-button></td>
    </tr></tbody></table>
@@ -18,7 +18,7 @@
     <p>技术状态：{{v.detail.status}}；版本{{v.detail.revision}}。原件及审计摘要不会凭空恢复缺失正文。</p>
     <p v-if="v.detail.source_accessible===false">当前来源已失效，仅显示技术元数据，不读取原件或公开文本。</p>
     <template v-if="v.source"><article v-for="doc in v.source.value.documents||[v.source.value]" :key="doc.source_id"><h3>{{doc.title}}</h3><p>{{doc.kind}}；组件{{doc.declared_component??'未知'}}；声明版本{{doc.declared_version??'未知'}}</p><pre>{{doc.text}}</pre></article></template>
-    <template v-if="v.original"><h3>受控原件，尚未自动遮盖</h3><p>原文码点{{Array.from(v.original.content_text).length}}；登记时钟不证明故障发生时间。</p><pre>{{v.original.content_text}}</pre></template>
+    <template v-if="v.original"><h3>受控原件，尚未自动遮盖</h3><p>原文码点{{Array.from(v.original.content_text).length}}；故障发生时间待补充。</p><pre>{{v.original.content_text}}</pre></template>
     <template v-if="v.draft"><h3>明确码点变换后的完整草稿</h3><pre>{{v.draft.released_text}}</pre></template>
     <el-button v-if="v.canGovern&&v.detail.case_id&&v.source&&!v.protectedPart" :disabled="v.busy" @click="v.openProtected">核对受控原件与完整投影</el-button>
     <pre v-if="v.protectedPart">{{v.canonical(v.protectedPart.value)}}</pre>

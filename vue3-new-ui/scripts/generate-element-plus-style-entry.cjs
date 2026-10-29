@@ -16,8 +16,6 @@ const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 // script bytes and expression are pinned; a changed/new selector needs review.
 // These return app menu components or SVG icons, never arbitrary Element Plus widgets.
 const AUDITED_DYNAMIC = /* AUDITED_DYNAMIC */ {
-  "src/components/VabPageHeader/index.vue|template|convertIcon(icon)": "4175bfb76c237aeebc5d388467446ea1b703a7b603ba646fc605907be6475e24",
-  "src/components/VabPageHeader/index.vue|template|convertIcon(rightIcon)": "4175bfb76c237aeebc5d388467446ea1b703a7b603ba646fc605907be6475e24",
   "src/layouts/components/VabFullScreen/index.vue|template|isFullscreen ? 'FullScreen' : 'FullScreen'": "ab1f6276222c5d18d7f0d198fecf866aba8fb8613568e50672739258313a13b9",
   "src/layouts/components/VabNav/index.vue|template|collapse ? 'DArrowRight' : 'DArrowLeft'": "f410326470f15a90386efd1084e826742e6d7c92c41ee6d3c264f71bae910bc7",
   "src/layouts/components/VabSide/components/VabMenuItem.vue|template|getIconComponent(routeChildren.meta.icon)": "b34d50edc8414d99d8a96e1016bb8a5d49c1c5419847a5f97a0e68366f445788",

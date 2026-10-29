@@ -25,14 +25,14 @@
       <p v-if="detailError" role="alert">{{ detailError }}</p>
       <template v-if="allowed&&detail">
         <p class="hash">{{ detail.source_id }}<br />原科室 #{{ detail.department_id }} · 原病区 #{{ detail.ward_id }}<br />资料可用截止UTC {{ detail.as_of }}<br />原冻结登记UTC {{ detail.created_at }} · 原作者 #{{ detail.created_by }}<br />完整原件 {{ detail.content_hash }}<br />完整集合 {{ detail.collection_digest }}<br />公开投影 {{ detail.projection_hash??'尚未发布' }}<br />当前治理 {{ detail.governance_hash }} · {{ bedSourceStates[detail.status] }} v{{ detail.revision }}</p>
-        <p>全集合当前性 {{ detail.source_current?'一致':'失效' }}；{{ detail.eligible?'当前可提交固定预测，仍不是运营效果验证':'当前不能用于新运行' }}。{{ detail.exclusion_reasons.join('；') }}</p>
+        <p>全集合当前性 {{ detail.source_current?'一致':'失效' }}；{{ detail.eligible?'当前可提交预测':'当前不能用于新运行' }}。{{ detail.exclusion_reasons.join('；') }}</p>
         <template v-if="detail.snapshot">
           <p v-if="detail.audit_only&&!detail.eligible">以下仅超级管理员独立冻结审计，不能恢复旧来源作新运行。</p>
           <p>原期间 {{ detail.snapshot.request.date_from }} 至 {{ detail.snapshot.request.date_to }} · {{ detail.snapshot.request.business_timezone }}；完整 {{ detail.snapshot.request.days.length }} 天、{{ detail.snapshot.facts.length }} 件来源。当前预测分析尚未在本面板运行。</p>
           <p>五个独立目标原声明：<span v-for="c in detail.snapshot.request.target_coverage" :key="c.target">{{ bedTargets[c.target] }}（{{ c.same_scope_confirmed }}/{{ c.same_definition_confirmed }}/{{ c.same_method_confirmed }}）；</span></p>
           <el-button @click="showFrozen=!showFrozen">{{ showFrozen?'收起':'展开' }}院内完整冻结原件</el-button><pre v-if="showFrozen" aria-label="院内完整床位序列原件">{{ JSON.stringify(detail.snapshot,null,2) }}</pre>
           <el-button v-if="detail.public_source" @click="showPublic=!showPublic">{{ showPublic?'收起':'展开' }}固定服务公开投影</el-button><pre v-if="showPublic" aria-label="床位序列固定服务公开投影">{{ JSON.stringify(detail.public_source,null,2) }}</pre>
-          <p>完整原范围、原件自由依据、原外部登记键仅院内核对。固定服务只接收公开投影；即时名额不替代可运营物理总床数，未来场景不冒充已观察事实。</p>
+          <p>服务接收已审核的床位数量和容量情景；原文和外部登记号保存在院内。</p>
           <el-button v-if="detail.eligible" @click="emit('select',detail)">选择此已发布床位序列</el-button>
         </template><p v-else>原件、公开投影及自由治理备注当前已隐藏，仅保留当前治理元数据。</p>
         <p v-if="detail.reviewed_at">原审核UTC {{ detail.reviewed_at }} · 原审核人 #{{ detail.reviewed_by }}<br />{{ detail.review_basis_note }}</p><p v-if="detail.revoked_at">原撤销UTC {{ detail.revoked_at }} · 原撤销人 #{{ detail.revoked_by }}<br />{{ detail.revoke_reason }}</p>

@@ -3,7 +3,7 @@
     <p v-if="!allowed">仅超级管理员可管理SOFA固定实施规则和全院冻结评估。</p>
     <template v-else>
       <el-tabs v-model="tab"><el-tab-pane label="SOFA独立固定规则" name="profiles"><template v-if="tab==='profiles'">
-      <p>SOFA-1原单位连续边界是本地明确实施政策。原单位分支分别审核，不能视为精确换算；发布规则不代表临床验证，不自动启用功能。</p>
+      <p>按原单位分别审核SOFA-1评分边界，发布后在功能配置中启用。</p>
       <el-button type="primary" :disabled="!option" @click="openCreate">新建SOFA固定规则草稿</el-button>
       <el-button :loading="loading" @click="load">刷新SOFA审核目录</el-button>
       <p v-if="error" role="alert">{{ error }}</p>
@@ -36,7 +36,7 @@
             <template v-if="detail.status==='draft'">
               <el-checkbox v-model="termsConfirmed">我已核对SOFA固定版本、原单位分支、本地边界及输入策略</el-checkbox>
               <el-input v-model="reviewEvidence" aria-label="SOFA发布依据标识" maxlength="2000" placeholder="至少5字，记录实际审核依据" />
-              <el-input v-model="reviewNote" aria-label="SOFA发布审核说明" type="textarea" maxlength="2000" placeholder="至少20字；实施审核不替代临床验证" />
+              <el-input v-model="reviewNote" aria-label="SOFA发布审核说明" type="textarea" maxlength="2000" placeholder="至少20字，说明审核依据" />
               <el-button type="primary" :disabled="!canPublish" :loading="acting" @click="act('publish')">审核并发布SOFA固定规则</el-button>
             </template>
             <template v-if="detail.status!=='revoked'"><el-input v-model="revokeReason" aria-label="SOFA规则撤销依据" type="textarea" maxlength="1000" placeholder="至少5字，说明撤销原版本的依据" /><el-button type="danger" :disabled="acting || revokeReason.trim().length<5" :loading="acting" @click="act('revoke')">撤销SOFA固定规则</el-button></template>

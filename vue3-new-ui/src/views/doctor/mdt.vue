@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="多学科会诊" description="发起和参与多学科联合会诊申请" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增会诊</el-button>

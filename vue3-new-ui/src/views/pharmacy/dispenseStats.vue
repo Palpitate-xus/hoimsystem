@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="发药统计" description="按处方创建日期统计已发药和已退药处方" />
     <el-card>
       <div class="page-toolbar">
         <el-date-picker v-model="dateRange" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" />

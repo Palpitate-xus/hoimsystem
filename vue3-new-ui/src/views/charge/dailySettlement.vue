@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="日结对账" description="收费员每日结算和对账管理（支持开单日 / 缴费日两种口径）" />
     <el-card>
       <el-form :inline="true" class="page-toolbar">
         <el-form-item label="日期">

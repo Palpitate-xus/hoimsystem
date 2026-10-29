@@ -13,7 +13,7 @@
         <p>原登记UTC：{{ selected.recorded_at }}；原专业签署：{{ selected.professional_status }}；审核UTC：{{ selected.reviewed_at??'原无审核' }}。</p>
         <p v-if="!selected.eligible_for_new_use">当前不可作为新场景的已生效原件：{{ selected.exclusion_reasons.join('；') }}。</p>
         <p v-if="selected.payload===null">当前仅返回治理摘要，私有正文和父件已由服务器隐去；不会从旧缓存恢复。</p>
-        <template v-else><p>以下为已核对完整摘要的院内原量与真实时钟。null、0、false和未知均保持原义，不代表已确认可排台。</p><el-button @click="showOriginal=!showOriginal">{{ showOriginal?'收起':'展开' }}完整院内冻结原件</el-button><el-input v-if="showOriginal" :model-value="JSON.stringify(selected,null,2)" aria-label="完整院内手术原件" type="textarea" :rows="20" readonly /></template>
+        <template v-else><p>请核对以下病例、资源数量和时间。</p><el-button @click="showOriginal=!showOriginal">{{ showOriginal?'收起':'展开' }}完整院内冻结原件</el-button><el-input v-if="showOriginal" :model-value="JSON.stringify(selected,null,2)" aria-label="完整院内手术原件" type="textarea" :rows="20" readonly /></template>
         <p><el-button v-if="selected.can_review===true" @click="beginAction('publish')">审核发布本条</el-button><el-button v-if="selected.can_review===true" @click="beginAction('reject')">审核拒绝本条</el-button><el-button v-if="selected.can_revoke===true" type="danger" @click="beginAction('revoke')">按当前版本撤销本条</el-button></p>
       </article>
     </el-tab-pane><el-tab-pane v-if="isSuper" label="全局资源登记与声明" name="registry"><RegistryManager v-if="tab==='registry'" :pool-id="pool" :active="active" @registry-changed="registryChanged" @pool-selected="chooseAuditPool" @invalidate="invalidate" /></el-tab-pane></el-tabs>

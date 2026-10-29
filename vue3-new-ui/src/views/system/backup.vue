@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="数据备份恢复" description="执行数据备份和恢复操作" />
     <el-card>
       <el-alert
         title="备份恢复说明"

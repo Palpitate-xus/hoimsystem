@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="输液管理" description="执行输液医嘱、记录巡视滴速并完成输液" />
     <el-card>
       <div class="page-toolbar"><el-button @click="fetchList">刷新</el-button></div>
       <el-table :data="orders" v-loading="loading" border empty-text="暂无输液医嘱">

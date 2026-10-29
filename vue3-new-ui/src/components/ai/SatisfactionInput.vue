@@ -2,7 +2,7 @@
   <section aria-label="受审评价证据输入">
     <p v-if="!allowed">当前身份不能读取评价证据。</p>
     <template v-else>
-      <p>明确选择受审的完整评价证据；只发送安全评分统计与已选择的人工摘录，不发送原评论、患者或就诊身份。人工摘录不是自动匿名或事实确认。</p>
+      <p>请选择已审核的评价资料。模型接收评分统计和选定的人工摘录。</p>
       <p v-if="error" role="alert">{{ error }}</p><p v-if="checking" role="status">正在核对本次评价资料。</p>
       <template v-if="!initialMalformed">
         <el-button @click="refresh" :loading="checking">重新核对当前评价引用</el-button><el-button v-if="selected || checking" @click="clearSelection">清除评价证据选择</el-button>

@@ -14,7 +14,7 @@
         </el-tab-pane>
         <el-tab-pane label="检验来源全院审计" name="sources">
           <el-form inline @submit.prevent="load"><el-form-item label="患者ID"><el-input v-model="filters.patient_id" aria-label="检验来源治理患者ID" inputmode="numeric" clearable /></el-form-item><el-form-item label="原住院ID"><el-input v-model="filters.admission_id" aria-label="检验来源治理原住院ID" clearable /></el-form-item><el-form-item label="状态"><el-select v-model="filters.status" aria-label="检验来源治理状态" clearable placeholder="全部状态"><el-option label="活动" value="active" /><el-option label="已撤销" value="revoked" /></el-select></el-form-item><el-button native-type="submit" :loading="loading">查询全院检验来源</el-button></el-form>
-          <p>清单不代表原来源当前有效；详细核对保留当时冻结原值。超级管理员审计可读取已变化的原版本，不能因此继续作为当前AI输入。</p>
+          <p>清单保留任务当时的检验记录；点击详情查看原值和当前来源状态。</p>
           <el-table :data="items" v-loading="loading" empty-text="本页没有匹配检验来源"><el-table-column prop="lab_source_id" label="来源ID" min-width="250" /><el-table-column label="原患者与住院" min-width="220"><template #default="{ row }">#{{ row.patient_id }} · {{ row.admission_id }}</template></el-table-column><el-table-column prop="collected_at_utc" label="人工核实采样UTC" min-width="220" /><el-table-column prop="available_at" label="本次纳入可用UTC" min-width="220" /><el-table-column label="状态与版本"><template #default="{ row }">{{ statusLabel(row.status) }} · v{{ row.revision }}</template></el-table-column><el-table-column label="核对" width="130"><template #default="{ row }"><el-button @click="inspectSource(row)">核对冻结检验</el-button></template></el-table-column></el-table>
         </el-tab-pane>
       </el-tabs>
@@ -24,7 +24,7 @@
           <el-form-item label="来源命名空间"><el-input v-model="form.source_namespace" aria-label="映射来源命名空间" maxlength="120" placeholder="明确原系统/来源域，不从本地编码猜测" /></el-form-item>
           <div class="fields"><el-form-item v-for="field in signatureFields" :key="field.key" :label="field.label"><el-input v-model="form.signature[field.key]" :aria-label="field.label" :maxlength="field.max" /></el-form-item></div>
           <el-form-item label="结果类型"><el-select v-model="form.signature.value_kind" aria-label="映射结果类型" placeholder="明确选择"><el-option label="数值" value="numeric" /><el-option label="定性" value="qualitative" /></el-select></el-form-item>
-          <p>单位留空仅用于原定性结果没有单位的情况；不把定性结果伪装成数值，不自动进行单位换算。</p>
+          <p>请填写原报告单位；定性结果原本没有单位时可留空。</p>
           <el-form-item label="目标项目身份"><el-select v-model="form.analyte_key" aria-label="映射目标项目身份" placeholder="从后端允许项目中明确选择"><el-option v-for="item in analytes" :key="item.key" :label="item.label" :value="item.key" /></el-select></el-form-item>
           <el-form-item label="依据来源标识"><el-input v-model="form.evidence_reference" aria-label="映射依据来源标识" maxlength="1000" placeholder="至少5字，填写原依据标识；系统不会抓取此文字对应的URL" /></el-form-item>
           <el-form-item label="项目身份核对依据"><el-input v-model="form.rationale" aria-label="映射项目身份核对依据" type="textarea" maxlength="2000" placeholder="至少20字，说明原来源、签名和项目身份对应关系" /></el-form-item>
@@ -34,7 +34,7 @@
         <div v-if="allowed" v-loading="inspecting"><p v-if="detailError" role="alert">{{ detailError }}</p>
           <template v-if="detail && detailKind === 'mappings'">
             <p class="hash">映射 {{ detail.mapping_id }} · {{ detail.label || detail.analyte_label || detail.analyte_key }} · {{ statusLabel(detail.status) }} · v{{ detail.revision }}<br />内容摘要 {{ detail.content_hash }}<br />治理摘要 {{ detail.governance_hash }}</p><p>来源命名空间 {{ detail.source_namespace }}；{{ signatureLabel(detail.signature) }}</p><p>原依据标识：{{ detail.evidence_reference }}</p><p>项目身份依据：{{ detail.rationale }}</p><p>登记 {{ detail.created_at }}；发布 {{ detail.published_at || '未发布' }}；原审核说明 {{ detail.review_note || '未提供' }}</p>
-            <template v-if="detail.status === 'draft'"><el-checkbox v-model="semanticConfirmed">我已核对目标项目语义身份</el-checkbox><el-checkbox v-model="signatureConfirmed">我已核对来源命名空间和完整原签名</el-checkbox><el-input v-model="reviewNote" aria-label="项目映射审核说明" type="textarea" maxlength="2000" placeholder="至少20字，记录审核依据；不代表临床模型验证" /><el-button type="primary" :disabled="!semanticConfirmed || !signatureConfirmed || reviewNote.trim().length < 20" :loading="acting" @click="publish">审核并发布此映射版本</el-button></template>
+            <template v-if="detail.status === 'draft'"><el-checkbox v-model="semanticConfirmed">我已核对目标项目语义身份</el-checkbox><el-checkbox v-model="signatureConfirmed">我已核对来源命名空间和完整原签名</el-checkbox><el-input v-model="reviewNote" aria-label="项目映射审核说明" type="textarea" maxlength="2000" placeholder="至少20字，说明审核依据" /><el-button type="primary" :disabled="!semanticConfirmed || !signatureConfirmed || reviewNote.trim().length < 20" :loading="acting" @click="publish">审核并发布此映射版本</el-button></template>
           </template>
           <ai-laboratory-findings v-if="detail && detailKind === 'sources'" :source="detail" :expected-patient-id="detail.patient_id" :expected-admission-id="detail.admission_id" />
           <template v-if="detail && detail.status !== 'revoked' && (detailKind === 'mappings' || detail.can_revoke === true)"><el-input v-model="revokeReason" aria-label="检验治理撤销依据" type="textarea" maxlength="1000" placeholder="至少5字，明确撤销原因；不能恢复原版本" /><el-button type="danger" :disabled="revokeReason.trim().length < 5" :loading="acting" @click="revoke">撤销此{{ detailKind === 'mappings' ? '映射版本' : '检验来源' }}</el-button></template>

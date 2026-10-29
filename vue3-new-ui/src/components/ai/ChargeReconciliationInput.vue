@@ -2,7 +2,7 @@
  <section aria-label="完整住院账目核对入口">
   <p v-if="!allowed">当前身份不能使用完整账目核对。</p>
   <template v-else>
-   <p>先核对真实患者、本次住院及一件完整已发布账目。模型仅提出待人工核对的问题，不证明现金收退、收费资格或自动计费。</p>
+   <p>请选择患者、本次住院和一份已发布的完整账目。</p>
    <p v-if="!scopeReady">请从已授权患者的真实住院记录进入，不能猜测患者或住院标识。</p>
    <template v-else>
     <el-button @click="refresh" :loading="checking">重新核对账目范围</el-button><el-button v-if="selected" @click="clearSelection">清除账目选择</el-button>

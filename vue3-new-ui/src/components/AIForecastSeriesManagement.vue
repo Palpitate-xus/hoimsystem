@@ -1,8 +1,8 @@
 <template>
   <section v-if="allowed" aria-label="挂号预测来源管理">
-    <p>冻结每日所有状态挂号原记录数（条/日），不代表实际到诊或独立患者。覆盖与原钟点时区由超级管理员声明，未独立核实外部完整性，也不代表预测效果已验证。来源不能编辑或恢复，需变更时新建来源。</p>
+    <p>每日挂号记录数包含全部挂号状态，单位为条/日。请核对覆盖日期和时区；修改资料时需新建来源。</p>
     <div class="page-toolbar"><el-button type="primary" @click="openCreate">新建覆盖声明</el-button><el-button @click="load">刷新来源</el-button><el-select v-model="status" aria-label="预测来源状态" clearable placeholder="全部状态" @change="load"><el-option label="活动" value="active" /><el-option label="已撤销" value="revoked" /></el-select></div>
-    <p v-if="directory.truncated">仅显示前100个来源，请按状态筛选；清单不是完整目录。</p>
+    <p v-if="directory.truncated">显示前100个来源，可按状态筛选。</p>
     <el-table :data="directory.items || []" v-loading="loading" empty-text="尚无冻结预测来源">
       <el-table-column prop="name" label="来源名称" min-width="180" /><el-table-column label="原范围" min-width="150"><template #default="{ row }">{{ row.scope === 'hospital' ? '全院' : `科室 #${row.department_id}` }} · {{ row.day_count }} 日</template></el-table-column>
       <el-table-column label="历史与时区" min-width="250"><template #default="{ row }">{{ row.date_from }} 至 {{ row.date_to }}<div>{{ row.timezone }} · 原数据库无时区钟点</div></template></el-table-column>
@@ -33,7 +33,7 @@
         <template v-if="detail">
           <h4>{{ detail.name }}</h4><p>状态 {{ detail.status }} · v{{ detail.revision }}；{{ detail.current ? '本次原资料一致性核对通过' : detail.current_error || '原资料一致性待核对' }}</p>
           <p>{{ detail.coverage_note }}</p><p v-for="note in detail.quality?.notes || []" :key="note">{{ note }}</p>
-          <template v-if="detail.source"><p>{{ detail.source.date_from }} 至 {{ detail.source.date_to }} · {{ detail.source.timezone }} · 覆盖声明 {{ detail.source.coverage_attested_at }}；仅管理员声明，不是独立完整性验证。</p><p class="hash">来源 {{ detail.source.source_id }}<br />内容摘要 {{ detail.source.content_hash }}<br />原登记摘要 {{ detail.source.registration_digest }}<br />声明依据摘要 {{ detail.source.coverage_note_hash }}</p><el-table :data="detail.source.observations" max-height="300" aria-label="已冻结挂号历史"><el-table-column prop="date" label="日期" /><el-table-column label="冻结记录数"><template #default="{ row }">{{ row.value ?? '未知' }}</template></el-table-column></el-table></template>
+          <template v-if="detail.source"><p>{{ detail.source.date_from }} 至 {{ detail.source.date_to }} · {{ detail.source.timezone }} · 覆盖声明 {{ detail.source.coverage_attested_at }}。</p><p class="hash">来源 {{ detail.source.source_id }}<br />内容摘要 {{ detail.source.content_hash }}<br />原登记摘要 {{ detail.source.registration_digest }}<br />声明依据摘要 {{ detail.source.coverage_note_hash }}</p><el-table :data="detail.source.observations" max-height="300" aria-label="已冻结挂号历史"><el-table-column prop="date" label="日期" /><el-table-column label="冻结记录数"><template #default="{ row }">{{ row.value ?? '未知' }}</template></el-table-column></el-table></template>
           <template v-if="detail.status === 'active'"><el-input v-model="revokeReason" aria-label="预测来源撤销依据" maxlength="1000" placeholder="说明撤销依据，撤销后不能恢复" /><el-button type="danger" :disabled="!revokeReason.trim()" :loading="revoking" @click="revoke">撤销此来源</el-button></template>
           <p v-else>已撤销 {{ detail.revoked_at }}：{{ detail.revoke_reason }}。此来源不能恢复。</p>
         </template>

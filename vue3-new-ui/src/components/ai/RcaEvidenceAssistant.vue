@@ -1,7 +1,7 @@
 <template>
  <section aria-label="事件RCA专属调查草稿助手"><p v-if="!v.mode" role="alert">此面板仅处理完整事件RCA证据模式，不退回旧截断资料或通用问答。</p><p v-else-if="!v.scopeValid||!v.initialValid" role="alert">仅接受本项Case引用和原样可选问题；不能混入患者、住院、药品或其它协议输入。</p><p v-else-if="!v.sessionAllowed" role="status">仅当前超级管理员可用，仍须独立事件及关联患者用途许可。</p><p v-if="v.error" role="alert">{{v.error}}</p>
   <el-button v-if="v.closed&&active" @click="v.reopen">显式重新打开RCA助手</el-button>
-  <template v-if="v.active"><p>候选解释、冲突引文和调查问题均未核实。没有返回假设不表示没有事件促成因素；不自动改写旧RCA、推进PDCA、确认责任或整改效果。已发出的模型请求可能计费，取消只停止接收结果，未知用量保留未知。</p><el-button @click="v.close">关闭并清除RCA助手</el-button>
+  <template v-if="v.active"><p>请逐项调查候选解释、冲突引文和待核问题。已发出的模型请求可能计费，取消后可在用量记录中查看已知费用。</p><el-button @click="v.close">关闭并清除RCA助手</el-button>
    <RcaEvidenceSourceInput :key="v.inputKey" :initial-references="v.initialReferences" :event-id="eventId" :expected-patient-id="expectedPatientId" :active="v.active" @selection="v.selected" @invalidate="v.invalidate"/>
    <el-input v-model="v.question" type="textarea" aria-label="RCA原样可选问题"/><el-checkbox v-model="v.preview">明确以Super试运行RCA</el-checkbox><el-checkbox v-model="v.wantTrace">明确读取原任务JSON审计</el-checkbox>
    <p v-if="!feature?.enabled">当前未启用；仅显式Super试运行，不自动启用或认定本地验证完成。</p><el-button :disabled="!v.canGenerate||v.busy" @click="v.inspect">预览本次完整RCA资料</el-button><el-button :disabled="!v.canGenerate||v.busy" :loading="v.busy" @click="v.submit">提交未核实RCA假设任务</el-button><el-button :disabled="v.busy" @click="v.loadHistory">读取RCA技术任务目录</el-button>
@@ -10,7 +10,7 @@
    <p v-if="v.run" aria-label="RCA原任务冻结问题">原任务问题：{{v.run.rca_evidence_findings.input.question===undefined?'未提供':v.run.rca_evidence_findings.input.question===null?'明确null':v.run.rca_evidence_findings.input.question}}</p>
    <RcaEvidenceFindings v-if="v.run" :run="v.run" :parts="v.parts" :trace="v.trace" :expected-run-id="v.lastRun" :expected-case-id="v.run.rca_evidence_case_id" :active="v.active" :audit-only="v.readAudit" :config-revision="feature?.revision" @invalidate="v.clearDerived()" @reload="v.refresh"/>
   </template>
-  <el-dialog :model-value="v.previewOpen" title="本次完整RCA资料预览" :before-close="v.closePreview" @update:model-value="value=>{if(!value)v.closePreview()}" destroy-on-close><template v-if="v.previewData&&v.active"><p>已核对本次当前完整Case、全部成员与模型所见完整投影；不证明事件原因或已匿名。</p><el-button @click="v.previewRaw=!v.previewRaw">{{v.previewRaw?'收起预览模型所见资料':'显式展开预览模型所见资料'}}</el-button><pre v-if="v.previewRaw" aria-label="RCA预览完整模型所见资料">{{JSON.stringify(v.previewData.source,null,2)}}</pre></template><p v-else>尚未展示正文。</p></el-dialog>
+  <el-dialog :model-value="v.previewOpen" title="本次完整RCA资料预览" :before-close="v.closePreview" @update:model-value="value=>{if(!value)v.closePreview()}" destroy-on-close><template v-if="v.previewData&&v.active"><p>已核对本次事件范围、所选成员和模型输入。</p><el-button @click="v.previewRaw=!v.previewRaw">{{v.previewRaw?'收起预览模型所见资料':'显式展开预览模型所见资料'}}</el-button><pre v-if="v.previewRaw" aria-label="RCA预览完整模型所见资料">{{JSON.stringify(v.previewData.source,null,2)}}</pre></template><p v-else>尚未展示正文。</p></el-dialog>
  </section>
 </template>
 <script setup>

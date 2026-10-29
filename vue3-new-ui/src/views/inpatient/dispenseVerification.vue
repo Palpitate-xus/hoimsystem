@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="配药核对" description="护士核对药品、剂量与患者信息后确认接收，避免发错药" />
     <el-card>
       <div class="page-toolbar"><el-button @click="fetchList">刷新</el-button></div>
       <el-table :data="records" v-loading="loading" border empty-text="暂无待核对配药记录">

@@ -25,7 +25,7 @@
     <p v-if="!canConfirmProfessional">当前技术身份可以登记未知、审核或治理。专业确认必须由实际药师本人完成；技术发布不改变其状态。</p>
     <el-form-item v-if="payload.professional_attestation?.status==='confirmed'" label="药师本人专业确认依据"><el-input type="textarea" :model-value="payload.professional_attestation.basis_note" aria-label="药师本人专业确认依据" @update:model-value="set('professional_attestation',{...payload.professional_attestation,basis_note:$event})" /></el-form-item>
     <template v-if="kind==='daily'">
-      <fieldset><legend>可选旧台账审计引用</legend><p>只核原台账的受控审计投影；不作为完整日量、需求、患者资料或 UTC 时钟证据。</p>
+      <fieldset><legend>可选旧台账审计引用</legend><p>以下为原台账审计记录。</p>
         <el-button v-if="!Array.isArray(payload.audit_refs)" @click="set('audit_refs',[])">本条不附旧台账审计引用</el-button>
         <el-button :disabled="payload.audit_refs?.length>=64" @click="addAudit">添加明确审计引用</el-button>
         <div v-for="(ref,index) in payload.audit_refs||[]" :key="index"><el-form-item :label="itemKind==='pharmaceutical'?'实际原台账编号':'实际原追溯UUID'"><el-input :model-value="String(itemKind==='pharmaceutical'?ref.ledger_id??'':ref.trace_id??'')" :aria-label="'原审计引用第'+(index+1)+'项'" @update:model-value="auditValue(index,$event)" /></el-form-item><el-button @click="set('audit_refs',payload.audit_refs.filter((_,i)=>i!==index))">移除此审计引用</el-button></div>

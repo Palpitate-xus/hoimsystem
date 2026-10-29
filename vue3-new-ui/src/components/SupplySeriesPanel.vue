@@ -1,6 +1,6 @@
 <template>
 <section aria-label="受审物资完整日序列">
- <el-alert :closable="false" type="info" title="三类实际记录数量分别预测；缺失与冲突不补零，不代表潜在需求、采购建议或可用库存。"/>
+ <el-alert :closable="false" type="info" title="分别预测申请量、出库量和退回量，请先选择数据来源。"/>
  <p v-if="error" role="alert">{{error}}</p>
  <el-button :disabled="loading||!allowed" @click="load">重新读取受审序列目录</el-button><el-button :disabled="!canCreate||loading" @click="beginCreate">明确当前SKU的完整日序列</el-button>
  <p v-if="!canCreate">新建需要业务入口明确实际SKU及医院库存范围；不按名称、药品规格或当前库存推导单位和历史数量。</p>

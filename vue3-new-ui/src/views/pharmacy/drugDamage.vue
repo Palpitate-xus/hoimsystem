@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="药品报损" description="记录过期、破损等药品损耗，审批通过后扣减库存" />
     <el-card>
       <div class="page-toolbar"><el-button type="primary" @click="openCreate">提交报损</el-button><el-button @click="loadData">刷新</el-button></div>
       <el-table :data="records" v-loading="loading" border empty-text="暂无报损记录">

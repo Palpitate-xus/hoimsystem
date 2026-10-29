@@ -7,7 +7,7 @@
         <el-alert :type="result.compatible?'success':'warning'" :closable="false" :title="result.compatible?'服务声明与登记配置匹配，实际运营适用性及效果仍须验证':'已保存配置与服务实际声明存在差异'" />
         <p v-for="issue in result.issues" :key="issue">{{ issue }}</p>
         <el-descriptions :column="1" border><el-descriptions-item v-for="[label,value] in rows" :key="label" :label="label"><span class="hash">{{ value }}</span></el-descriptions-item></el-descriptions>
-        <p>{{ result.scope_note }}</p><p>仅提供候选方案，不自动预约、锁房间、写入排台或开始手术。能力核对不改变验证状态或启用配置。</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p><p>核对模型后，请保存配置；候选方案在排台流程中另行审核。</p>
         <p>填写实际模型只回填编辑表单，仍须用户核对并保存当前版本。</p>
       </template>
     </div>
@@ -16,6 +16,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import {computed,onBeforeUnmount,onDeactivated,ref,watch} from 'vue';
 import {useStore} from 'vuex';
 import {checkSurgeryProvider,verifySurgeryProviderCheck} from '@/api/ai/surgeryProvider';

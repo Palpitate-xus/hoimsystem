@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="运营趋势" description="基于每日预聚合事实表展示核心业务与财务指标" />
     <el-card>
       <div class="page-toolbar">
         <el-date-picker v-model="range" type="daterange" value-format="YYYY-MM-DD" start-placeholder="开始日期" end-placeholder="结束日期" />

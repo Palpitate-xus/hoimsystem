@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="审方规则引擎" description="药师维护用药安全规则，开方/审方时自动执行检查（不预置数据，由药师录入）" />
     <el-card>
       <div class="page-toolbar">
         <el-select v-model="query.rule_type" placeholder="规则类型" clearable style="width: 150px" @change="load">
@@ -136,7 +135,7 @@
       <div v-if="checkResult">
         <el-alert v-if="checkResult.blocked" type="error" :closable="false" title="存在禁止事项或禁止级规则尚未完整评估，处方不可通过" />
         <el-alert v-else-if="checkResult.findings.length" type="warning" :closable="false" title="存在规则提示或尚待复核事项" />
-        <el-alert v-else type="info" :closable="false" title="现有规则未产生提示；不代表已覆盖全部用药风险" />
+        <el-alert v-else type="info" :closable="false" title="当前规则未发现用药提示" />
         <el-table v-if="checkResult.findings.length" :data="checkResult.findings" border size="small" style="margin-top: 8px">
           <el-table-column prop="severity" label="级别" width="70">
             <template #default="{ row }">

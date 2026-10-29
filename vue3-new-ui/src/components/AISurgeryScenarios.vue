@@ -17,13 +17,13 @@
    <template v-if="creating"><p>原申请全集由业务页面给定：{{cohort.join('、')}}。截止时刻须不早于全部相关原件登记及发布时刻；不回填历史可得性。</p>
     <SurgeryFields v-model="period" :schema="captureSchema.$defs.PeriodSelection" :root="captureSchema" label="明确规划时区、日期与资料截止"/>
     <el-button :disabled="!captureValid||loading" @click="capture">读取全部当前相关原件与物理资源</el-button>
-    <template v-if="preview&&form"><p>完整捕获UTC：{{preview.captured_at}}；全部相关来源 {{preview.source_records.length}} 件，物理资源 {{preview.resources.length}} 件。每根用途、依据和每个候选均须明确填写；技术绑定已固定，不能手填原件SHA替代读取。</p>
-     <p>候选职责只从当前捕获的明确整件职责原件选择。账号或平台角色不证明岗位资格；原成本和时长保留十进制文本、null、0和未知。</p>
+    <template v-if="preview&&form"><p>完整捕获UTC：{{preview.captured_at}}；全部相关来源 {{preview.source_records.length}} 件，物理资源 {{preview.resources.length}} 件，请逐项填写用途和审核依据。</p>
+     <p>请从当前记录中选择人员职责，并核对岗位资质、成本和时长。</p>
      <SurgeryFields :key="preview.collection_digest" v-model="form" :schema="formSchema" :root="formSchema" :lookups="lookups" :fixed-keys="fixedKeys" :locked-arrays="['members','resources','cases']" label="本件完整有限域与逐件审阅"/>
     </template>
    </template><template #footer><el-button @click="closeCreate">关闭</el-button><el-button :disabled="!formValid||loading" type="primary" @click="create">保存整件草稿，等待独立审核</el-button></template>
   </el-dialog>
-  <el-dialog :model-value="!!action" title="独立完整场景治理" width="min(760px,94vw)" @update:model-value="v=>!v&&closeAction()"><p>当前完整场景 {{selected?.scenario_id}}，原版本 {{selected?.revision}}。审核不代表真实临床或运营验证，也不产生预约。</p><el-input v-model="basis" aria-label="本次完整场景治理依据" type="textarea" :rows="5" placeholder="至少20非空白字符；撤销最多1000字符，审核最多4000UTF8字节"/><template #footer><el-button @click="closeAction">关闭</el-button><el-button :disabled="!actionValid||loading" type="primary" @click="govern">保存本次完整场景治理</el-button></template></el-dialog>
+  <el-dialog :model-value="!!action" title="独立完整场景治理" width="min(760px,94vw)" @update:model-value="v=>!v&&closeAction()"><p>当前完整场景 {{selected?.scenario_id}}，原版本 {{selected?.revision}}。</p><el-input v-model="basis" aria-label="本次完整场景治理依据" type="textarea" :rows="5" placeholder="至少20非空白字符；撤销最多1000字符，审核最多4000UTF8字节"/><template #footer><el-button @click="closeAction">关闭</el-button><el-button :disabled="!actionValid||loading" type="primary" @click="govern">保存本次完整场景治理</el-button></template></el-dialog>
  </section>
 </template>
 <script setup>

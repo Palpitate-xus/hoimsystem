@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="急诊分诊" description="按四级分诊记录主诉、生命体征和绿色通道状态，优先处理高危患者" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="患者"><el-select v-model="form.patient_id" filterable placeholder="选择患者" style="width: 180px"><el-option v-for="item in patients" :key="item.id" :label="item.name" :value="item.id" /></el-select></el-form-item>

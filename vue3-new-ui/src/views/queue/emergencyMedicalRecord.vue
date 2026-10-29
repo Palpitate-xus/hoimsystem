@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="急诊病历" description="按急诊分诊记录书写主诉、查体、诊断和处理计划，签名后不可修改" />
     <el-card>
       <el-form :model="form" label-width="90px">
         <el-form-item label="急诊患者"><el-select v-model="form.triage_id" filterable placeholder="选择分诊记录" style="width: 280px"><el-option v-for="item in triages" :key="item.triage_id" :label="`${item.patient_name}（${item.triage_level_text}）`" :value="item.triage_id" /></el-select></el-form-item>

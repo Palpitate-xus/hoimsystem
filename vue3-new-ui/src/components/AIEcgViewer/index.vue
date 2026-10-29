@@ -12,20 +12,21 @@
       <p>已读取原样本 {{ windowData.start_sample }}–{{ windowData.end_sample_exclusive }}（结束不含）；{{ (windowData.start_sample / rate).toFixed(3) }}–{{ (windowData.end_sample_exclusive / rate).toFixed(3) }}秒。当前原文件状态：{{ statuses[windowData.status] || windowData.status }}，版本{{ windowData.revision }}。</p>
       <p v-if="windowData.decimated" class="data-gap">当前为保留极值的抽样概览，缺失区间断开；请缩小窗口查看完整采样点，不能把概览当作全部原始采样。</p>
       <p v-else>当前窗口显示全部原始采样点，缺失值保持缺失。</p>
-      <p v-if="highlight">模型定位导联 {{ highlight.leads?.join('、') || '所示导联' }}，原样本 {{ highlight.start }}–{{ highlight.end }}（结束不含），待人工核对；不表示已确认病变或诊疗发生时间。</p>
+      <p v-if="highlight">模型定位导联 {{ highlight.leads?.join('、') || '所示导联' }}，原样本 {{ highlight.start }}–{{ highlight.end }}（结束不含）。</p>
       <div class="lead-grid">
         <div v-for="lead in windowData.leads" :key="lead.name" class="lead-panel">
           <strong>{{ lead.name }}</strong><span v-if="lead.missing_samples_in_window"> · 本窗缺失 {{ lead.missing_samples_in_window }} 个采样</span>
           <canvas :ref="el => bindCanvas(lead.name, el)" :aria-label="`导联 ${lead.name} 原始波形`" role="img" />
         </div>
       </div>
-      <p>{{ windowData.scope_note }}</p>
+      <p v-if="noticeText(windowData.scope_note)">{{ noticeText(windowData.scope_note) }}</p>
     </template>
-    <p>采样与幅度显示不证明设备校准、生理信号质量或诊断已验证；不补齐缺失导联、缺失采样或实际采集时间。</p>
+
     <div v-if="allowDownload" class="controls"><el-button :disabled="downloading" @click="download('header')">下载原头文件（可能含标识）</el-button><el-button :disabled="downloading" @click="download('pair')">下载原始成对文件（含原头注释）</el-button></div>
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
 import { getAIEcgContent, getAIEcgWindow } from "@/api/ai";
 const props = defineProps({ source: { type: Object, required: true }, allowDownload: Boolean });

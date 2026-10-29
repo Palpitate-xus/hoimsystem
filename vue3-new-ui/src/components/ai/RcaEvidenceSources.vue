@@ -20,7 +20,7 @@
     <p>当前记录状态 {{ v.detail.governance.status }}；{{ v.detailKind==='grants'?(v.detail.current_scope?'当前许可范围满足':'许可已失效'):(v.detail.eligible?'本件满足当前来源条件':'当前不可用于新任务') }}。</p>
     <el-button @click="v.showBody=!v.showBody">{{ v.showBody?'收起本件完整原件':'显式展开本件完整原件' }}</el-button>
     <pre v-if="v.showBody" aria-label="RCA本件完整私有原件">{{ pretty(v.detailKind==='grants'?v.detail.identity:v.detail.immutable) }}</pre>
-    <details><summary>资料核验详情</summary><p>原naive时间保留“时区未提供”；登记和审核UTC6为服务器记录时钟，不冒充事件发生时刻。</p></details>
+    <details><summary>资料核验详情</summary><p>原记录时区未提供，登记和审核时间采用服务器UTC。</p></details>
     <template v-if="v.detailKind!=='grants'&&v.detail.governance.status==='draft'">
      <fieldset><legend>逐项明确原文审核，不默认确认</legend>
       <el-select v-model="v.reviewForm.decision" aria-label="RCA明确审核决定" placeholder="明确发布或拒绝"><el-option label="发布这份提供稿" value="publish"/><el-option label="拒绝这份提供稿" value="reject"/></el-select>

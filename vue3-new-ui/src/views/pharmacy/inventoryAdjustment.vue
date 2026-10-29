@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="库存调整" description="药品报损、报溢需提交审批后才会变更库存" />
     <el-card>
       <div class="page-toolbar"><el-button type="primary" @click="openCreate">提交调整单</el-button><el-button @click="fetchData">刷新</el-button></div>
       <el-table :data="records" v-loading="loading" border empty-text="暂无库存调整单">

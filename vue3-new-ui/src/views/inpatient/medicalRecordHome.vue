@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病案首页" description="住院患者基本信息、诊断、手术及费用汇总" />
     <el-card>
       <template #header>
         <div class="page-toolbar">

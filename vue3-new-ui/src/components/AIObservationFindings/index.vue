@@ -4,14 +4,14 @@
     <template v-else>
       <h4>原住院观测窗</h4>
       <p>观察区间 {{ findings.start_at }} 至 {{ findings.end_at }}；系统可用截止 {{ findings.as_of }}。点测量包含起止两端，尿量按原始半开区间记录。</p>
-      <p>当前快照的回溯观测资料，非历史数据库回放。离散测量不证明连续监护或采样完整；未提供模型输入适用性验证。</p>
+      <p>资料来自本次保存的历史观测记录。</p>
       <el-button link @click="$emit('inspect', findings.source_id)">核对原冻结观测窗依据</el-button>
-      <p v-for="item in findings.limitations || []" :key="item">{{ item }}</p>
+      <p v-for="item in noticeList(findings.limitations || [])" :key="item">{{ item }}</p>
       <p v-if="findings.schema_version === 'inpatient_window_v1'">此v1旧窗未接入检验，保留当时缺口；不会补入现在的项目映射、肌酐、感染证据或基线。</p>
       <template v-else>
         <h4>受控检验来源子集</h4>
-        <p>本窗 {{ findings.quality?.laboratory?.member_count ?? '未知' }} 项原来源，来源及映射核对可纳入 {{ findings.quality?.laboratory?.eligible_count ?? '未知' }} 项；不证明全套检验齐全、模型适用或临床效果。</p>
-        <p>采样时间须在窗口内，本次受控登记可用时间须不晚于截止；不是原LIS首次发布时间。不自动换算单位、补肾功能基线或把定性文本转为数值。</p>
+        <p>本窗 {{ findings.quality?.laboratory?.member_count ?? '未知' }} 项原来源，来源及映射核对可纳入 {{ findings.quality?.laboratory?.eligible_count ?? '未知' }} 项。</p>
+        <p>采样时间须在窗口内，登记可用时间须不晚于资料截止时间。检验结果按原单位显示。</p>
         <p v-if="findings.laboratory_projection">风险输入仅保留结构化原值和来源依据；完整父报告正文及申请自由文字未外发，仍按原哈希重核。核实说明只作来源依据。</p>
         <p v-for="item in findings.quality?.laboratory?.excluded_sources || []" :key="item.source_id">{{ item.source_id }} 未作有效输入：{{ item.reasons.join('；') }}。</p>
         <p v-for="(item, index) in findings.quality?.laboratory?.same_time_groups || []" :key="`lab:${index}`">{{ item.collected_at_utc }} · {{ item.analyte_key }} · {{ item.identity?.source_namespace }}：{{ item.state === 'duplicate_same_value' ? '同值重复，未合并选择' : '原值或参考资料冲突，未任取最后一条' }}，{{ item.source_ids.length }} 个原来源。</p>
@@ -40,7 +40,7 @@
       </el-table>
       <h4>分时尿量原记录</h4>
       <p>不自动累加、不分摊跨窗体积、不计算mL/kg/h或AKI分期。重叠、部分收集或非患者总量不能作为完整覆盖。</p>
-      <el-table :data="findings.urine_intervals || []" max-height="280" aria-label="分时尿量原区间" empty-text="无分时尿量原记录；不是0mL">
+      <el-table :data="findings.urine_intervals || []" max-height="280" aria-label="分时尿量原区间" empty-text="无分时尿量记录">
         <el-table-column prop="start_at" label="收集开始" min-width="205" /><el-table-column prop="end_at" label="收集结束" min-width="205" />
         <el-table-column label="原mL量" min-width="140"><template #default="{ row }">{{ row.payload.volume_ml ?? `未知（${absent[row.payload.absent_reason] || row.payload.absent_reason || '未记录'}）` }}</template></el-table-column>
         <el-table-column label="收集完整性" width="115"><template #default="{ row }">{{ completeness[row.payload.collection_completeness] || '未知' }}</template></el-table-column>
@@ -58,8 +58,8 @@
         <el-table-column label="起始缺口（秒）" min-width="130"><template #default="{ row }">{{ row.leading_gap_seconds ?? '无有值时点' }}</template></el-table-column>
         <el-table-column label="末尾缺口（秒）" min-width="130"><template #default="{ row }">{{ row.trailing_gap_seconds ?? '无有值时点' }}</template></el-table-column>
       </el-table>
-      <p>这些间隔不构成采样计划或完整性证明。</p>
-      <p v-for="(item, index) in findings.quality?.urine?.overlap_groups || []" :key="`overlap:${index}`">尿量相连重叠组：{{ item.source_ids.join('、') }}。不表示组内每对都重叠，组内记录未计为可靠覆盖。</p>
+
+      <p v-for="(item, index) in findings.quality?.urine?.overlap_groups || []" :key="`overlap:${index}`">尿量相连重叠组：{{ item.source_ids.join('、') }}。</p>
       <p v-for="item in findings.quality?.urine?.excluded_intervals || []" :key="item.source_id">{{ item.source_id }} 不计覆盖：{{ item.reasons.map(reason => urineReasons[reason] || reason).join('；') }}。</p>
       <p v-for="(item, index) in findings.quality?.urine?.uncovered_intervals || []" :key="`gap:${index}`">尿量未确认覆盖区间 {{ item.start_at }} 至 {{ item.end_at }}，不填0。</p>
     </template>
@@ -67,6 +67,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, defineAsyncComponent } from "vue";
 import { observationWindowMatches } from "@/api/inpatientObservations";
 const AiLaboratoryFindings = defineAsyncComponent(() => import("@/components/AILaboratoryFindings/index.vue"));

@@ -5,7 +5,7 @@
   <template v-else>
    <ResearchCohortSourceInput :active="active" :initial-references="initialReferences" @selection="select" @availability="availability" @invalidate="clear" />
    <el-input v-model="v.question" type="textarea" aria-label="本次科研待核原问题" placeholder="补充研究问题（可选）" />
-   <p v-if="v.selected&&!v.canRequestModel" role="status">本地来源有效不代表允许模型处理；本项目尚未明确允许外部模型处理，本界面不会提交模型任务。</p>
+   <p v-if="v.selected&&!v.canRequestModel" role="status">项目尚未取得外部模型处理许可，请先在项目中配置许可。</p>
    <el-button :disabled="v.busy||!v.selected" @click="preview">预览本次模型来源与原问题</el-button>
    <el-button :disabled="v.busy||v.audit||!v.canRequestModel" @click="generate">提交科研待核问题任务</el-button>
    <el-button @click="v.historyOpen=!v.historyOpen">{{ v.historyOpen?'关闭科研任务目录':'打开科研任务目录' }}</el-button>

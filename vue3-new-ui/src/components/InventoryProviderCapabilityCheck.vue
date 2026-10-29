@@ -7,8 +7,8 @@
         <el-alert :type="result.compatible ? 'success' : 'warning'" :closable="false" :title="result.compatible ? '服务声明与登记配置匹配，运营适用性和效果仍须独立验证' : '已保存配置与服务实际声明存在差异'" />
         <p v-for="issue in result.issues" :key="issue">{{ issue }}</p>
         <el-descriptions :column="1" border><el-descriptions-item v-for="[label, value] in rows" :key="label" :label="label"><span class="hash">{{ value }}</span></el-descriptions-item></el-descriptions>
-        <p>{{ result.scope_note }}</p>
-        <p>在人工声明的完整有限候选中比较；保留全部并列项，不证明全集之外的最优，不自动采购、选单、处置或改库存。</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p>
+        <p>在所选候选方案中比较，保留全部并列结果。</p>
         <p>能力核对不启用功能、不改变验证状态。填写实际模型只回填编辑表单，仍须核对并保存当前版本。</p>
       </template>
     </div>
@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { checkInventoryProvider, verifyInventoryProviderCheck } from '@/api/ai/inventoryProvider';
@@ -35,7 +36,7 @@ const rows = computed(() => {
     ['共同约束', '全部候选共享逐日期末最小可用量、最大总量及明确预算；原币种和成本单位不自动换算。'],
     ['固定计算', '日初失效、收货、FEFO分配和期末约束；完整逐日守恒与批次账。'],
     ['原量边界', '独立实盘与数据库采集区分；已知零、未知、负量、冻结、效期、专业确认与集合缺口分别保留。'],
-    ['成本口径', '全部订购量价款、订单费用及方案费用；包括未用或过期的订购量，不冒充完整经济成本。'],
+    ['成本口径', '成本包含全部订购量价款、订单费用和方案费用。'],
     ['真实运行环境', `Python ${c.python_version}；${Object.entries(c.engine_versions).map(([k, v]) => k + ' ' + v).join('；')}`],
     ['四核心文件', Object.entries(c.core_sha256).map(([k, v]) => k + ': ' + v).join('；')],
     ['时区库', c.timezone_database_digest],

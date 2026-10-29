@@ -25,7 +25,7 @@
             <details><summary>原编码绑定与当前字典（完整分页）</summary><el-table :data="detail.snapshot.collection.code_bindings.slice(bindingPage * 20, bindingPage * 20 + 20)" border aria-label="完整原编码绑定分页"><el-table-column prop="kind" label="原类型" /><el-table-column prop="icd_code" label="原编码" /><el-table-column prop="icd_name" label="原存储名称" /><el-table-column prop="is_primary" label="原主要标记" /></el-table><el-button :disabled="bindingPage === 0" @click="bindingPage--">上一页编码</el-button><el-button :disabled="(bindingPage + 1) * 20 >= detail.snapshot.collection.code_bindings.length" @click="bindingPage++">下一页编码</el-button></details>
             <p>旧临床记录时钟按原始文本保留，时区依据未知，不能解释为原 UTC 或当时可得证据。</p>
           </template>
-          <template v-else><p>冻结 {{ detail.snapshot.rules.length }} 条实际本地前缀规则；不是官方发布分组器。</p><el-table :data="detail.snapshot.rules" border><el-table-column prop="rule_id" label="原规则ID" /><el-table-column prop="group_code" label="原组编码" /><el-table-column prop="version" label="原本地版本" /><el-table-column prop="status" label="原状态" /></el-table></template>
+          <template v-else><p>冻结 {{ detail.snapshot.rules.length }} 条本地前缀规则。</p><el-table :data="detail.snapshot.rules" border><el-table-column prop="rule_id" label="原规则ID" /><el-table-column prop="group_code" label="原组编码" /><el-table-column prop="version" label="原本地版本" /><el-table-column prop="status" label="原状态" /></el-table></template>
         </template>
         <p v-else>当前授权仅返回失效原件的技术元数据；正文及自由治理备注已隐藏。</p>
         <el-button v-if="tab === 'case' && !auditOnly && detail.eligible && detail.public_source" @click="selectDetail">选择本条受审编码快照</el-button>
@@ -45,7 +45,7 @@
           <el-input v-model="note" type="textarea" aria-label="院内编码快照登记备注" placeholder="可留空，至多4000 UTF-8字节；不发送给模型" />
         </template>
         <template v-if="creating && tab === 'package'">
-          <p>只选择当前真实本地 DrgRule 原行。版本为本地原字段，不构成官方规则发布证明。</p>
+          <p>请选择本地已登记的DRG规则及版本。</p>
           <el-select v-model="ruleIds" multiple aria-label="实际本地前缀规则" placeholder="明确选择原规则"><el-option v-for="r in rules" :key="r.rule_id" :value="r.rule_id" :label="`${r.rule_id} · ${r.group_code} · ${r.version}`" /></el-select>
           <el-input v-model="packageBasis" type="textarea" aria-label="本地规则包登记依据" placeholder="至少20个非空白字符，至多4000 UTF-8字节" />
         </template>

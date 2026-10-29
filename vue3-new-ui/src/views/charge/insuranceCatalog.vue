@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医保目录对照" description="维护本院收费项目与医保目录的映射关系（用于费用上传与结算对照）" />
     <el-card>
       <div class="page-toolbar">
         <el-select v-model="query.local_item_type" placeholder="项目类型" clearable style="width: 130px" @change="load">

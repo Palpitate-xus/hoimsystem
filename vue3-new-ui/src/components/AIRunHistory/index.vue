@@ -65,9 +65,9 @@
               <ai-speech-findings v-if="visible" :findings="detail.audio_findings" :transcription="detail.result?.transcription" @inspect="showEvidence" />
               <ai-image-findings v-if="visible" :findings="detail.image_findings" :analysis="detail.result?.image_analysis" @inspect="showEvidence" />
               <ai-ecg-findings v-if="visible" :findings="detail.ecg_findings" :analysis="detail.result?.ecg_analysis" @inspect="showEvidence" />
-              <template v-if="!rcaAudit&&!drugLabelRun&&!hasCharge(detail)&&(!hasSatisfaction(detail)||legacySatisfaction(detail))"><p class="plain-text">{{ detail.result?.summary || '此任务没有已接收的结果' }}</p>
-              <el-alert v-for="(item, i) in detail.result?.warnings || []" :key="'warning-' + i" type="warning" :closable="false" :title="item" class="spaced" />
-              <p v-for="(item, i) in detail.result?.missing_data || []" :key="'missing-' + i">待补资料：{{ item }}</p>
+              <template v-if="!rcaAudit&&!drugLabelRun&&!hasCharge(detail)&&(!hasSatisfaction(detail)||legacySatisfaction(detail))"><p class="plain-text" v-if="noticeText(detail.result?.summary || '此任务没有已接收的结果')">{{ noticeText(detail.result?.summary || '此任务没有已接收的结果') }}</p>
+              <el-alert v-for="(item, i) in noticeList(detail.result?.warnings || [])" :key="'warning-' + i" type="warning" :closable="false" :title="item" class="spaced" />
+              <p v-for="(item, i) in noticeList(detail.result?.missing_data || [])" :key="'missing-' + i">待补资料：{{ item }}</p>
               <section v-for="(item, i) in detail.result?.sections || []" :key="i"><h4>{{ item.title }}</h4><p class="plain-text">{{ item.content }}</p><el-button v-for="id in item.source_ids" :key="id" link @click="showEvidence(id)">查看依据 {{ id }}</el-button></section></template>
               </template>
             </el-tab-pane>
@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, defineAsyncComponent, shallowRef, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, toRaw, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -221,7 +222,7 @@ async function inspect(row) {
     if(listedVariableObjects.has(toRaw(row))||filters.value.feature_key==='research_extraction'||hasVariable(row)){await inspectVariable();return;}
     if(listedRcaScope.value!==null||rcaRunHasMarkers(row)){
       const declared=JSON.parse(supportCanonical(row)),scope=listedRcaScope.value?{...listedRcaScope.value}:null,live=()=>isCurrent()&&rows.value.includes(row)&&rcaSame(row,declared)&&rcaSame(scope,listedRcaScope.value);
-      if(!rows.value.includes(row)||!rcaSchema('RcaRunSummary',declared))throw new Error('原目录行不是完整RCA元数据');
+      if(!rows.value.includes(row)||!rcaSchema('RcaRunSummary',declared))throw new Error('RCA目录数据不完整');
       const accepted=await readVerifiedRcaTask(row.run_id,{caseId:scope?.caseId||declared.rca_evidence_case_id,auditOnly:true,trace:true,summary:declared,current:live});
       if(live()&&accepted){rcaAudit.value=accepted;detail.value=accepted.run;}return;
     }

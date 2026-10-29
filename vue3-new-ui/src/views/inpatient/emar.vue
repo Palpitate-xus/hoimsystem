@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="eMAR 扫码给药" description="核对患者腕带与医嘱药品条码，形成可追溯给药闭环" />
     <el-tabs v-model="activeTab" @tab-change="loadCurrentTab">
       <el-tab-pane label="待扫码给药" name="pending">
         <el-card>

@@ -15,9 +15,9 @@
     <p v-if="v.proof.run" aria-label="说明书任务状态">{{ states[v.proof.run.status] }}</p>
     <p v-if="v.proof.run" aria-label="说明书实际用量">输入用量：{{ shown(v.proof.run.input_tokens) }}；输出用量：{{ shown(v.proof.run.output_tokens) }}；{{ v.receipt===null?'实际调用与用量回执待返回':v.receipt.model_call_attempted===null?'是否实际调用未知':v.receipt.model_call_attempted?'模型已调用':'已确认模型未调用' }}。</p>
     <template v-if="v.result">
-     <p>已整理 {{ v.rows.length }} 段待复核引文。</p><details><summary>任务摘要原文</summary><p aria-label="说明书模型摘要">{{ v.result.summary }}</p></details>
+     <p>已整理 {{ v.rows.length }} 段待复核引文。</p><details><summary>任务摘要原文</summary><p aria-label="说明书模型摘要" v-if="noticeText(v.result.summary)">{{ noticeText(v.result.summary) }}</p></details>
      <p>{{ coverageNote }}</p>
-     <p v-if="!v.rows.length">本次没有字段草稿；不能据此认为原文没有成分、用法、禁忌或其它内容。</p>
+     <p v-if="!v.rows.length">本次未生成字段草稿。</p>
      <el-table v-if="v.rows.length" :data="v.visibleRows" aria-label="说明书逐字字段表">
       <el-table-column label="模型类别（未核实）"><template #default="{row}">{{ labels[row.field] }}</template></el-table-column>
       <el-table-column label="原文位置"><template #default="{row}">[{{ row.start }}, {{ row.end }})</template></el-table-column>
@@ -39,6 +39,7 @@
  </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import {reactive} from 'vue';
 import {drugLabelCoverageNote as coverageNote} from '@/api/ai/drugLabelResults';
 import {useDrugLabelFindings} from './useDrugLabelFindings';

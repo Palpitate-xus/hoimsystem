@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="通知公告" description="发布和管理院内通知公告信息" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">发布公告</el-button>

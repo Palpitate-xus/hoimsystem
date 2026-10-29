@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="报表统计" description="统计分析门诊量、财务、药品、医生和科室工作量" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="门诊量统计" name="outpatient">
         <el-form :inline="true" :model="outpatientForm" class="page-toolbar">

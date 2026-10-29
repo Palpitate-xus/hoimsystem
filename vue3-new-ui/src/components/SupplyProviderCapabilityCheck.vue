@@ -7,7 +7,7 @@
         <el-alert :type="result.compatible?'success':'warning'" :closable="false" :title="result.compatible?'服务声明与登记配置匹配，实际运营适用性及效果仍须验证':'已保存配置与服务实际声明存在差异'" />
         <p v-for="issue in result.issues" :key="issue">{{ issue }}</p>
         <el-descriptions :column="1" border><el-descriptions-item v-for="[label,value] in rows" :key="label" :label="label"><span class="hash">{{ value }}</span></el-descriptions-item></el-descriptions>
-        <p>{{ result.scope_note }}</p><p>仅预测已记录数量，不输出潜在需求、采购量或缺货概率。能力核对不改变验证状态或启用配置。</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p><p>仅预测已记录数量，不输出潜在需求、采购量或缺货概率。能力核对不改变验证状态或启用配置。</p>
         <p>填写实际模型只回填编辑表单，仍须用户核对并保存当前版本。</p>
       </template>
     </div>
@@ -16,6 +16,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import {computed,onBeforeUnmount,onDeactivated,ref,watch} from 'vue';
 import {useStore} from 'vuex';
 import {checkSupplyProvider,verifySupplyProviderCheck} from '@/api/ai/supplyProvider';
@@ -26,7 +27,7 @@ const roles=computed(()=>store.getters['user/permissions']||[]),allowed=computed
 const rows=computed(()=>{const c=result.value?.capabilities;return c?[
  ['实际模型',c.model_version],['声明范围','单物资、明确库存范围及一个受审核单位；请求、毛实发和确认实耗三个目标独立。'],
  ['六种固定方法','Croston、SBA、TSB、全前缀均值、末28日均值和末周季节朴素；不自动选最优。'],
- ['原始边界','已知零、未知、单位不符和缺失分别保留；供应约束标记不等于潜在需求观测。'],
+ ['原始边界','分别记录零值、未知、单位冲突和缺项。'],
  ['真实运行环境',`Python ${c.python_version}；${Object.entries(c.engine_versions).map(([k,v])=>k+' '+v).join('；')}`],
  ['四核心文件',Object.entries(c.core_sha256).map(([k,v])=>k+': '+v).join('；')],['时区库',c.timezone_database_digest],
  ['固定限制',`请求 ${c.max_request_bytes} 字节；响应 ${c.max_response_bytes} 字节；服务时限 ${c.timeout_seconds} 秒。`],

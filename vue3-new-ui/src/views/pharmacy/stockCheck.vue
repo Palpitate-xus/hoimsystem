@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="库存盘点" description="定期盘点药品库存，生成盘盈盘亏报告" />
     <el-card>
       <el-alert title="请逐一输入各药品的实盘数量，系统将自动对比系统库存并生成盈亏" type="info" :closable="false" show-icon />
       <el-table :data="drugList" v-loading="loading" empty-text="暂无记录">

@@ -2,20 +2,21 @@
  <section aria-label="科研队列原记录结果与待核问题">
   <p v-if="!ready" role="status">正在核对本次队列资料与结果。</p>
   <template v-else>
-   <p>以下匹配结果基于本次记录与条件；研究入组仍需另行审核。</p><details><summary>来源与任务核验详情</summary><p>当前完整Source、私有Case、原始TEXT和冻结Prompt版本已核对；技术审核不代表研究入组、伦理批准、因果或匿名认证。</p></details>
+   <p>以下匹配结果基于本次记录与条件；研究入组仍需另行审核。</p><details><summary>来源与任务核验详情</summary><p>已核对本次来源、研究范围、原文及Prompt版本。</p></details>
    <p>明确患者集合 {{ data.source.counts.declared_patients }}；原记录条件匹配 {{ data.source.counts.recorded_true }}；原记录条件不匹配 {{ data.source.counts.recorded_false }}；未知 {{ data.source.counts.unknown }}。</p>
    <details><summary>Prompt版本详情</summary><p>实际Prompt来源：{{ data.task.prompt_snapshot.origin==='packaged_catalog'?'随包默认版本（无数据库Prompt版本行）':'已保存不可变版本' }}；版本 {{ data.task.prompt_snapshot.prompt_version }}。</p></details>
-   <template v-if="data.result"><p>本次提出 {{ data.result.question_draft.questions.length }} 项待核问题。</p><details><summary>任务摘要原文</summary><p>{{ data.result.summary }}</p></details><p v-if="!data.result.question_draft.questions.length">本次没有返回待核问题；这不证明所有记录或条件均已核实。</p>
+   <template v-if="data.result"><p>本次提出 {{ data.result.question_draft.questions.length }} 项待核问题。</p><details><summary>任务摘要原文</summary><p v-if="noticeText(data.result.summary)">{{ noticeText(data.result.summary) }}</p></details><p v-if="!data.result.question_draft.questions.length">本次未返回待核问题。</p>
     <article v-for="(question,index) in data.result.question_draft.questions" :key="index" aria-label="模型部分待核问题"><h4>{{ question.title }}</h4><p>{{ question.observation }}</p><p>{{ question.clarification_question }}</p><el-button v-for="(citation,j) in question.citations" :key="j" @click="show(citation)">核对第{{ index+1 }}条问题的逐字引文{{ j+1 }}</el-button></article>
-    <ul><li v-for="(text,index) in data.result.limitations" :key="index">{{ text }}</li></ul>
+    <ul><li v-for="(text,index) in noticeList(data.result.limitations)" :key="index">{{ text }}</li></ul>
    </template><p v-else>任务尚无完整成功结果；未把排队、失败或未知用量视为模型完成。</p>
    <el-button @click="rawOpen=!rawOpen">{{ rawOpen?'收起任务技术详情':'任务技术详情' }}</el-button><template v-if="rawOpen"><pre aria-label="科研任务原始输入TEXT">{{ data.task.input_json }}</pre><pre aria-label="科研任务原始证据TEXT">{{ data.task.evidence_json }}</pre><pre aria-label="科研任务原始元数据TEXT">{{ data.task.context_metadata_json }}</pre><p>原SHA按各字符串UTF8逐字核对，未将重新序列化的对象称为原TEXT。</p></template>
   </template>
   <p v-if="error" role="alert">{{ error }}</p>
-  <el-dialog :model-value="evidenceOpen" title="本次研究公开来源逐字引文" :close-on-click-modal="false" @update:model-value="value=>!value&&closeEvidence()"><template v-if="evidence"><p>仅为本次公开证据字符串的Unicode码点切片，不声称已披露完整原临床字段。</p><blockquote>{{ evidence.quote }}</blockquote><pre>{{ evidence.target.text }}</pre><p>范围 [{{ evidence.start }}, {{ evidence.end }})；类型 {{ evidence.target.category }}。</p></template></el-dialog>
+  <el-dialog :model-value="evidenceOpen" title="本次研究公开来源逐字引文" :close-on-click-modal="false" @update:model-value="value=>!value&&closeEvidence()"><template v-if="evidence"><p>引用位置按本次模型输入的Unicode码点计算。</p><blockquote>{{ evidence.quote }}</blockquote><pre>{{ evidence.target.text }}</pre><p>范围 [{{ evidence.start }}, {{ evidence.end }})；类型 {{ evidence.target.category }}。</p></template></el-dialog>
  </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import {computed,onActivated,onBeforeUnmount,onDeactivated,onMounted,ref,toRaw,watch} from 'vue';
 import {useStore} from 'vuex';
 import {supportCanonical as canonical} from '@/api/inpatientSupport';

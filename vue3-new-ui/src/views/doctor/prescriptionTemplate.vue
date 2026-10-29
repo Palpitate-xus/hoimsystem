@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方模板" description="维护个人常用处方，开方时可一键带入药品" />
     <el-card>
       <div class="page-toolbar"><el-button type="primary" @click="openCreate">新建模板</el-button></div>
       <el-table :data="templates" v-loading="loading" border empty-text="暂无模板">

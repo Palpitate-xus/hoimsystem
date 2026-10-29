@@ -116,14 +116,14 @@ test("门诊成对原文件以真实multipart登记，预览与模型任务绑�
   await expect.poll(() => state.submissions.length).toBe(1);
   expect(state.previews[0]).toMatchObject({ patient_id: 1, encounter_ref: encounterRef, source_refs: { ecg_asset_id: assetId } }); expect(state.submissions[0]).toMatchObject({ encounter_ref: encounterRef, input: { ecg_asset_id: assetId } });
   expect(state.submissions[0].input.record_id).toBeUndefined();
-  const result = drawer.getByLabel("AI任务结果", { exact: true }); await expect(result).toContainText("非患病概率"); await expect(result).toContainText("全记录级，未提供局部定位"); await expect(result.locator(".ecg-findings img")).toHaveCount(0); await expect(result.getByLabel("本地心电研究模型运行记录", { exact: true })).toHaveCount(0);
-  const localRow = result.getByRole("row").filter({ hasText: "隔离测试局部候选" }); await expect(localRow.getByRole("cell", { name: "0 非患病概率", exact: true })).toBeVisible();
+  const result = drawer.getByLabel("AI任务结果", { exact: true }); await expect(result).toContainText("模型原始分数"); await expect(result).toContainText("全记录级，未提供局部定位"); await expect(result.locator(".ecg-findings img")).toHaveCount(0); await expect(result.getByLabel("本地心电研究模型运行记录", { exact: true })).toHaveCount(0);
+  const localRow = result.getByRole("row").filter({ hasText: "隔离测试局部候选" }); await expect(localRow.getByRole("cell", { name: "0", exact: true })).toBeVisible();
   await localRow.getByRole("button", { name: "查看原波形", exact: true }).click(); await expect(result).toContainText("模型定位导联 I，原样本 600–800");
   const highlightedPixels = label => result.getByRole("img", { name: `导联 ${label} 原始波形`, exact: true }).evaluate(element => { const bytes = element.getContext("2d").getImageData(0, 0, element.width, element.height).data; let yellow = 0; for (let i = 0; i < bytes.length; i += 4) if (bytes[i] > 235 && bytes[i + 1] > 210 && bytes[i + 1] < 247 && bytes[i + 2] < 235) yellow++; return yellow; });
   await expect.poll(() => highlightedPixels("I")).toBeGreaterThan(100); expect(await highlightedPixels("MLII")).toBe(0);
   await result.getByRole("img", { name: "导联 I 原始波形", exact: true }).screenshot({ path: testInfo.outputPath("ecg-waveform.png") });
   await result.getByRole("button", { name: "复制心电候选草稿", exact: true }).click();
-  await expect.poll(() => page.evaluate(() => window.__copiedEcg)).toContain("模型原始分数 0（非患病概率）"); const copied = await page.evaluate(() => window.__copiedEcg); expect(copied).toContain("原样本[600, 800)"); expect(copied).toContain("整段候选，不提供精确定位"); expect(copied).toContain(signalHash); expect(state.businessWrites).toEqual([]);
+  await expect.poll(() => page.evaluate(() => window.__copiedEcg)).toContain("模型原始分数 0"); const copied = await page.evaluate(() => window.__copiedEcg); expect(copied).toContain("原样本[600, 800)"); expect(copied).toContain("整段候选，不提供精确定位"); expect(copied).toContain(signalHash); expect(state.businessWrites).toEqual([]);
 });
 
 test("本地研究模型展示真实运行记录和五类独立原始分数，保留未验证人群及临床范围", async ({ page }) => {
@@ -139,12 +139,12 @@ test("本地研究模型展示真实运行记录和五类独立原始分数，�
   await expect(runtime).toContainText("reject：拒绝缺失样本；不滤波、不重采样、不填补或补零、不裁剪原始输入");
   await expect(runtime).toContainText("signal_only：仅对所选原始信号分类");
   await expect(runtime).toContainText("not_verified：未核实采集时人群及本模型适用性");
-  await expect(runtime).toContainText("not_provided：未提供临床验证，不代表已验证的临床准确性");
-  await expect(runtime).toContainText("未设置诊断阈值，不能据此判定正常或确诊");
+  await expect(runtime).toContainText("not_provided：尚无验证记录");
+  await expect(runtime).toContainText("诊断阈值尚未配置");
   const labels = ["NORM", "CD", "HYP", "MI", "STTC"], scores = [0, 0.1, 0.2, 0.7, 1];
   for (const [index, label] of labels.entries()) {
     const row = result.getByRole("row").filter({ has: page.getByRole("cell", { name: label, exact: true }) });
-    await expect(row.getByRole("cell", { name: `${scores[index]} 非患病概率`, exact: true })).toBeVisible();
+    await expect(row.getByRole("cell", { name: `${scores[index]}`, exact: true })).toBeVisible();
     await expect(row).toContainText("全记录级，未提供局部定位");
   }
   expect(state.submissions).toHaveLength(1); expect(state.windows).toEqual([]); expect(state.businessWrites).toEqual([]);

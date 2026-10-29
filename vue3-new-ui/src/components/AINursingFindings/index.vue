@@ -2,12 +2,12 @@
   <section v-if="findings" class="nursing-findings" aria-label="护理与评分原始依据">
     <h4>护理与评分原始依据</h4>
     <p>仅本次住院的有限原记录；未知项保留为未知。人工分项汇总不能作为疾病概率或自动转出决定。</p>
-    <p v-for="note in findings.limitations || []" :key="note" class="data-gap">{{ note }}</p>
+    <p v-for="note in noticeList(findings.limitations || [])" :key="note" class="data-gap">{{ note }}</p>
     <el-collapse>
       <el-collapse-item v-for="row in findings.assessments || []" :key="row.source_id" :name="row.source_id" :title="`已完成护理评估${row.explicitly_selected ? ' · 本次所选' : ''}`">
         <p>评估发生时间：{{ utcTime(row.assessed_at) }}；原创建：{{ row.create_time || '未记录' }}；原更新：{{ row.update_time || '未记录' }}。</p>
         <p v-if="row.legacy_defaults_possible" class="data-gap">历史记录：原默认值是否经过显式评估未核实，保留原值。</p>
-        <p v-else>新表单保留未评估项；保存或完成不代表标准量表验证。</p>
+        <p v-else>空项表示未评估。</p>
         <el-descriptions :column="1" border>
           <el-descriptions-item v-for="(label, key) in assessmentFields" :key="key" :label="label">{{ assessmentValue(row, key) }}</el-descriptions-item>
           <el-descriptions-item label="护理备注"><p class="recorded-text">{{ row.note || '未记录' }}</p></el-descriptions-item>
@@ -40,6 +40,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 defineProps({ findings: { type: Object, default: null } });
 defineEmits(["inspect"]);
 const assessmentFields = { adl_score: "ADL原分值", pressure_ulcer_risk: "压疮风险原标记", fall_risk: "跌倒风险原标记", consciousness: "意识原标记", nutrition_risk: "营养风险原标记" };

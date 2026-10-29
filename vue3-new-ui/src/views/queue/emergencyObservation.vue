@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="留观管理" description="登记急诊留观患者、记录病情和医嘱，并在结束时补齐费用状态" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="急诊患者"><el-select v-model="form.triage_id" filterable placeholder="选择分诊记录" style="width: 220px"><el-option v-for="item in triages" :key="item.triage_id" :label="`${item.patient_name}（${item.triage_level_text}）`" :value="item.triage_id" /></el-select></el-form-item>

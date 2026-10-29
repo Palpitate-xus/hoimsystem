@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="双向转诊" description="查看转诊申请状态和转诊记录" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增转诊</el-button>

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="住院医嘱管理" description="开立、审核、执行住院医嘱" />
     <el-row :gutter="20">
       <el-col :span="6">
         <el-card>

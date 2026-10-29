@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="转诊/会诊审批" description="按本科室范围处理医生提交的转诊和多学科会诊申请" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="转诊申请" name="referral">
         <el-table :data="referrals" v-loading="loading" border empty-text="暂无待审批转诊">

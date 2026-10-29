@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="窗口挂号" description="收费窗口代患者办理现场挂号" />
     <el-card>
       <el-steps :active="step" finish-status="success" simple style="margin-bottom: 20px;">
         <el-step title="验证患者" />

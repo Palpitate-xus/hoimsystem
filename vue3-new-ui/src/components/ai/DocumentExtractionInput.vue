@@ -4,8 +4,8 @@
     <el-alert v-else-if="!v.authorized" title="仅当前超级管理员可核对抽取原文" type="info" :closable="false" />
     <p v-if="v.error" role="alert">{{ v.error }}</p>
     <template v-if="v.authorized">
-      <el-alert title="选择未核实逐字草稿抽取的原文" description="只选择当前已发布且明确完成隐私与原意审核的完整原件。不会自动选首条、登记候选或发布知识；来源声明不代表官方来源或临床已验证。" type="info" :closable="false" />
-      <details><summary>原文容量与核验详情</summary><p>原文登记支持4MiB；模型任务仍须对完整输入、Prompt与结果逐项核对65535字节存储上限。原始字节较小也不保证任务可运行，超限不会截断原文。</p></details>
+      <el-alert title="选择未核实逐字草稿抽取的原文" description="请选择已发布、已完成隐私和原意审核的原文。" type="info" :closable="false" />
+      <details><summary>原文容量与核验详情</summary><p>原文登记上限4MiB，模型任务的完整请求和结果按65535字节存储上限检查。</p></details>
       <el-button :loading="v.busy" @click="v.loadPage(1)">刷新原文目录并清除选择</el-button>
       <p v-if="v.preset">预置原文ID：<code>{{ v.preset }}</code> <el-button :disabled="v.busy" @click="v.selectPreset">核对预置原件</el-button>；预置引用尚未自动建立选择。</p>
       <el-table :data="v.directory?.items||[]" :empty-text="v.directory?'本页暂无原件':'尚未读取目录'" aria-label="抽取原文元数据目录">

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="就诊评价" description="对就诊医生和医院进行满意度评价" />
     <el-card>
       <el-form :model="form" label-width="100px">
         <el-form-item label="医生">

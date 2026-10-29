@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="CA数字签名" description="管理电子签名证书和签章记录" />
     <el-card>
       <el-form label-width="100px">
         <el-form-item label="签名内容">

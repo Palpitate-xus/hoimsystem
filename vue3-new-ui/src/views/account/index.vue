@@ -1,6 +1,5 @@
 <template>
   <div class="account-page">
-    <vab-page-header title="个人中心" description="查看当前账号和本机使用偏好" />
     <el-card shadow="never">
       <el-descriptions title="账号信息" :column="1" border>
         <el-descriptions-item label="用户名">{{ username }}</el-descriptions-item>

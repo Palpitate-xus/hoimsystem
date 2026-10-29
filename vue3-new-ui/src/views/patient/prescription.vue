@@ -1,8 +1,7 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方查询" description="查询个人处方记录和药品明细" />
     <el-card>
-      
+
       <div class="page-toolbar">
         <el-input
           v-model="searchQuery"

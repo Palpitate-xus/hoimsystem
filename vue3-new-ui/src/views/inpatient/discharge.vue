@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="出院结算" description="办理患者出院、查看出院记录和费用汇总" />
     <el-row :gutter="20">
       <el-col :span="8">
         <el-card>

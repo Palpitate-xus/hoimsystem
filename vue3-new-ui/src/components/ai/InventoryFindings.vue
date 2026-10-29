@@ -3,7 +3,7 @@
     <p v-if="checking">正在核对完整原件、单位、冻结任务与逐日库存和费用证明……</p>
     <el-alert v-else-if="error" type="error" :closable="false" :title="error" />
     <template v-else-if="accepted">
-      <el-alert type="info" :closable="false" title="仅比较明确声明的完整候选方案；未来数量是受审情景，不是潜在需求，也不执行采购或库存变更。" />
+      <el-alert type="info" :closable="false" title="比较所选采购方案，未来数量采用审核后的情景值。" />
       <p>院内物资 {{ local.item_kind }} · {{ local.item_id }}；声明数量单位 {{ local.original_unit_text??'未知（null）' }}；声明成本单位 {{ local.currency_text??'未知（null）' }} / {{ local.original_cost_unit_text??'未知（null）' }}。</p>
       <p>院内库存范围；未来 {{ source.date_from }} 至 {{ source.date_to }}，{{ source.scenario.days.length }} 个业务日；IANA 时区 {{ source.timezone }}。资料截止 {{ source.as_of }}。</p>
       <p v-if="accepted.run">冻结任务状态：{{ taskState(accepted.run.status) }}。</p>
@@ -14,8 +14,8 @@
         <details><summary>计算与模型核验详情</summary><p>比较已与服务器冻结的 Prompt 摘要及模型版本对齐；逐日原量、守恒和费用在浏览器独立重算。</p></details>
         <p>本次核对 {{ analysis.candidate_count }} 件：已核可行 {{ analysis.known_feasible_count }} 件、已核不满足约束 {{ analysis.known_infeasible_count }} 件、未知 {{ analysis.unknown_count }} 件。</p>
         <p>已核可行子集的最低明确采购成本 {{ exact(analysis.best_known_feasible_cost) }}。{{ analysis.best_among_declared_candidates?'完整声明候选集合内的最低成本已核清，全部并列项见下表。':analysis.all_declared_candidates_proven_infeasible?'该集合已核无可行方案，不产生最低可行采购成本。':'尚不能证明整个声明集合的最低成本；未知候选不能按不可行或零成本处理。' }}</p>
-        <p v-if="analysis.all_declared_candidates_proven_infeasible">完整声明候选集合内，所有方案均不满足至少一项明确约束；这不代表声明集合外不存在可行方案。</p>
-        <p>没有自动选择方案。采购成本只包含明确数量、对应单价和订单／方案固定费，不代表全部经济成本；没有提供运营效果验证。</p>
+        <p v-if="analysis.all_declared_candidates_proven_infeasible">所选候选方案均未满足全部约束，详情见各方案的约束检查。</p>
+        <p>成本口径：采购数量×单价，加订单或方案固定费。请在候选列表中选择方案。</p>
         <el-table :data="analysis.candidate_results.slice((candidatePage-1)*10,candidatePage*10)" aria-label="完整采购候选比较">
           <el-table-column label="声明候选"><template #default="{row}">{{ candidateLabel(row.candidate_id) }}</template></el-table-column>
           <el-table-column label="整件状态"><template #default="{row}">{{ stateText(row.status) }}</template></el-table-column>
@@ -28,10 +28,10 @@
         <el-pagination v-if="analysis.candidate_results.length>10" v-model:current-page="candidatePage" :page-size="10" :total="analysis.candidate_results.length" layout="prev,pager,next,total" />
         <template v-if="selected">
           <h4>{{ candidateLabel(selected.candidate_id) }}</h4>
-          <p>完整采购成本 {{ exact(selected.total_cost) }}；已知费用部分和 {{ exact(selected.known_cost_subtotal) }}，部分和不替代未知完整成本。</p>
+          <p>完整采购成本 {{ exact(selected.total_cost) }}；已知费用部分和 {{ exact(selected.known_cost_subtotal) }}。</p>
           <p v-if="selected.reasons.length">明确缺项或冲突：{{ selected.reasons.map(reasonText).join('；') }}。</p>
           <p>完整订货量 {{ exact(selected.totals.ordered) }}，期内收货 {{ exact(selected.totals.received) }}，已满足情景量 {{ exact(selected.totals.fulfilled) }}，未满足情景量 {{ exact(selected.totals.unmet) }}，预计失效移出 {{ exact(selected.totals.expired) }}。</p>
-          <p>期末总量 {{ exact(selected.totals.ending_total) }}，可用量 {{ exact(selected.totals.ending_usable) }}，冻结量 {{ exact(selected.totals.ending_frozen) }}；失效移出仅为情景账，不是实际报损或处置记录。</p>
+          <p>期末总量 {{ exact(selected.totals.ending_total) }}，可用量 {{ exact(selected.totals.ending_usable) }}，冻结量 {{ exact(selected.totals.ending_frozen) }}；失效移出量为情景值。</p>
           <el-table v-if="selected.violations.length" :data="selected.violations" aria-label="候选明确约束不满足"><el-table-column label="约束"><template #default="{row}">{{ violationText(row.code) }}</template></el-table-column><el-table-column prop="date" label="日期"/><el-table-column label="原量"><template #default="{row}">{{ exact(row.actual) }}</template></el-table-column><el-table-column label="限值"><template #default="{row}">{{ exact(row.limit) }}</template></el-table-column></el-table>
           <el-table v-if="selected.daily" :data="selected.daily.slice((dayPage-1)*10,dayPage*10)" aria-label="逐日精确库存守恒">
             <el-table-column prop="date" label="业务日期"/><el-table-column label="期初总量"><template #default="{row}">{{ exact(row.opening_total) }}</template></el-table-column><el-table-column label="到货"><template #default="{row}">{{ exact(row.arrived) }}</template></el-table-column><el-table-column label="失效移出"><template #default="{row}">{{ exact(row.expired) }}</template></el-table-column><el-table-column label="分配"><template #default="{row}">{{ exact(row.allocated) }}</template></el-table-column><el-table-column label="未满足"><template #default="{row}">{{ exact(row.unmet) }}</template></el-table-column><el-table-column label="日末总量"><template #default="{row}">{{ exact(row.closing_total) }}</template></el-table-column><el-table-column label="可用／冻结"><template #default="{row}">{{ exact(row.closing_usable) }} ／ {{ exact(row.closing_frozen) }}</template></el-table-column>

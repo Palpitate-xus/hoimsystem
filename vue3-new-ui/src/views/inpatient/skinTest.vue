@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="皮试管理" description="执行皮试医嘱并记录观察结果，结果判定后不可重复修改" />
     <el-card>
       <div class="page-toolbar"><el-button @click="fetchList">刷新</el-button></div>
       <el-table :data="orders" v-loading="loading" border empty-text="暂无皮试医嘱">

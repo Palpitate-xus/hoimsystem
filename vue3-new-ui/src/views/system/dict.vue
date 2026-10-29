@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="数据字典" description="维护系统数据字典和编码规范" />
     <el-card>
       <el-form :inline="true" :model="queryForm" class="page-toolbar">
         <el-form-item label="字典类型">

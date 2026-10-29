@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="预交金管理" description="充值、查询和使用预交金余额" />
     <el-card>
       <el-form :inline="true" label-width="100px" class="page-toolbar">
         <el-form-item label="患者身份证号">

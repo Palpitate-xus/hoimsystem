@@ -1,6 +1,6 @@
 <template>
   <section v-if="findings?.reports?.length" class="adr-findings">
-    <h4>ADR原上报与处理记录</h4><p>{{ findings.scope_note }}</p>
+    <h4>ADR原上报与处理记录</h4><p v-if="noticeText(findings.scope_note)">{{ noticeText(findings.scope_note) }}</p>
     <p>症状发生时间、实际给药关联与对应就诊：原记录未注明，不根据上报时间推断。</p>
     <el-collapse><el-collapse-item v-for="row in findings.reports" :key="row.source_id" :name="row.source_id" :title="`ADR #${row.reaction_id} · ${row.status_text || '状态待核实'}`">
       <p v-if="row.recorded_state === 'legacy_ambiguous'" class="data-gap">历史状态2尚未核实为已处理或已排除，保持未知。</p>
@@ -19,6 +19,7 @@
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 defineProps({ findings: { type: Object, default: null } });
 defineEmits(["inspect"]);
 const severities = { 1: "上报轻度", 2: "上报中度", 3: "上报重度" };

@@ -2,10 +2,10 @@
   <section aria-label="每日挂号记录数预测输入">
     <el-form-item label="冻结预测来源"><el-select v-model="seriesId" aria-label="冻结预测来源" clearable filterable placeholder="明确选择已确认的历史来源" :disabled="!allowed || loading"><el-option v-for="item in items" :key="item.series_id" :value="item.series_id" :label="`${item.name} · ${item.date_from}至${item.date_to} · ${item.timezone}`" /></el-select><el-button :disabled="!allowed" :loading="loading" @click="load">刷新来源目录</el-button></el-form-item>
     <el-form-item label="外推跨度"><el-select v-model="horizon" aria-label="外推跨度"><el-option label="7天" :value="7" /><el-option label="14天" :value="14" /></el-select></el-form-item>
-    <p v-if="truncated">目录仅显示前100个有权限的活动来源，并非完整清单。</p>
+    <p v-if="truncated">显示前100个可用来源。</p>
     <p v-if="selected">{{ selected.scope === 'hospital' ? '全院' : `科室 #${selected.department_id}` }} · 原历史 {{ selected.date_from }} 至 {{ selected.date_to }} · {{ selected.day_count }} 日 · 原钟点时区解释 {{ selected.timezone }}。列表尚未保证原资料仍一致。</p>
     <p v-if="checking">正在重新核对所选冻结来源与当前原资料。</p><p v-if="error" role="alert">{{ error }}</p>
-    <template v-if="source"><p>当前核对通过。目标为每日所有状态挂号原记录数（条/日），不是实际到诊或独立患者；覆盖和原无时区钟点解释均为超级管理员声明，未独立核实外部完整性。</p><p>自历史末日次日起算：{{ nextDate(source.date_to) }}，外推 {{ horizon }} 天。旧历史窗口可能只是在过去日期外推；这不是从今天起算。</p><p class="hash">来源 {{ source.source_id }}<br />冻结摘要 {{ source.content_hash }}<br />原登记摘要 {{ source.registration_digest }}</p><p>无时间挂号记录 {{ source.unassigned_time_records }} 条，无法分日，已排除。来源、历史日期、目标、时区和原数值均不能在补充JSON中替换。</p></template>
+    <template v-if="source"><p>来源已核对，统计口径为每日全部状态的挂号记录数（条/日）。</p><p>自历史末日次日起算：{{ nextDate(source.date_to) }}，外推 {{ horizon }} 天。</p><p class="hash">来源 {{ source.source_id }}<br />冻结摘要 {{ source.content_hash }}<br />原登记摘要 {{ source.registration_digest }}</p><p>无时间挂号记录 {{ source.unassigned_time_records }} 条，无法分日，已排除。来源、历史日期、目标、时区和原数值均不能在补充JSON中替换。</p></template>
   </section>
 </template>
 <script setup>

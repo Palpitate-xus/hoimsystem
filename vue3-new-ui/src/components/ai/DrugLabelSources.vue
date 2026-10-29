@@ -1,6 +1,6 @@
 <template>
   <section class="drug-label-sources" aria-label="药品说明书来源治理">
-    <el-alert title="只核对明确目录身份与完整提供原文；目录缺少厂家、批准号、规格和单位。当前药师账户角色不代表已验证执照，技术发布不形成临床规则。" type="info" :closable="false" />
+    <el-alert title="请核对药品目录和完整说明书。厂家、批准号、规格和单位需在原文中确认。" type="info" :closable="false" />
     <p v-if="!v.authorized" role="status">仅当前药师或超级管理员可访问本项已释放来源。</p>
     <template v-else>
       <el-button :loading="v.loading" @click="v.refresh">刷新来源目录</el-button>
@@ -12,7 +12,7 @@
       <p v-if="v.error" role="alert">{{ v.error }}</p><p v-if="v.notice" role="status">{{ v.notice }}</p>
       <p v-if="!v.selectedId&&!auditOnly">尚未选择药品；不会自动选取第一项。</p>
       <el-table :data="v.directory" aria-label="说明书来源完整元数据目录"><el-table-column label="来源标识" prop="source_binding_id" /><el-table-column label="目录药品" prop="pharmaceutical_id" /><el-table-column label="状态"><template #default="{row}">{{ states[row.status] }}</template></el-table-column><el-table-column label="登记UTC" prop="recorded_at" /><el-table-column label="核对"><template #default="{row}"><el-button @click="v.inspect(row)">读取本件完整依据</el-button></template></el-table-column></el-table>
-      <p>目录只有技术元数据，不能据此执行抽取；须明确读取本件并核对完整签署关系。</p>
+      <p>请选择一份原文，核对内容和签署记录后再抽取。</p>
     </template>
     <el-dialog v-model="v.detailOpen" title="说明书原件与独立签署核对" width="85%" :close-on-click-modal="false">
       <template v-if="v.detail">
@@ -23,7 +23,7 @@
         <p>释放依据：{{ v.detail.snapshot.basis_note }}</p>
         <template v-if="v.detail.professional_review"><p>药师签署：目录对应 {{ reviews[v.detail.professional_review.snapshot.catalog_match_review] }}；本次完整提供版本 {{ reviews[v.detail.professional_review.snapshot.provided_text_version_review] }}；状态 {{ v.detail.professional_review.governance.status==='signed'?'已签署':'已撤销' }}。</p><p>签署UTC：{{ v.detail.professional_review.snapshot.signed_at }}；依据：{{ v.detail.professional_review.snapshot.basis_note }}</p></template>
         <fieldset v-if="v.canSign"><legend>当前药师本人独立复核，不代签</legend><el-select v-model="v.signForm.catalog_match_review" aria-label="目录药品对应复核" placeholder="明确对应情况"><el-option v-for="(label,value) in reviews" :key="value" :label="label" :value="value" /></el-select><el-select v-model="v.signForm.provided_text_version_review" aria-label="完整提供版本复核" placeholder="明确本次提供版本情况"><el-option v-for="(label,value) in reviews" :key="value" :label="label" :value="value" /></el-select><el-input v-model="v.signForm.basis_note" type="textarea" aria-label="药师本人复核依据" /><el-button :loading="v.busy" @click="v.mutate('sign')">提交本人独立签署</el-button></fieldset>
-        <fieldset v-if="v.canReview"><legend>超级管理员技术审核，不替代药师签署</legend><el-select v-model="v.reviewForm.decision" aria-label="来源技术审核决定" placeholder="明确发布或拒绝"><el-option label="技术发布" value="approve" :disabled="!v.canPublish" /><el-option label="拒绝" value="reject" /></el-select><el-input v-model="v.reviewForm.basis_note" type="textarea" aria-label="来源技术审核依据" /><el-button :loading="v.busy" @click="v.mutate('review')">提交本件技术审核</el-button></fieldset>
+        <fieldset v-if="v.canReview"><legend>超级管理员审核</legend><el-select v-model="v.reviewForm.decision" aria-label="来源技术审核决定" placeholder="明确发布或拒绝"><el-option label="技术发布" value="approve" :disabled="!v.canPublish" /><el-option label="拒绝" value="reject" /></el-select><el-input v-model="v.reviewForm.basis_note" type="textarea" aria-label="来源技术审核依据" /><el-button :loading="v.busy" @click="v.mutate('review')">提交本件技术审核</el-button></fieldset>
         <fieldset v-if="v.canRevoke||v.canWithdraw"><legend>明确撤销</legend><el-input v-model="v.revokeNote" type="textarea" aria-label="本件撤销依据" /><el-button v-if="v.canWithdraw" :loading="v.busy" @click="v.mutate('professional_revoke')">撤销本件专业签署</el-button><el-button v-if="v.canRevoke" :loading="v.busy" type="danger" @click="v.mutate('revoke')">撤销本件来源</el-button></fieldset>
         <p v-if="v.formError" role="alert">{{ v.formError }}</p>
       </template><template #footer><el-button v-if="v.detail?.eligible&&!auditOnly" :disabled="v.busy" @click="v.selectSource">明确选择本件来源</el-button><el-button @click="v.detailOpen=false">关闭原件核对</el-button></template>

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="智能导诊" description="输入症状描述，获取智能科室推荐" />
     <el-card>
       <div style="max-width: 700px; margin: 0 auto;">
         <h3 style="text-align: center; margin-bottom: 20px; color: #303133;">
@@ -22,7 +21,7 @@
           <ai-action label="AI 预问诊" title="AI 导诊与预问诊" :disabled="emergency" :feature-keys="['conversational_triage', 'preconsultation']" initial-feature="preconsultation" :initial-input="{ question: symptomText }" />
         </div>
         <el-alert
-          title="导诊仅用于分流参考，不构成医疗诊断"
+          title="请选择症状，查询建议就诊科室。"
           description="如出现胸痛、呼吸困难、意识不清、大出血等情况，请立即前往急诊或拨打急救电话。"
           type="warning"
           show-icon

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="生命体征录入" description="为患者录入和查询生命体征数据" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">录入体征</el-button>

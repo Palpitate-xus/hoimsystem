@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病案 ICD 编码工作台" description="将首页文本诊断/手术映射为 ICD 码（主诊断唯一），覆盖待编码病案列表与编码统计" />
     <el-tabs v-model="tab">
       <!-- 待编码 -->
       <el-tab-pane :label="`待编码（${uncoded.length}）`" name="todo">

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="影像检查" description="影像申请、报告书写、审核和 Viewer 调阅" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="检查申请" name="orders">
         <div class="page-toolbar">

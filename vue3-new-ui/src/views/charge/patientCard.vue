@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="就诊卡办理" description="为患者办理、查询、挂失和注销就诊卡" />
     <el-card>
       <div class="page-toolbar">
         <el-input v-model="keyword" placeholder="卡号、患者姓名或身份证号" clearable class="page-search-input" @keyup.enter="loadCards" />

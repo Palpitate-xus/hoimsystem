@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="收费项目" description="维护门诊收费项目及价格，停用项目不应继续用于收费" />
     <el-card>
       <div class="page-toolbar"><el-button v-if="isAdmin" type="primary" @click="openCreate">新增收费项目</el-button><el-button @click="fetchList">刷新</el-button></div>
       <el-table :data="items" v-loading="loading" border empty-text="暂无收费项目"><el-table-column prop="code" label="编码" width="120" /><el-table-column prop="name" label="项目名称" width="180" /><el-table-column prop="category" label="类别" width="120" /><el-table-column prop="price" label="价格(元)" width="110" /><el-table-column label="状态" width="90"><template #default="{ row }"><el-tag :type="row.status ? 'success' : 'info'">{{ row.status_text }}</el-tag></template></el-table-column><el-table-column prop="note" label="备注" min-width="180" /><el-table-column v-if="isAdmin" label="操作" width="160"><template #default="{ row }"><el-button size="small" @click="openEdit(row)">编辑</el-button><el-button size="small" type="warning" @click="toggle(row)">{{ row.status ? "停用" : "启用" }}</el-button></template></el-table-column></el-table>

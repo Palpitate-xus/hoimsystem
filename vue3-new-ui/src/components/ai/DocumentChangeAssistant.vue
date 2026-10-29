@@ -6,11 +6,10 @@
     <el-alert v-if="error" :title="error" type="error" :closable="false" />
     <el-button v-if="closed && mode && superUser && scopeValid && initialValid" @click="reopen">重新打开双原文核对</el-button>
     <template v-if="active">
-      <el-alert title="模型只提出待核实问题；不自动发布知识、确认影响、退休旧规则或修改临床路径。" type="warning" :closable="false" />
       <el-button @click="close">关闭并清除双原文任务</el-button>
       <document-change-input :key="inputKey" :active="active" :initial-references="initialReferences" @selection-change="selected" />
       <el-form label-position="top"><el-form-item label="可选核对问题（原样保留）"><el-input v-model="question" type="textarea" aria-label="双原文可选问题" /></el-form-item><el-checkbox v-model="preview">明确以超级管理员试运行</el-checkbox></el-form>
-      <p v-if="!feature?.enabled || feature?.validation_status !== 'validated'">当前未启用或尚未完成验证，须明确勾选试运行；此选择不证明原文、模型或临床影响正确。</p>
+      <p v-if="!feature?.enabled || feature?.validation_status !== 'validated'">功能尚未启用或验证尚未完成，超级管理员可勾选试运行。</p>
       <el-alert v-if="message" :title="message" type="info" :closable="false" />
       <div><el-button :disabled="!canGenerate || busy" @click="inspect">预览双原文与有限范围</el-button><el-button type="primary" :disabled="!canGenerate || busy" :loading="busy" @click="submit">生成未核实核对问题</el-button><el-button :disabled="!selection || busy" @click="loadHistory">读取此范围任务历史</el-button></div>
       <ul v-if="history.length" aria-label="有限范围任务历史"><li v-for="row in history" :key="row.run_id"><el-button :disabled="busy" @click="openRun(row.run_id)">打开原任务 {{ row.run_id }}</el-button> {{ states[row.status] }}</li></ul>

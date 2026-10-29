@@ -16,7 +16,7 @@ async function open(page) {
     await route.fulfill({ json: { code: 200, msg: 'Synthetic navigation fixture', data } });
   });
   await page.goto(harness.origin);
-  await expect(page.getByRole('heading', { name: 'AI 管理中心', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'AI 管理导航', exact: true })).toBeVisible();
   return state;
 }
 test('four groups and one searchable directory expose all 41 entries without starting a Source request', async ({ page }) => {

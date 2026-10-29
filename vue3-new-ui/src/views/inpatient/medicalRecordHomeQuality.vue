@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病案首页质控" description="检查病案首页完整性，记录问题、评分和整改依据" />
     <el-row :gutter="16" style="margin-bottom: 16px">
       <el-col :span="6"><el-card><div class="metric-label">检查总数</div><div class="metric-value">{{ summary.total }}</div></el-card></el-col>
       <el-col :span="6"><el-card><div class="metric-label">错误项</div><div class="metric-value danger">{{ summary.error_count }}</div></el-card></el-col>

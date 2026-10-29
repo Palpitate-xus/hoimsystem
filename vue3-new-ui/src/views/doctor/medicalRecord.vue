@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病历管理" description="书写、查看和签名患者病历记录" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增病历</el-button>

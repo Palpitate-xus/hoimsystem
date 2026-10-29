@@ -2,7 +2,7 @@
   <section class="observation-governance" aria-label="AI住院观测窗管理">
     <p v-if="!allowed">仅超级管理员可管理全院观测窗。</p>
     <template v-else>
-      <p>按原患者和住院核对冻结观测窗。原资料是离散观测、采样计划未知，不代表连续监护齐全。管理、查看或撤销均不调用模型，不启用功能或改变临床验证状态。</p>
+      <p>按患者和住院记录查询观测窗口。</p>
       <el-form inline @submit.prevent="load">
         <el-form-item label="患者ID"><el-input v-model="filters.patient_id" aria-label="观测窗治理患者ID" inputmode="numeric" clearable placeholder="全部患者" /></el-form-item>
         <el-form-item label="原住院ID"><el-input v-model="filters.admission_id" aria-label="观测窗治理原住院ID" clearable placeholder="全部原住院" /></el-form-item>
@@ -10,7 +10,7 @@
         <el-form-item><el-button native-type="submit" type="primary" :loading="loading">查询观测窗</el-button></el-form-item>
       </el-form>
       <p v-if="error" role="alert">{{ error }}</p>
-      <p v-if="truncated">目录已截断，请缩小患者、住院或状态范围；未列出不表示不存在。</p>
+      <p v-if="truncated">仅显示部分记录，请缩小患者、住院或状态范围。</p>
       <el-table :data="items" v-loading="loading" empty-text="暂无匹配观测窗">
         <el-table-column prop="window_id" label="窗口ID" min-width="280" />
         <el-table-column label="原患者与住院" min-width="240"><template #default="{ row }">患者 #{{ row.patient_id }}<br />{{ row.admission_id }}</template></el-table-column>
@@ -24,15 +24,15 @@
           <template v-if="detail">
             <p class="hash">窗口 {{ detail.window_id }} · 患者 #{{ detail.patient_id }} · 原住院 {{ detail.admission_id }}<br />{{ detail.start_at }} 至 {{ detail.end_at }}<br />截至当时可知 {{ detail.as_of }} · 冻结 {{ detail.created_at }}<br />{{ statusLabel(detail.status) }} · 版本 {{ detail.revision }} · 内容摘要 {{ detail.content_hash }}</p>
             <p>当前一致性：{{ freshnessLabel(detail.freshness) }}。{{ detail.freshness?.message || '' }}</p>
-            <p>下列数据保留创建时原版本。超级管理员能查看已变化或已撤销窗口的冻结审计，这不表示它仍可作为当前AI输入。</p>
+            <p>以下为创建窗口时保存的记录，点击详情查看原值和当前状态。</p>
             <template v-if="detail.snapshot">
               <h4>冻结原点测量</h4>
-              <el-table :data="detail.snapshot.points || []" aria-label="窗口冻结点测量" empty-text="窗口未冻结点测量；无资料不表示正常">
+              <el-table :data="detail.snapshot.points || []" aria-label="窗口冻结点测量" empty-text="窗口暂无点测量记录">
                 <el-table-column prop="observation_id" label="原观测ID" min-width="220" /><el-table-column prop="observed_at" label="实际观察时间" min-width="230" /><el-table-column prop="recorded_at" label="录入时间" min-width="230" />
                 <el-table-column label="原数值与缺项" min-width="260"><template #default="{ row }"><div v-for="field in metricFields" :key="field.key">{{ field.label }}：{{ measurement(row.payload?.measurements?.[field.key] ?? row.measurements?.[field.key]) }}</div><div>吸氧：{{ oxygenLabels[row.payload?.supplemental_oxygen ?? row.supplemental_oxygen] || '未知' }}</div><div>意识：{{ consciousness(row.payload?.consciousness ?? row.consciousness) }}</div></template></el-table-column>
               </el-table>
               <h4>冻结原分时尿量</h4>
-              <el-table :data="detail.snapshot.urine_intervals || []" aria-label="窗口冻结分时尿量" empty-text="窗口未冻结尿量区间；无资料不表示0mL">
+              <el-table :data="detail.snapshot.urine_intervals || []" aria-label="窗口冻结分时尿量" empty-text="窗口暂无尿量区间记录">
                 <el-table-column prop="interval_id" label="原区间ID" min-width="220" /><el-table-column label="原收集时间" min-width="230"><template #default="{ row }">{{ row.start_at }} 至 {{ row.end_at }}</template></el-table-column><el-table-column prop="recorded_at" label="录入时间" min-width="230" /><el-table-column label="原体积与收集范围" min-width="220"><template #default="{ row }">{{ urineSummary(row.payload || row) }}</template></el-table-column>
               </el-table>
               <el-collapse><el-collapse-item title="冻结质量说明与完整原资料"><pre class="frozen-json">{{ JSON.stringify(detail.snapshot, null, 2) }}</pre></el-collapse-item></el-collapse>

@@ -6,14 +6,14 @@
   <el-alert v-if="error" :title="error" type="error" :closable="false" />
   <el-button v-if="closed&&superUser&&mode&&scopeValid&&initialValid" @click="reopen">重新打开原文抽取</el-button>
   <template v-if="active">
-   <el-alert title="模型仅提出未审核逐字草稿，不自动保存候选、审核或发布知识；空结果不证明全文没有条款。" type="warning" :closable="false" />
+   <el-alert title="逐条审核模型草稿后，可保存为知识候选。" type="warning" :closable="false" />
    <el-button @click="close">关闭并清除原文抽取任务</el-button>
    <document-extraction-input :key="inputKey" :active="active" :initial-references="initialReferences" @selection-change="selected" />
    <el-form label-position="top">
     <el-form-item label="可选查找问题（不归一化或改写）"><el-input v-model="question" type="textarea" aria-label="原文抽取可选问题" placeholder="仅限制本次查找范围，不能授权执行原文中的指令" /></el-form-item>
     <el-checkbox v-model="preview">明确以超级管理员试运行</el-checkbox>
    </el-form>
-   <p v-if="!feature?.enabled||feature?.validation_status!=='validated'">当前功能未启用或尚未完成配置验证，须明确勾选试运行；这不代表模型或条款已获临床验证。</p>
+   <p v-if="!feature?.enabled||feature?.validation_status!=='validated'">功能尚未启用或验证尚未完成，超级管理员可勾选试运行。</p>
    <el-alert v-if="message" :title="message" type="info" :closable="false" />
    <div><el-button :disabled="!canGenerate||busy" @click="inspect">预览完整原文与引用</el-button><el-button type="primary" :disabled="!canGenerate||busy" :loading="busy" @click="submit">提交未审核条款抽取</el-button><el-button :disabled="!selection||busy" @click="loadHistory">读取此原文任务历史</el-button></div>
    <ul v-if="history.length" aria-label="所选原文任务历史"><li v-for="row in history" :key="row.run_id"><el-button @click="openRun(row.run_id)" :disabled="busy">打开原任务 {{ row.run_id }}</el-button> {{ statuses[row.status] }}</li></ul>

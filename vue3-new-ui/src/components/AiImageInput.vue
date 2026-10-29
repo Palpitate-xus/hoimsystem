@@ -2,21 +2,21 @@
   <section class="ai-image-input" aria-label="原始影像登记与选择">
     <h4>选择本患者的真实影像申请与原文件</h4>
     <label>影像申请 <el-select :model-value="orderId || null" :disabled="disabled || !!lockedOrderId || uploading || loading" clearable filterable aria-label="原始影像申请" placeholder="明确选择原申请，不按时间推定就诊" style="width: 100%" @update:model-value="setOrder"><el-option v-for="order in orders" :key="order.imaging_order_id" :value="order.imaging_order_id" :label="orderLabel(order)" /></el-select></label>
-    <p>{{ orderScopeNote || '申请文字仅用于院内核对；申请与就诊的关联须另行明确，不按申请日期推定。' }}</p>
+    <p>{{ orderScopeNote || '请确认影像申请对应的就诊。' }}</p>
     <p v-if="selectedOrder?.status === 5 || selected?.order_status === 5" class="data-gap">原申请已取消，可核对原记录，不能继续登记或生成识别候选。</p>
-    <p v-if="ordersTruncated">申请清单仅显示近期100项，不能据此断言不存在其他申请。</p>
+    <p v-if="ordersTruncated">显示最近100项影像申请。</p>
     <label>原始影像 <el-select :model-value="selectedId || null" :disabled="disabled || uploading || loading || assetsLoading || !orderId" clearable filterable aria-label="待复核原始影像" placeholder="选择已登记的单帧DICOM原图" style="width: 100%" @update:model-value="selectAsset"><el-option v-for="item in assets" :key="item.asset_id" :value="item.asset_id" :disabled="item.status !== 'ready'" :label="assetLabel(item)" /></el-select></label>
-    <p>{{ options.scope_note || '登记与预览不调用模型；当前诊疗成员按原患者、申请与就诊权限核对。' }}</p>
+    <p v-if="noticeText(options.scope_note || '登记与预览不调用模型；当前诊疗成员按原患者、申请与就诊权限核对。')">{{ noticeText(options.scope_note || '登记与预览不调用模型；当前诊疗成员按原患者、申请与就诊权限核对。') }}</p>
     <p v-if="error" role="alert" class="data-gap">{{ error }}</p>
     <template v-if="selected">
       <p>原申请 {{ selected.imaging_order_id }}；原就诊 {{ selected.encounter_ref || '未记录，不按日期推定' }}；采集时刻 {{ selected.recorded_at || '未核实，不以登记时刻或DICOM时钟代替' }}。</p>
-      <p>{{ selected.image_metadata?.modality || 'unknown' }} · {{ selected.image_metadata?.columns }}列 × {{ selected.image_metadata?.rows }}行 · {{ statuses[selected.status] || selected.status }}。单张图像不代表完整序列或全部检查。</p>
+      <p>{{ selected.image_metadata?.modality || 'unknown' }} · {{ selected.image_metadata?.columns }}列 × {{ selected.image_metadata?.rows }}行 · {{ statuses[selected.status] || selected.status }}。</p>
       <p v-if="selected.image_metadata?.valid_pixel_count === 0" class="data-gap">原图全部为填充值，可核查原记录，不能生成识别候选。</p>
       <el-button :disabled="uploading" @click="viewVisible = true">查看所选原始影像</el-button><el-button v-if="selected.can_withdraw" type="warning" :disabled="disabled || uploading" @click="withdraw">撤回所选原始影像</el-button>
     </template>
     <p v-if="assetsTruncated">原图清单仅显示近期50项，可通过原申请缩小范围。</p>
     <el-collapse><el-collapse-item title="登记单帧DICOM原始影像">
-      <p>支持单帧、8/16位原生小端灰阶DICOM；不选择压缩、多帧、容积的首张图替代完整资料，不用截图、报告文字或外部URL代替原始像素。</p>
+      <p>支持单帧、8/16位原生小端灰阶DICOM，请上传原始文件。</p>
       <label class="file-row">原始DICOM文件 <input ref="fileInput" type="file" accept=".dcm,application/dicom" aria-label="选择原始DICOM文件" :disabled="disabled || uploading || !orderId" @change="chooseFile" /></label>
       <p>原文件上限 {{ options.max_bytes ? `${Math.floor(options.max_bytes / 1048576)} MiB` : '尚未读取' }}；像素上限 {{ options.max_pixels || '尚未读取' }}；当前登记用量 {{ Math.ceil((options.used_bytes || 0) / 1048576) }} MiB。</p>
       <el-checkbox v-model="confirmed" :disabled="disabled || uploading">我已核对来源、使用授权、患者与原影像申请及所选就诊的关联</el-checkbox>
@@ -29,6 +29,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import request from "@/utils/request";

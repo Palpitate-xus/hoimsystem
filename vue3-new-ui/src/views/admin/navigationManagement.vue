@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="院内路线管理" description="配置院区导航节点和路线连线，患者端按最短距离生成路线" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="导航节点" name="nodes">
         <div class="page-toolbar">

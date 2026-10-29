@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="体检管理" description="管理体检套餐、体检项目、体检预约和体检记录" />
     <el-tabs v-model="activeTab">
       <!-- 体检套餐 -->
       <el-tab-pane label="体检套餐" name="package">

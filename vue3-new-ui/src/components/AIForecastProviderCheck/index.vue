@@ -8,7 +8,7 @@
         <el-descriptions :column="1" border class="forecast-description">
           <el-descriptions-item v-for="row in descriptions" :key="row[0]" :label="row[0]"><span class="digest">{{ row[1] }}</span></el-descriptions-item>
         </el-descriptions>
-        <p>{{ result.scope_note }}</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p>
       </template>
     </div>
     <template #footer>
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
@@ -33,13 +34,13 @@ const descriptions = computed(() => {
   const cap = result.value?.capabilities;
   return cap ? [
     ["实际模型", cap.model_version],
-    ["统计目标", "每日挂号创建记录数，包含已取消记录；不是实际到诊人数。"],
+    ["统计目标", "每日挂号记录数，包含已取消记录。"],
     ["固定算法", `${cap.recipe}：最近四周同星期均值；不按回测成绩自动择优。`],
     ["历史与跨度", `${cap.history_min_days}–${cap.history_max_days} 个连续已确认日；外推 ${cap.horizon_days?.join(' / ')} 天。`],
-    ["回测与区间", `${cap.backtest_origins} 个滚动起点；名义 ${cap.nominal_coverage * 100}% 经验区间，不保证未来覆盖。`],
+    ["回测与区间", `${cap.backtest_origins} 个滚动起点；名义 ${cap.nominal_coverage * 100}%经验误差区间。`],
     ["实际运行环境", `Python ${cap.python_version}；${Object.entries(cap.engine_versions || {}).map(([name, version]) => `${name} ${version}`).join(' ')}`],
     ["请求限制", `最大 ${cap.max_request_bytes} 字节；服务时限 ${cap.timeout_seconds} 秒，模型请求另留传输时间。`],
-    ["Prompt", "仅用于溯源，不改变固定统计数值。"],
+    ["Prompt", "记录本次统计版本。"],
     ["效果验证", `${cap.operational_validation}：服务未提供独立运营效果验证；能力核对不修改验证状态。`],
     ["算法摘要", cap.recipe_digest], ["运行摘要", cap.runtime_digest],
   ] : [];

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="就诊导航" description="查询科室位置、联系电话和医生信息" />
     <el-card>
       <div class="page-toolbar">
         <el-input v-model="keyword" placeholder="搜索科室名称" clearable class="page-search-input" @keyup.enter="fetchDepartments" />

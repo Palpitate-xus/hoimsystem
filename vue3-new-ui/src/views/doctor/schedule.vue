@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医生排班" description="管理个人出诊排班和时段设置" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">设置排班</el-button>

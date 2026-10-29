@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="违约记录" description="查看患者预约挂号违约记录和处理情况" />
     <el-card>
       <el-form :inline="true" class="page-toolbar">
         <el-form-item label="患者姓名">

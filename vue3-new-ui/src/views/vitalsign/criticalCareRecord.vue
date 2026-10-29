@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="危重护理记录" description="人工记录意识、GCS、氧疗和生命体征；空项表示未记录，不推定正常值或完整量表。" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="住院患者"><el-select v-model="form.admission_id" aria-label="住院患者" filterable placeholder="选择在院患者" style="width: 240px" @change="selectAdmission"><el-option v-for="item in admissions" :key="item.admission_id" :label="`${item.patient_name}（${item.admission_no}）`" :value="item.admission_id" /></el-select></el-form-item>

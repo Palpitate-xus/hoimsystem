@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="护士工作站" description="医嘱执行、护理记录、体温单" />
     <el-row :gutter="20">
       <el-col :span="5">
         <el-card>

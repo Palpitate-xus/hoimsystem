@@ -1,6 +1,6 @@
 <template>
   <div aria-label="风险观测窗选择">
-    <el-alert type="info" :closable="false" title="先选择原住院的冻结观测窗。离散记录不代表连续监护完整，也不代表模型已验证。" />
+    <el-alert type="info" :closable="false" title="选择本次住院的观测窗口。" />
     <p v-if="!admissionId">请选择原住院记录；门诊体征和患者级检验不会按日期归入住院。</p>
     <template v-else-if="canUse">
       <el-form-item label="原住院观测窗">

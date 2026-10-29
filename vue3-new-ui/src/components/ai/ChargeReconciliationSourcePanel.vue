@@ -4,7 +4,7 @@
   <template v-else>
    <p>保留本次住院全部收费、医嘱、原项目、执行和eMAR记录。已结算或已退费只是原记录状态，实收、实退、币种和收费资格仍需独立证据；不会自动收费或退款。</p>
    <p v-if="!scopeReady&&!auditOnly">请从已授权患者的真实住院记录进入，不能猜测标识。</p>
-   <p v-if="auditOnly">Super全院技术审计；原件发布不代表财务专业确认。</p>
+   <p v-if="auditOnly">审计范围：全院。</p>
    <el-button :loading="loading" @click="reload">重新读取账目目录</el-button>
    <el-button v-if="scopeReady&&options?.can_record" @click="openCreate">捕获完整住院账目</el-button>
    <p v-if="error" role="alert">{{error}}</p><p v-if="notice" role="status">{{notice}}</p>

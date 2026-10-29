@@ -1,6 +1,6 @@
 <template>
   <section aria-label="SOFA独立24小时原资料评估">
-    <p>SOFA-1日评估使用独立完整24小时原资料清单。逐源用途、实际记录覆盖和当前医生回顾判读分别保存；清单完整不代表捕获连续生理最差状态。</p>
+    <p>选择24小时评估资料，逐项核对覆盖时段和医生判读。</p>
     <p v-if="!admissionId">请选择实际原住院记录。</p>
     <template v-else-if="allowed">
       <el-form-item label="SOFA复核类型"><el-select :disabled="locked||disabled" v-model="assessmentMode" aria-label="SOFA复核类型"><el-option label="完整24小时日评估" value="daily" /><el-option label="变化与感染独立复核" value="change" /></el-select></el-form-item>

@@ -1,7 +1,7 @@
 <template>
   <section aria-label="双原文版本核对来源治理">
     <h3>双原文与有限关联范围</h3>
-    <el-alert title="这里只登记和审核人工声明的比较范围" description="不自动抽取、替代或退休原文，不改写知识、规则、Prompt或临床阈值。范围外、未审核和已变化的依赖仍完整保留；全院规则盘点未提供。" type="info" :closable="false" />
+    <el-alert title="这里只登记和审核人工声明的比较范围" description="选择两份原文，登记比较范围和相关依赖。" type="info" :closable="false" />
     <el-alert v-if="!v.allowed" title="仅当前超级管理员可以读取和治理这些完整原件" type="warning" :closable="false" />
     <template v-else>
       <div class="actions"><el-button :loading="v.listsBusy" @click="v.refresh">刷新来源合同与两个目录</el-button></div>
@@ -21,7 +21,7 @@
         </el-form>
         <div v-if="v.target" aria-label="已核对当前目标"><p>目标状态：{{ v.target.snapshot.state }}；完整目标摘要：{{ v.target.snapshot_hash }}</p><el-button :disabled="!v.target.snapshot.exists||v.declared.length>=256" @click="v.addTarget">明确加入本次有限范围</el-button><details><summary>展开完整院内目标原件（不发送模型）</summary><pre>{{ v.canonical(v.target.snapshot) }}</pre></details></div>
         <ul aria-label="声明的有限目标"><li v-for="(target,index) in v.declared" :key="target.kind+target.target_id">{{ target.kind }} / {{ target.target_id }} <el-button @click="v.removeTarget(index)">移出本次声明</el-button></li></ul>
-        <p v-if="!v.declared.length">当前明确列出的目标为0项；这不表示全院没有关联或没有影响。</p>
+        <p v-if="!v.declared.length">当前比较范围尚未添加目标。</p>
       </fieldset>
       <fieldset :disabled="v.busy||!v.optionsReady">
         <legend>登记一条待审核人工关联</legend>
@@ -38,7 +38,7 @@
       <fieldset :disabled="v.busy||!v.optionsReady">
         <legend>捕获并登记完整有限比较范围</legend>
         <el-form label-position="top" :disabled="v.busy||!v.optionsReady">
-          <el-form-item label="两原文关系声明"><el-select v-model="v.form.relationship" aria-label="两原文关系声明" placeholder="明确选择"><el-option label="只做比较，不声明替代" value="comparison_only" /><el-option label="人工声明继任（仍不自动替代）" value="declared_successor" /></el-select></el-form-item>
+          <el-form-item label="两原文关系声明"><el-select v-model="v.form.relationship" aria-label="两原文关系声明" placeholder="明确选择"><el-option label="仅登记比较关系" value="comparison_only" /><el-option label="声明继任关系" value="declared_successor" /></el-select></el-form-item>
           <el-form-item label="同一指南家族的核实状态"><el-select v-model="v.form.family" aria-label="同一家族核实状态"><el-option label="未知" value="unknown" /><el-option label="已明确核实" value="confirmed" /><el-option label="未确认" value="not_confirmed" /></el-select></el-form-item>
           <el-form-item label="原文关系依据"><el-input v-model="v.form.relationshipBasis" aria-label="原文关系依据" type="textarea" :rows="3" /></el-form-item>
           <el-form-item label="有限范围的关联覆盖声明"><el-select v-model="v.form.coverage" aria-label="关联覆盖声明"><el-option label="未知" value="unknown" /><el-option label="不完整" value="incomplete" /><el-option label="仅明确声明范围内完整" value="complete_within_declared_scope" /></el-select></el-form-item>
@@ -46,7 +46,7 @@
           <el-button :disabled="!v.pairValid" :loading="v.busy" @click="v.captureScope">捕获全部依赖供人工核对</el-button>
         </el-form>
         <div v-if="v.capture" aria-label="待登记完整比较捕获"><p>完整成员 {{ v.capture.member_count }} 项；摘要 {{ v.capture.inventory_hash }}。当前两原文的全部直接知识发布及已登记关联均保留，非赢家不丢弃。</p><details><summary>展开捕获的全部私有原件</summary><pre>{{ v.canonical(v.capture.inventory) }}</pre></details><el-button :loading="v.busy" @click="v.enrollScope">按此完整摘要登记范围草稿</el-button></div>
-        <p>两件原文各自4MiB登记能力不保证整件范围、任务或模型报文可装入8MiB预算；超限整件拒绝，不截断或替换正文。</p>
+        <p>每份原文上限4MiB，任务整体上限8MiB，提交时统一检查。</p>
       </fieldset>
       <div v-for="kind in ['links','scopes']" :key="kind" class="directory" :aria-label="kind==='links'?'人工关联目录':'有限范围目录'">
         <h4>{{ kind==='links'?'人工关联目录':'有限范围目录' }}</h4>

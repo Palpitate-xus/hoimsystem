@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="药品采购管理" description="创建采购订单，跟踪采购入库流程" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新建采购单</el-button>

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="收费记录查询" description="查询全院收费记录和退费明细" />
     <el-card>
       <div class="page-toolbar">
         <el-input

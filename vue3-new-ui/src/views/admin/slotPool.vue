@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="号源池管理" description="查看各科室号源分布和使用情况" />
     <el-card>
       <el-table :data="list" v-loading="loading" empty-text="暂无记录">
         <el-table-column prop="department_name" label="科室" />

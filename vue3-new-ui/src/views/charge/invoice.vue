@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="发票管理" description="生成、查询和打印医疗收费发票" />
     <el-card>
       <div class="page-toolbar">
         <el-input

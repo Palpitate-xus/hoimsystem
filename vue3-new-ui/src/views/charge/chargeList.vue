@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="费用管理" description="管理患者费用记录，支持缴费和退费处理" />
     <el-card>
 
       <div class="page-toolbar">

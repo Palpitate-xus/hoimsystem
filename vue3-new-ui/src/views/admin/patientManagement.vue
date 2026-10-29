@@ -1,8 +1,7 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病人管理" description="查看和管理患者基本信息档案" />
     <el-card>
-      
+
       <div class="page-toolbar">
         <el-input
           v-model="searchQuery"

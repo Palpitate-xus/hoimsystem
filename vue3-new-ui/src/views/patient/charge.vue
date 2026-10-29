@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="缴费管理" description="查询待缴费用，在线完成缴费" />
     <el-card>
 
       <div class="page-toolbar">

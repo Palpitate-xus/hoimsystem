@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="科室绩效核算" description="工作量×绩效系数 − 成本分摊（明细手工录入，服务端核算）" />
     <el-card>
       <div class="page-toolbar">
         <el-input v-model="query.period" placeholder="统计期 如 2026-08" clearable style="width: 150px" @keyup.enter="load" />

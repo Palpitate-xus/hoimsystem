@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="候诊巡视记录" description="记录候诊区巡视情况和特殊患者状态" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="dialogVisible = true">新增巡视记录</el-button>

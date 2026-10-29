@@ -1,9 +1,5 @@
 <template>
   <div class="app-container ai-management">
-    <header class="ai-page-heading">
-      <h1>AI 管理中心</h1>
-      <p>配置功能与模型，审核资料，查看任务和访问记录。</p>
-    </header>
     <dl class="management-summary">
       <div v-for="item in summary" :key="item.label"><dt>{{ item.label }}</dt><dd class="summary-value">{{ item.value }}</dd></div>
     </dl>
@@ -16,7 +12,6 @@
           <el-option v-for="entry in group.entries" :key="entry.name" :value="entry.name" :label="entry.label" />
         </el-option-group>
       </el-select>
-      <p class="navigation-context">{{ activeManagementGroupLabel }} · {{ currentManagementEntry?.label }}<span>可搜索全部 {{ availableManagementEntries.length }} 个管理入口</span></p>
     </section>
     <el-card v-loading="loading" shadow="never" class="management-content-card">
       <el-tabs v-model="tab" class="management-content-tabs">
@@ -38,7 +33,7 @@
             <el-table-column label="配置检查" width="145"><template #default="{ row }">
               <el-popover trigger="click" placement="left" :width="380" :title="row.name + '：配置检查'">
                 <p v-for="item in row.setup_check?.issues || []" :key="item.code">{{ item.message }}</p>
-                <p v-if="row.setup_check?.ready">基础配置已具备。</p><p class="setup-note">{{ row.setup_check?.scope_note || '实际执行仍按患者、科室、问题和资料范围重新核验。' }}</p>
+                <p v-if="row.setup_check?.ready">基础配置已具备。</p><p class="setup-note" v-if="noticeText(row.setup_check?.scope_note || '实际执行仍按患者、科室、问题和资料范围重新核验。')">{{ noticeText(row.setup_check?.scope_note || '实际执行仍按患者、科室、问题和资料范围重新核验。') }}</p>
                 <template #reference><el-button link :type="row.setup_check?.ready ? 'success' : 'warning'" :aria-label="row.name + '配置检查'">{{ row.setup_check ? row.setup_check.ready ? '基础配置就绪' : '待补齐 ' + row.setup_check.issues.length + ' 项' : '待检查' }}</el-button></template>
               </el-popover>
             </template></el-table-column>
@@ -151,9 +146,9 @@
         <el-form-item label="模型服务"><el-select v-model="featureForm.provider_id" clearable placeholder="选择已配置的服务"><el-option v-for="item in providers" :key="item.provider_id" :label="item.name" :value="item.provider_id" /></el-select></el-form-item>
         <el-form-item label="使用角色"><el-checkbox-group v-model="featureForm.allowed_roles"><el-checkbox v-for="role in selectedFeature.default_roles" :key="role" :value="role">{{ roles[role] || role }}</el-checkbox></el-checkbox-group></el-form-item>
         <el-form-item label="验证状态"><el-select v-model="featureForm.validation_status"><el-option v-for="(label, value) in validations" :key="value" :label="label" :value="value" /></el-select></el-form-item>
-        <el-form-item label="验证记录"><el-input v-model="featureForm.validation_note" type="textarea" :rows="4" maxlength="5000" :placeholder="selectedFeature.key==='clinical_training'?'记录明确合成教学材料、本人提交、独立模型处理许可、逐字引用与未知用量的教学反馈适用范围；不代表临床能力或资质认证':selectedFeature.requires_operational_validation ? '记录实际科室、输入覆盖、离线回放与边界验证结果、负责人和依据；普通运营执行与启用前须完成验证' : '记录适用范围、病例验证结果、负责人和依据；临床启用前需要完成验证'" /></el-form-item>
+        <el-form-item label="验证记录"><el-input v-model="featureForm.validation_note" type="textarea" :rows="4" maxlength="5000" :placeholder="selectedFeature.key==='clinical_training'?'说明合成教学材料、适用对象、模型处理许可和反馈审核范围':selectedFeature.requires_operational_validation ? '记录实际科室、输入覆盖、离线回放与边界验证结果、负责人和依据；普通运营执行与启用前须完成验证' : '记录适用范围、病例验证结果、负责人和依据；临床启用前需要完成验证'" /></el-form-item>
         <el-form-item label="每日调用上限"><el-input-number v-model="featureForm.daily_limit" :min="1" :max="10000" /></el-form-item>
-        <el-form-item label="面向业务启用"><el-switch v-model="featureForm.enabled" :disabled="selectedFeature.requires_operational_validation && !featureForm.enabled && featureForm.validation_status!=='validated'" /><p v-if="selectedFeature.key==='clinical_training'">教学AI须明确验证本次教学反馈适用范围；本地固定集合匹配不要求模型启用，预览不代替独立复核、模型处理许可或临床能力认证。</p><p v-else-if="selectedFeature.requires_operational_validation">此运营能力须完成实际范围验证后才能面向业务启用和普通执行；管理员预览不代表本地验证、候选获批或实际排班已改变。</p></el-form-item>
+        <el-form-item label="面向业务启用"><el-switch v-model="featureForm.enabled" :disabled="selectedFeature.requires_operational_validation && !featureForm.enabled && featureForm.validation_status!=='validated'" /><p v-if="selectedFeature.key==='clinical_training'">教学AI须明确验证本次教学反馈适用范围；本地固定集合匹配不要求模型启用，预览不代替独立复核、模型处理许可或临床能力认证。</p><p v-else-if="selectedFeature.requires_operational_validation">完成适用范围验证后，可在此启用功能。</p></el-form-item>
       </el-form>
       <template #footer><el-button @click="featureDialog = false">取消</el-button><el-button type="primary" :loading="saving" @click="submitFeature">保存配置</el-button></template>
     </el-dialog>
@@ -211,7 +206,7 @@
             <el-descriptions-item label="服务处理时限">{{ speechCheckResult.capabilities.timeout_seconds }} 秒，模型请求超时需另留传输时间</el-descriptions-item>
           </el-descriptions>
           <p>本地声学识别只转写原音，未区分说话人。修改任务Prompt不会让识别器补写未听到的内容；专科术语和医疗质量须另行验证。</p>
-          <p>{{ speechCheckResult.scope_note }}</p>
+          <p v-if="noticeText(speechCheckResult.scope_note)">{{ noticeText(speechCheckResult.scope_note) }}</p>
         </template>
       </div>
       <template #footer><el-button @click="speechCheckDialog = false">关闭</el-button><el-button v-if="speechCheckResult && speechCheckResult.configured_model !== speechCheckResult.capabilities.model_version" @click="editActualSpeechModel">填写实际模型，待保存</el-button></template>
@@ -239,8 +234,8 @@
             <el-descriptions-item label="预处理摘要"><span class="prompt-text">{{ ecgCheckResult.capabilities.preprocessing_digest }}</span></el-descriptions-item>
             <el-descriptions-item label="临床验证声明">{{ ecgCheckResult.capabilities.clinical_validation }}（未提供临床验证）</el-descriptions-item>
           </el-descriptions>
-          <p>来源模型和格式匹配不代表临床准确性。填写模型标识仅更新待保存表单，仍需另行保存、评审及配置启用。</p>
-          <p>{{ ecgCheckResult.scope_note }}</p>
+          <p>选择模型后，请保存配置并完成适用范围审核。</p>
+          <p v-if="noticeText(ecgCheckResult.scope_note)">{{ noticeText(ecgCheckResult.scope_note) }}</p>
         </template>
       </div>
       <template #footer><el-button @click="ecgCheckDialog = false">关闭</el-button><el-button v-if="ecgCheckResult && ecgCheckResult.configured_model !== ecgCheckResult.capabilities.model_version" @click="editActualEcgModel">填写实际模型，待保存</el-button></template>
@@ -269,10 +264,10 @@
             <el-descriptions-item label="人群适用性">{{ imageCheckResult.capabilities.population_applicability }}：未核实采集时人群与模型适用性。</el-descriptions-item>
             <el-descriptions-item label="临床验证">{{ imageCheckResult.capabilities.clinical_validation }}：未提供临床验证。</el-descriptions-item>
           </el-descriptions>
-          <p>研究配置按原 BitsStored 可表示范围归一化，MONOCHROME1 只反转一次，再按原作者中心方形裁剪并缩放为224×224（双线性、抗锯齿）。不应用DICOM VOI显示窗、不自动minmax或旋转；不声称与原训练数据预处理等价。</p>
-          <p>该流程与原图查看器的DICOM显示窗分别保留。模型只提供单图分类原始分数，不提供病灶框或完整序列判断；分数不是患病概率。</p>
+          <p>研究配置按原BitsStored范围归一化，MONOCHROME1反转一次，再居中方形裁剪并缩放至224×224，采用双线性抗锯齿。</p>
+          <p>模型返回单张图像各标签的原始分数，原图查看器使用DICOM显示窗。</p>
           <p>填写实际模型仅更新待保存表单；保存服务、启用功能及临床评审仍须分别明确操作。</p>
-          <p>{{ imageCheckResult.scope_note }}</p>
+          <p v-if="noticeText(imageCheckResult.scope_note)">{{ noticeText(imageCheckResult.scope_note) }}</p>
         </template>
       </div>
       <template #footer><el-button @click="imageCheckDialog = false">关闭</el-button><el-button v-if="canCheckImage && imageCheckResult && imageCheckResult.configured_model !== imageCheckResult.capabilities.model_version" @click="editActualImageModel">填写实际模型，待保存</el-button></template>
@@ -343,6 +338,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import RcaEvidenceSources from '@/components/ai/RcaEvidenceSources.vue';
 
 import { computed, defineAsyncComponent, onMounted, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
@@ -453,7 +449,6 @@ const availableManagementGroups = computed(() => AI_MANAGEMENT_GROUPS.map(group 
 })).filter(group => group.entries.length));
 const currentManagementEntry = computed(() => availableManagementEntries.value.find(entry => entry.name === tab.value));
 const activeManagementGroup = computed(() => currentManagementEntry.value?.group || "features_models");
-const activeManagementGroupLabel = computed(() => AI_MANAGEMENT_GROUPS.find(group => group.key === activeManagementGroup.value)?.label || "");
 function selectManagementTab(name) {
   if (availableManagementEntries.value.some(entry => entry.name === name)) tab.value = name;
 }
@@ -749,9 +744,6 @@ onMounted(refresh);
 </script>
 
 <style scoped>
-.ai-page-heading { margin-bottom: 20px; }
-.ai-page-heading h1 { margin: 0 0 8px; font-size: 24px; font-weight: 600; color: var(--el-text-color-primary); }
-.ai-page-heading p { margin: 0; color: var(--el-text-color-secondary); line-height: 1.6; }
 .management-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 20px; padding: 16px 0; border-top: 1px solid var(--el-border-color-lighter); border-bottom: 1px solid var(--el-border-color-lighter); }
 .management-summary > div { padding: 0 20px; border-left: 1px solid var(--el-border-color-lighter); }
 .management-summary > div:first-child { padding-left: 0; border-left: 0; }
@@ -759,8 +751,6 @@ onMounted(refresh);
 .summary-value { margin: 8px 0 0; font-size: 24px; font-weight: 600; line-height: 1.2; color: var(--el-text-color-primary); }
 .management-navigation { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 16px; }
 .management-entry-select { width: min(360px, 100%); }
-.navigation-context { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--el-text-color-regular); line-height: 1.6; }
-.navigation-context span { margin-left: 16px; color: var(--el-text-color-secondary); }
 .management-content-tabs > :deep(.el-tabs__header) { display: none; }
 .ai-management :deep(.el-card) { box-shadow: none !important; border: 1px solid var(--el-border-color-lighter); border-radius: 6px; }
 @media (max-width: 640px) {
@@ -769,7 +759,6 @@ onMounted(refresh);
   .management-navigation :deep(.el-radio-group) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .management-navigation :deep(.el-radio-button__inner) { width: 100%; }
   .management-entry-select { width: 100%; }
-  .navigation-context span { display: block; margin-left: 0; }
 }
 .setup-note { font-size: 12px; color: var(--el-text-color-secondary); line-height: 1.6; }
 .field-hint { margin-left: 12px; font-size: 12px; color: #606266; }

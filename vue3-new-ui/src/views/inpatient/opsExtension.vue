@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="运营扩展：CSSD / PIVAS / ICU评分 / 临床路径" description="器械消毒供应、静配中心、专科评分与路径执行（全部手工登记，无预置数据）" />
     <el-tabs v-model="tab">
       <!-- CSSD -->
       <el-tab-pane label="CSSD 器械包" name="cssd">
@@ -270,7 +269,7 @@ export default {
       pivasTransitionVisible: false, pivasTransitionStatus: null, pivasCurrent: {},
       scoreLoading: false, scoreData: [], scoreQuery: { score_type: null },
       scoreDialogVisible: false, scoreForm: newScoreForm(), scoreSubmitting: false, scoreEpoch: 0, scoreLoadSequence: 0,
-      scoreDefinitions: { gcs: "GCS 人工分项", apache2: "APACHE II 人工分项（APS已由人员汇总）", sofa: "SOFA 原1996版人工分项", aldrete: "Aldrete 原1970肤色版（不含SpO₂替代）", steward: "Steward 原1975版人工分项" },
+      scoreDefinitions: { gcs: "GCS 人工分项", apache2: "APACHE II 人工分项（APS已由人员汇总）", sofa: "SOFA 原1996版人工分项", aldrete: "Aldrete 原1970肤色版", steward: "Steward 原1975版人工分项" },
       pathwayLoading: false, pathwayData: [], pathwayQuery: { status: null },
       pathwayDialogVisible: false, pathwayForm: { total_items: 0 },
     };

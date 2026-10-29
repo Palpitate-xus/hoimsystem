@@ -8,7 +8,7 @@
    <p v-if="selected">已选择材料集{{selected.operations_case_id}}，共{{metadata.source_count}}份已发布文档。</p><details v-if="selected"><summary>材料核验标识</summary><p>公开SHA：{{metadata.public_hash}}</p></details>
    <el-button v-if="selected" :disabled="busy" @click="choose(selected)">重新核对当前公开材料</el-button><el-button v-if="selected" @click="clear">清除所选材料集</el-button>
    <OperationsSupportSources v-for="instance in [sourceKey]" :key="instance" :active="allowed&&entryValid" :config-revision="configRevision" @select="choose" @invalidate="invalidateSource(instance)" @source-changed="invalidateSource(instance)" />
-   <el-collapse v-if="source"><el-collapse-item title="本次完整公开材料（不是受控原件）" name="source"><article v-for="doc in source.documents" :key="doc.source_id"><h3>{{doc.title}}</h3><pre>{{doc.text}}</pre></article></el-collapse-item></el-collapse>
+   <el-collapse v-if="source"><el-collapse-item title="本次模型接收的完整材料" name="source"><article v-for="doc in source.documents" :key="doc.source_id"><h3>{{doc.title}}</h3><pre>{{doc.text}}</pre></article></el-collapse-item></el-collapse>
   </template>
  </section>
 </template>

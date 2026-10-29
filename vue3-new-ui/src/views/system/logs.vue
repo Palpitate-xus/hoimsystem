@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="操作日志" description="审计系统操作日志，支持筛选和查询" />
     <el-card>
       <el-form :inline="true" :model="queryForm" class="page-toolbar">
         <el-form-item label="操作类型">

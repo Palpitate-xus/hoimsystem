@@ -3,7 +3,7 @@
     <el-button :loading="loading" @click="load">读取{{ label }}候选</el-button>
     <el-select :model-value="selectedId" :aria-label="label" clearable placeholder="明确选择原来源，不自动最近" @update:model-value="select"><el-option v-for="row in items" :key="identity(row)" :value="identity(row)" :label="description(row)" /></el-select>
     <p v-if="modelValue">已明确 {{ modelValue.source_id || identity(modelValue) }} · 完整摘要 {{ modelValue.content_hash }}</p><p v-if="error" role="alert">{{ error }}</p>
-    <el-pagination v-if="total > 20" v-model:current-page="page" :page-size="20" :total="total" layout="prev,pager,next" @current-change="load" /><small>仅当前页目录，未列记录不表示没有资料。所有原量和时刻保留。</small>
+    <el-pagination v-if="total > 20" v-model:current-page="page" :page-size="20" :total="total" layout="prev,pager,next" @current-change="load" /><small>显示当前页记录。</small>
   </fieldset>
 </template>
 <script setup>

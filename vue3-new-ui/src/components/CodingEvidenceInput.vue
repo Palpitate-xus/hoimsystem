@@ -10,7 +10,7 @@
           <el-button native-type="submit" :loading="loading">重新核对病案范围</el-button><el-button v-if="selected" @click="clearSelection">清除编码依据选择</el-button>
         </el-form>
         <p v-if="error" role="alert">{{ error }}</p><p v-if="checking" role="status">正在核对完整病案、原件哈希及当前治理。</p>
-        <p v-if="selected" aria-label="已选择完整编码依据">受审原件 {{ selected.source_id }}；{{ selected.public_source.code_bindings.length }} 条完整编码绑定；捕获时刻 {{ selected.snapshot.collection.captured_at }}。技术发布不替代专业确认。</p>
+        <p v-if="selected" aria-label="已选择完整编码依据">受审原件 {{ selected.source_id }}；{{ selected.public_source.code_bindings.length }} 条完整编码绑定；捕获时刻 {{ selected.snapshot.collection.captured_at }}。</p>
         <coding-evidence-sources v-if="homeReady" :key="childKey" :patient-id="patientId" :admission-id="admissionId" :home-id="home" :active="active" :audit-only="false" @select="selectCase" @source-changed="sourceChanged" @invalidate="sourceUnavailable" />
       </template>
     </template>

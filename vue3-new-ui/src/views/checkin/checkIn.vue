@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="报到签到" description="预约患者到院报到签到，管理违约记录" />
 
     <el-card>
       <el-steps :active="step" finish-status="success" simple>

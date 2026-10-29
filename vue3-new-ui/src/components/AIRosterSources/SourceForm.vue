@@ -1,6 +1,6 @@
 <template>
   <el-form label-position="top" :disabled="disabled" aria-label="排班原来源草稿字段" @submit.prevent>
-    <p>所有资质、可用性和记录完整性均须按原依据明确填写；登记草稿不代表已发布规则、可行排班或可预约号源。外部证照、个人原因及自由文字只保留院内核对。</p>
+    <p>请按原记录填写资质、可用时间和班次。证照、个人原因和审核依据保存在院内。</p>
     <el-form-item v-for="field in fields" :key="field.key" :label="field.label"><el-select v-if="field.values" v-model="draft[field.key]" :aria-label="field.label" placeholder="请明确选择"><el-option v-for="entry in field.values" :key="String(entry[0])" :label="entry[1]" :value="entry[0]" /></el-select><el-input v-else v-model="draft[field.key]" :aria-label="field.label" :type="field.key==='authorized_job_keys'?'textarea':'text'" :placeholder="field.key==='authorized_job_keys'?'按原定义填写岗位代码，每行一个；不从职称生成':field.key==='policy_reference'?'实际审核规则或原文标识':'YYYY-MM-DDTHH:mm:ss.ffffffZ，明确UTC或偏移'" :maxlength="field.key==='policy_reference'?2000:field.key==='authorized_job_keys'?10000:100" /></el-form-item>
     <nullable-value v-if="kind==='duty_interval'" v-model="job" kind="job" label="班次原岗位标识" />
     <nullable-value v-if="kind==='work_rule_policy'" v-model="policyEnd" kind="clock" label="规则原有效结束UTC" />

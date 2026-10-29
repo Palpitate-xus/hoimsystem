@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="结构化电子病历" description="病历书写、病程记录、查房记录、病历质控" />
     <el-row :gutter="20">
       <el-col :span="5">
         <el-card>

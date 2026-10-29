@@ -3,8 +3,8 @@
     <p v-if="checking">正在核对完整原件、投影与逐字引文……</p>
     <el-alert v-else-if="error" :title="error" type="error" :closable="false" />
     <template v-else-if="accepted">
-      <el-alert title="所有模型意见均待人工复核；文字位置一致不证明医学解释或编码适用性" type="warning" :closable="false" />
-      <p>单份首页及同次住院，共 {{ source.code_bindings.length }} 项编码绑定。当前字典发行版本未知，已记录分组缺少完整历史规则依据；本地前缀规则不等于官方 DRG/DIP 分组器。</p>
+      <el-alert title="请逐项核对模型意见、引用和编码适用范围" type="warning" :closable="false" />
+      <p>单份首页及同次住院，共 {{ source.code_bindings.length }} 项编码绑定。字典发行版本和历史分组规则待补充。</p>
       <p v-if="source.missing_document_fields.length">文书字段未记录：{{ source.missing_document_fields.map(fieldName).join('、') }}。</p>
       <p v-if="!analysis">{{ accepted.run ? stateName(accepted.run.status) : '资料预览' }}：没有已接受的模型草稿，以下仅显示原记录结构。</p>
       <el-table :data="rows.slice((page-1)*20,page*20)" aria-label="完整编码绑定与模型逐项意见" row-key="binding_token">
@@ -32,7 +32,7 @@
         <p v-else>本项尚无已接受的模型意见。</p>
       </section>
       <h4>本次模型可见文书投影</h4>
-      <p>直接标识最小化不保证匿名；以下位置对应投影文字，完整私有原文仍在院内快照中。</p>
+      <p>以下位置对应模型接收的文字，完整原文保存在院内。</p>
       <el-button v-for="document in source.documents" :key="document.source_id" @click="selectDocument(document)">{{ fieldName(document.field) }}</el-button>
       <template v-if="document"><p>{{ fieldName(document.field) }}</p><details><summary>文书核验标识</summary><p>UTF-8 SHA256 {{ document.text_hash }}</p></details><pre aria-label="可定位的模型可见文书投影">{{ highlight.prefix }}<mark v-if="highlight.quote">{{ highlight.quote }}</mark>{{ highlight.suffix }}</pre></template>
       <el-button @click="inspect">查看完整来源依据</el-button>

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="健康档案" description="查看和管理个人健康档案信息" />
     <el-card>
       <el-descriptions title="基本信息" :column="2" border>
         <el-descriptions-item label="姓名">{{ profile.name }}</el-descriptions-item>

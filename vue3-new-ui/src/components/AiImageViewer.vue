@@ -1,8 +1,8 @@
 <template>
   <section class="ai-image-viewer" aria-label="原始单帧影像复核">
-    <p>当前来源 {{ sourceId || '未选择' }}；一次显示一张原始图像，不代表完整序列、容积或整次检查。</p>
+    <p>当前来源 {{ sourceId || '未选择' }}；每次显示一张图像。</p>
     <p v-if="metadata">原始 {{ metadata.columns }}列 × {{ metadata.rows }}行；{{ metadata.modality || 'unknown' }}，部位 {{ metadata.body_part_examined || 'unknown' }}，体位 {{ metadata.view_position || 'unknown' }}。按存储行列显示，不推定解剖左右或病灶实际尺寸。</p>
-    <p v-if="metadata?.burned_in_annotation !== 'NO'" class="data-gap">像素内是否含文字标识：{{ metadata?.burned_in_annotation || 'unknown' }}。请按原资料权限核对，标签不证明像素已匿名化。</p>
+    <p v-if="metadata?.burned_in_annotation !== 'NO'" class="data-gap">像素内是否含文字标识：{{ metadata?.burned_in_annotation || 'unknown' }}。请核对像素中的身份信息。</p>
     <el-button :loading="loading" :disabled="!sourceId || disabled" @click="load">{{ pixels ? '重新读取原始像素' : '加载原始影像像素' }}</el-button>
     <p v-if="error" role="alert" class="data-gap">{{ error }}</p>
     <template v-if="pixels && metadata">
@@ -12,13 +12,13 @@
         <label>窗宽 WW <input v-model.number="width" type="number" step="any" aria-label="影像窗宽WW" @change="windowChoice = 'manual'" /></label>
         <label>窗函数 <el-select v-model="voi" aria-label="影像窗函数" style="width: 155px" @change="windowChoice = 'manual'"><el-option v-for="name in VOI_FUNCTIONS" :key="name" :value="name" :label="name" /></el-select></label>
       </div>
-      <p>{{ windowChoice === 'auto' ? '自动使用非填充像素的重标定最小/最大值，只是显示选项，不是诊断窗。' : windowChoice === 'manual' ? '当前为人工调整的显示窗，不写回原文件或诊断结论。' : '当前使用原文件中的窗预设；预设不证明检查适用性或诊断质量。' }} {{ metadata.invert_display ? '按已核对的原灰阶关系反转一次。' : '按已核对的原灰阶关系显示。' }} 填充值始终显示为黑色。</p>
+      <p>{{ windowChoice === 'auto' ? '自动采用非填充像素的重标定最小值和最大值。' : windowChoice === 'manual' ? '当前为人工调整的显示窗，不写回原文件或诊断结论。' : '使用原文件中的窗预设。' }} {{ metadata.invert_display ? '按已核对的原灰阶关系反转一次。' : '按已核对的原灰阶关系显示。' }} 填充值始终显示为黑色。</p>
       <div class="image-controls"><el-button aria-label="放大原始影像" :disabled="zoom >= 12" @click="changeZoom(zoom * 1.25)">放大</el-button><el-button aria-label="缩小原始影像" :disabled="zoom <= 0.25" @click="changeZoom(zoom / 1.25)">缩小</el-button><el-button @click="resetView">适合窗口并复位</el-button><span>缩放 {{ Math.round(zoom * 100) }}% · 拖动平移、滚轮缩放</span></div>
       <div ref="viewport" class="image-viewport"><canvas ref="canvas" role="img" aria-label="原始行列灰阶影像" :data-source-asset-id="loaded?.asset_id || ''" @pointerdown="pointerDown" @pointermove="pointerMove" @pointerup="pointerUp" @pointercancel="pointerUp" @pointerleave="cursor = null" @wheel.prevent="wheel" /></div>
       <p v-if="renderError" role="alert" class="data-gap">{{ renderError }}</p>
       <p v-if="cursor">原始像素坐标（0起始）：列 {{ cursor.column }}，行 {{ cursor.row }}；{{ cursor.padding ? '此处为原始填充值' : `stored ${cursor.stored}，重标定值 ${cursor.scaled}` }}。此处未进行解剖定位或长度测量。</p>
       <p v-else>在图上移动可核对原始行、列和灰阶值；不添加左右方向或测量标记。</p>
-      <p v-if="metadata.valid_pixel_count === 0" class="data-gap">原记录全部为填充值，未补造有效影像，不能据此生成识别候选。</p>
+      <p v-if="metadata.valid_pixel_count === 0" class="data-gap">影像全部为填充值，请上传含有效像素的影像。</p>
       <p>PixelSpacing（原行/列间距）：{{ spacing(metadata.pixel_spacing_mm) }}；ImagerPixelSpacing（原探测器行/列间距）：{{ spacing(metadata.imager_pixel_spacing_mm) }}。两类间距分别保留，不推定实际病灶尺寸。</p>
     </template>
   </section>

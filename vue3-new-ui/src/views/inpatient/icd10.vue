@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="ICD-10 编码" description="诊断和手术操作编码查询，支持维护常用编码" />
     <el-card>
       <template #header>
         <div class="page-toolbar">

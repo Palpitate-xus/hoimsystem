@@ -2,7 +2,7 @@
   <section aria-label="评价证据来源与治理">
     <p v-if="!allowed">当前身份不能读取评价证据来源。</p>
     <template v-else>
-      <p>评价记录数不是就诊次数或应答人数。有效 1–5 评分统计与人工摘录分开核对；不提供 NPS、应答率、投诉处理率或医疗责任判断。</p>
+      <p>分别核对评价条数、有效评分和人工摘录。</p>
       <el-form inline @submit.prevent="load">
         <el-form-item label="明确评价范围"><el-select v-model="scopeKind" aria-label="明确评价范围" clearable placeholder="明确选择范围，不默认全院"><el-option v-for="kind in options?.scope_kinds || []" :key="kind" :value="kind" :label="kind === 'hospital_reviews' ? '全院已记录评价' : '显式有限医生集合'" /></el-select></el-form-item>
         <el-form-item v-if="scopeKind === 'explicit_doctor_cohort'" label="实际医生集合"><el-select v-model="doctorIds" multiple filterable :multiple-limit="256" aria-label="实际医生集合" placeholder="明确选择 1–256 名实际医生"><el-option v-for="doctor in Object.values(doctorCache)" :key="doctor.doctor_id" :value="doctor.doctor_id" :label="`${doctor.name || '原姓名未记录'} · 医生 ${doctor.doctor_id}`" /></el-select></el-form-item>
@@ -10,7 +10,7 @@
         <el-form-item label="原记录结束日"><el-input v-model="dateTo" type="date" aria-label="原记录结束日" /></el-form-item>
         <el-button native-type="submit" :disabled="!auditOnly && !scopeReady" :loading="loading">读取完整范围目录</el-button>
       </el-form>
-      <p>日期是旧记录原存储日历，时区未知。NULL 或无法解释的时钟成员仍保留，不能补成今天；医生当前登记科室不表示评价当时科室；原人工审核时钟只保留旧字面量，不证明其时区或真实性。</p>
+      <p>日期按原记录显示，时区未知。无挂号关联时采用医生当前科室，审核时间保留原值。</p>
       <div v-if="scopeKind === 'explicit_doctor_cohort' && doctors"><span>实际医生目录第 {{ doctorPage }} 页，共 {{ doctors.total }} 名。</span><el-button :disabled="doctorPage <= 1" @click="loadDoctors(doctorPage - 1)">上一页医生</el-button><el-button :disabled="doctorPage * 100 >= doctors.total" @click="loadDoctors(doctorPage + 1)">下一页医生</el-button></div>
       <p v-if="error" role="alert">{{ error }}</p>
       <el-button v-if="canCreate" @click="openCreate">捕获完整评价证据</el-button>
@@ -31,7 +31,7 @@
             <p>完整安全投影 SHA {{ detail.safe_projection_hash }}；全成员摘要 SHA {{ detail.safe_snapshot.member_manifest_hash }}。</p>
             <el-table :data="detail.safe_snapshot.member_manifest.slice(manifestPage * 20, manifestPage * 20 + 20)" border aria-label="完整评价版本摘要分页"><el-table-column prop="kind" label="根类型" /><el-table-column prop="status" label="原状态" /><el-table-column prop="version" label="原版本" /><el-table-column prop="revision" label="原治理版本" /><el-table-column prop="selected" label="明确选择" /><el-table-column prop="eligibility" label="人工声明资格" /></el-table>
             <el-button :disabled="manifestPage === 0" @click="manifestPage--">上一页成员</el-button><el-button :disabled="(manifestPage + 1) * 20 >= detail.safe_snapshot.member_manifest.length" @click="manifestPage++">下一页成员</el-button>
-            <p v-for="excerpt in detail.safe_snapshot.selected_excerpts" :key="excerpt.excerpt_token">已选人工摘录：{{ excerpt.text }}（隐私和原意人工声明，不是匿名保证或事实核实）</p>
+            <p v-for="excerpt in detail.safe_snapshot.selected_excerpts" :key="excerpt.excerpt_token">已选人工摘录：{{ excerpt.text }}（隐私和原意审核记录）</p>
           </template><p v-else>原件当前仅可返回技术元数据；失效、拒绝或撤销正文及自由备注已隐藏。</p>
           <el-button v-if="selectable && !auditOnly && detail.eligible && !detail.audit_only" :loading="inspecting" @click="selectDetail">选择本条受审评价证据</el-button>
           <el-button v-if="auditOnly && superUser && !protectedVisible" @click="inspect(detail,{protectedRead:true})">显式读取 Super 受保护冻结原文</el-button>
@@ -43,7 +43,7 @@
           <div v-if="auditOnly && superUser && detail.can_review || detail.can_revoke" aria-label="评价来源治理操作">
             <el-input v-model="governanceBasis" type="textarea" aria-label="本次评价来源治理依据" placeholder="明确本次技术审核或撤销依据，至少 20 个字符" />
             <el-button v-if="auditOnly && superUser && detail.can_review" :disabled="!satisfactionBasis(governanceBasis) || governing" @click="govern('publish')">审核发布本件</el-button><el-button v-if="auditOnly && superUser && detail.can_review" :disabled="!satisfactionBasis(governanceBasis) || governing" @click="govern('reject')">审核拒绝本件</el-button><el-button v-if="detail.can_revoke" :disabled="!satisfactionRevokeBasis(governanceBasis) || governing" @click="govern('revoke')">撤销本件</el-button>
-            <p>发布前仍需完成人工隐私与原意审核。</p><details><summary>资料核验详情</summary><p>Super 技术发布不替代原摘录的人工隐私／原意审核。撤销至多 1000 个 Unicode 字符、4000 UTF-8 字节；完整私有治理 SHA 仅在持有完整原文时重建。</p></details>
+            <p>发布前仍需完成人工隐私与原意审核。</p><details><summary>资料核验详情</summary><p>请填写撤销原因，最多1000字、4000字节。</p></details>
           </div>
         </article>
       </el-dialog>

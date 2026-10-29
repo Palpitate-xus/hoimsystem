@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="注射管理" description="查看注射医嘱并记录执行完成状态" />
     <el-card>
       <div class="page-toolbar"><el-button @click="fetchList">刷新</el-button></div>
       <el-table :data="orders" v-loading="loading" border empty-text="暂无注射医嘱">

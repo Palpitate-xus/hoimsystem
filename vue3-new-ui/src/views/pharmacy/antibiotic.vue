@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="抗菌药物管理" description="分级目录、越级审批和使用强度统计" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="分级目录" name="grade">
         <el-table :data="grades" v-loading="loading" border empty-text="暂无抗菌药物">

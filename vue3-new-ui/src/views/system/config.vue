@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="系统参数" description="配置系统运行参数和基础设置" />
     <el-card>
       <div class="page-toolbar">
         <el-input

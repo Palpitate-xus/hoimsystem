@@ -1,7 +1,7 @@
 <template>
   <section class="research-variable-assistant" data-testid="research-variable-assistant">
     <h3>科研变量提取</h3>
-    <el-alert :closable="false" type="info" title="提取结果需逐条复核。记录缺失或没有候选，不能推断未测、正常或疾病不存在。" />
+    <el-alert :closable="false" type="info" title="请逐条核对提取结果，并补充列出的缺项。" />
     <el-alert v-if="!sessionAllowed" :closable="false" type="warning" title="当前会话无明确科研变量角色；项目和全部患者研究、模型用途仍由服务器逐次核验。" />
     <el-alert v-else-if="!scopeValid" :closable="false" type="error" title="本功能仅接受明确变量批次和可选问题；不接受患者、诊次或其他输入。" />
     <el-alert v-else-if="!modeReady" :closable="false" type="warning" title="当前科研变量提取配置不可用，请联系管理员。" />
@@ -27,7 +27,7 @@
         <h4>本次资料已核对</h4>
         <p>批次 {{ preview.bindingReference.batch_id }} · 原声明 {{ preview.source.records.length }} 条记录 / {{ preview.source.documents.length }} 个原字段</p>
         <p>已核对项目内全部 {{ preview.preview.research_variable_binding.request_authorization.patient_authorizations.length }} 位患者的研究用途授权；尚未调用模型。</p>
-        <details><summary>输入容量与核验详情</summary><p>问题原样保存，最多2000个Unicode码点、8000个UTF8字节。登记或分件8MiB容量不保证实际完整Provider请求可容纳；入队仍会全包拒超限，不截断。</p></details>
+        <details><summary>输入容量与核验详情</summary><p>问题最多2000个Unicode码点、8000字节；资料上限8MiB，入队时另行检查模型请求大小。</p></details>
         <el-button data-testid="variable-evidence" @click="evidenceOpen=true">查看资料原件</el-button>
       </article>
       <div v-if="history.length" data-testid="variable-history-list">

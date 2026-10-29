@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="随访管理" description="制定随访计划，记录随访结果" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增随访计划</el-button>

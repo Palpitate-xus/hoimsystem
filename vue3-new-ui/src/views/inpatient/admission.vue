@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="入院登记管理" description="办理患者入院登记、床位分配和退院" />
     <el-card>
       <template #header>
         <div class="page-toolbar">

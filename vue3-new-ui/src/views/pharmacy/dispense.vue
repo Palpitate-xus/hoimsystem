@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="处方审核与发药" description="审核处方合理性，确认发药和退药处理" />
     <el-card>
       <div class="page-toolbar">
         <el-input

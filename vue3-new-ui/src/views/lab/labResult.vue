@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="检验科管理" description="录入和查询检验检查结果数据" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="待处理申请" name="pending">
         <div class="page-toolbar">

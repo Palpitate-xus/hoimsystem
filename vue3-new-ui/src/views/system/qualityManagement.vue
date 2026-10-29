@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="不良事件 RCA 与 HQMS 指标" description="RCA 根因分析（PDCA 闭环）与医疗质量指标上报" />
     <el-tabs v-model="tab">
       <el-tab-pane label="RCA 根因分析" name="rca">
         <div class="page-toolbar">

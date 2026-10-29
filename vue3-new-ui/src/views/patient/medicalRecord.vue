@@ -1,8 +1,7 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病历查询" description="查看个人就诊病历和诊断记录" />
     <el-card>
-      
+
       <div class="page-toolbar">
         <el-input
           v-model="searchQuery"

@@ -44,7 +44,7 @@ function bootstrapChecked(state){expect(state.bootstrap).toEqual([{method:'POST'
 
 test('生产Super按需加载床位原来源和完整序列，撤销冻结审计保留原文且不能用于新预测',async({page})=>{
   const state=await setup(page);await page.goto('/#/ai/manage');
-  await expect(page.getByRole('heading',{name:'AI 管理中心',exact:true})).toBeVisible();
+  await expect(page.getByRole('region', { name: 'AI 管理导航', exact: true })).toBeVisible();
   expect(state.reads.some(r=>r.path.includes('/bed-'))).toBe(false);
   await selectManagementTab(page, '床位原来源治理');
   await page.getByRole('button',{name:'核对床位原来源',exact:true}).click();

@@ -7,7 +7,7 @@
       <el-collapse v-if="canCreate"><el-collapse-item title="登记已审核检验原来源">
         <p>候选只表示同一患者的已审核原观察项，尚未确认属于本住院。所有原值只读，不从正文解析或补数值、单位。</p>
         <el-button :loading="candidateLoading" :disabled="creating" @click="loadCandidates">读取已审核检验候选</el-button>
-        <p v-if="candidateTruncated">候选目录已截断，未列出不表示不存在；不能据此断言历史齐全。</p>
+        <p v-if="candidateTruncated">仅显示部分候选，请缩小查询范围。</p>
         <el-form label-position="top" :disabled="creating" @submit.prevent>
           <el-form-item label="同患者原观察项"><el-select v-model="candidateId" aria-label="待核实原检验观察项" placeholder="明确选择，不自动选最近结果" :disabled="candidateLoading" filterable clearable><el-option v-for="row in candidates" :key="row.observation_id" :label="candidateLabel(row)" :value="row.observation_id" :disabled="row.registration?.status === 'already_registered'" /></el-select></el-form-item>
           <template v-if="candidate">
@@ -18,7 +18,7 @@
             <p v-if="!matchingMappings.length">没有已审核且精确匹配的映射，不能通过改写原项目或单位继续；请由超级管理员核对项目身份。</p>
           </template>
           <template v-if="mapping">
-            <p>映射命名空间 {{ mapping.source_namespace }}；项目身份 {{ mapping.label || mapping.analyte_label || mapping.analyte_key }}。同编码文字不证明出自同一来源系统。</p>
+            <p>映射命名空间 {{ mapping.source_namespace }}；项目身份 {{ mapping.label || mapping.analyte_label || mapping.analyte_key }}。请核对来源系统。</p>
             <el-form-item label="人工核实的采样UTC"><el-input v-model="form.collected_at_utc" aria-label="人工核实采样UTC" placeholder="明确填写含秒和时区的ISO；不从旧clock自动填入" /></el-form-item>
             <el-checkbox v-model="form.collection_time_confirmed">我已核实此观察项的真实采样UTC</el-checkbox>
             <el-input v-model="form.collection_time_basis_note" aria-label="采样UTC核实依据" type="textarea" maxlength="2000" placeholder="至少20字，说明原时钟语义及UTC核实依据" />
@@ -34,7 +34,7 @@
       <p v-if="error" role="alert">{{ error }}</p>
       <el-button :loading="loading" @click="loadSources">刷新本住院检验来源</el-button>
       <p>目录共 {{ total ?? '未知' }} 项；目录未逐项核对一致性，选择原行后重新核对。</p>
-      <el-table :data="sources" v-loading="loading" empty-text="本页未列检验来源；无资料不表示正常或阴性">
+      <el-table :data="sources" v-loading="loading" empty-text="本页暂无检验来源">
         <el-table-column prop="lab_source_id" label="原来源ID" min-width="230" /><el-table-column prop="collected_at_utc" label="人工核实采样UTC" min-width="230" /><el-table-column prop="available_at" label="本次纳入可用UTC" min-width="230" /><el-table-column label="状态与一致性" min-width="150"><template #default="{ row }">{{ row.status === 'active' ? '活动' : '已撤销' }} · v{{ row.revision }}<br />目录尚未逐项核对</template></el-table-column><el-table-column label="核对" width="130"><template #default="{ row }"><el-button @click="inspect(row)">核对原检验来源</el-button></template></el-table-column>
       </el-table>
       <el-pagination v-if="total > pageSize" v-model:current-page="page" :page-size="pageSize" :total="total" layout="prev,pager,next" @current-change="loadSources" />

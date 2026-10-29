@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="过敏标识" description="维护患者结构化过敏信息，临床开立医嘱时可快速识别风险" />
     <el-card>
       <div class="page-toolbar">
         <el-input v-model="search" placeholder="按患者或过敏原搜索" clearable class="page-search-input" />

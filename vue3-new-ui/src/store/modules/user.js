@@ -10,7 +10,7 @@ import {
   setAccessToken,
 } from "@/utils/accessToken";
 import { resetRouter } from "@/router";
-import { title, tokenName } from "@/config";
+import { tokenName } from "@/config";
 import { ElMessage } from "element-plus";
 
 const state = () => ({
@@ -49,20 +49,8 @@ const actions = {
     const accessToken = data[tokenName];
     if (accessToken) {
       commit("setAccessToken", accessToken);
-      const hour = new Date().getHours();
-      const thisTime =
-        hour < 8
-          ? "早上好"
-          : hour <= 11
-          ? "上午好"
-          : hour <= 13
-          ? "中午好"
-          : hour < 18
-          ? "下午好"
-          : "晚上好";
-      ElMessage.success(`欢迎登录${title}，${thisTime}！`);
     } else {
-      ElMessage.error(`登录接口异常，未正确返回${tokenName}...`);
+      ElMessage.error("登录未完成，请重试。");
     }
   },
   async getUserInfo({ commit, state }) {

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="数据导入导出" description="批量维护医生、患者和药品基础数据，导入前请先下载模板" />
     <el-alert title="导入规则" type="info" :closable="false" show-icon>
       每次导入为全量校验：只要有一行错误就不会写入任何数据；医生和患者账号默认密码为 123456，请导入后及时修改。
     </el-alert>

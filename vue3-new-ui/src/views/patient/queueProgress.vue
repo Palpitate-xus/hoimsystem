@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="排队进度" description="实时查看当前候诊序号和预计等待时间" />
     <el-alert title="预计等待时间按每位患者10分钟估算，实际情况以现场叫号为准" type="info" :closable="false" />
     <el-table :data="items" v-loading="loading" border empty-text="当前没有候诊记录" style="margin-top:16px">
       <el-table-column prop="doctor_name" label="医生" />

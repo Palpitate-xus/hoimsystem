@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="家庭成员" description="维护家属资料，预约或挂号时可代家属办理" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="openCreate">添加家庭成员</el-button>

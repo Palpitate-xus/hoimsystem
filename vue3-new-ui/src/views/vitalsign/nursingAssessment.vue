@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="入院护理评估" description="人工记录已评估项目；未评估保留空值。这些原始记录尚未验证为标准风险量表。" />
     <el-card>
       <el-alert v-if="editingId" :title="`继续填写草稿 #${editingId}；保存后仍须单独完成评估`" type="info" :closable="false" />
       <el-form :model="form" inline @submit.prevent>
@@ -12,7 +11,7 @@
         <el-form-item label="备注"><el-input v-model="form.note" aria-label="护理评估备注" maxlength="1000" placeholder="护理重点和风险说明" style="width: 300px" /></el-form-item>
         <el-form-item><el-button type="primary" :loading="submitting" @click="submit">{{ editingId ? '保存修改' : '保存评估' }}</el-button><el-button v-if="editingId" @click="cancelEdit">取消填写</el-button><el-button @click="load">刷新</el-button></el-form-item>
       </el-form>
-      <p>空项表示未评估；0 分须明确录入。至少评估一项才能完成，完成不代表已使用标准量表。留空时点不推定实际评估时间。</p>
+      <p>空项表示未评估；0分需手动录入。至少评估一项才能完成，请填写实际评估时间。</p>
     </el-card>
     <el-card>
       <el-table :data="records" v-loading="loading" border empty-text="暂无护理评估">

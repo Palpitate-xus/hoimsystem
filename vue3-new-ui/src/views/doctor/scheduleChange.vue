@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="停诊/加号申请" description="医生提交排班变更申请，由科主任或管理员审批" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="申请类型"><el-select v-model="form.request_type" style="width: 120px"><el-option label="停诊" value="stop" /><el-option label="加号" value="add" /></el-select></el-form-item>

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="交接班记录" description="记录病区重点事项，由接班护士确认后完成交接" />
     <el-card class="form-card">
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="班次"><el-select v-model="form.shift_type" style="width: 130px"><el-option label="白班" value="白班" /><el-option label="夜班" value="夜班" /><el-option label="其他" value="其他" /></el-select></el-form-item>

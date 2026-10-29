@@ -16,8 +16,8 @@
      <article v-for="(row,i) in result.hypotheses" :key="'h'+i" aria-label="未核实故障假设"><h4>{{row.title}}</h4><p>{{row.explanation}}</p><p>未核实假设，需管理员复核。</p><el-button v-for="(span,j) in row.evidence" :key="j" @click="show(span)">核对假设{{i+1}}的逐字引文{{j+1}}</el-button></article>
      <article v-for="(row,i) in result.manual_checks" :key="'c'+i" aria-label="手册原操作参考"><p>{{row.purpose}}</p><p>仅受审手册原引用，不自动执行；当前适用性与影响尚未核实。</p><el-button @click="show(row.instruction_reference)">核对检查{{i+1}}的手册原文</el-button></article>
      <ul aria-label="明确资料缺口"><li v-for="(gap,i) in result.gaps" :key="i">{{gap.kind}}：{{gap.explanation}}</li></ul>
-     <el-form aria-label="运维草稿人工反馈" label-position="top"><el-form-item label="人工复核结论"><el-select v-model="outcome" aria-label="人工复核结论"><el-option label="接受此草稿供人工使用" value="accepted"/><el-option label="修改后使用" value="modified"/><el-option label="拒绝此草稿" value="rejected"/></el-select></el-form-item><el-form-item label="复核说明"><el-input v-model="comment" aria-label="复核说明" type="textarea"/></el-form-item><el-button :disabled="!feedbackReady||busy" @click="feedback">记录本任务人工反馈</el-button><p v-if="feedbackId">本任务反馈回执：{{feedbackId}}。这不证明当前环境或兼容性。</p></el-form>
-    </template><p v-else>尚无完整成功草稿；排队、在途、取消和失败状态不等于模型完成。</p>
+     <el-form aria-label="运维草稿人工反馈" label-position="top"><el-form-item label="人工复核结论"><el-select v-model="outcome" aria-label="人工复核结论"><el-option label="接受此草稿供人工使用" value="accepted"/><el-option label="修改后使用" value="modified"/><el-option label="拒绝此草稿" value="rejected"/></el-select></el-form-item><el-form-item label="复核说明"><el-input v-model="comment" aria-label="复核说明" type="textarea"/></el-form-item><el-button :disabled="!feedbackReady||busy" @click="feedback">记录本任务人工反馈</el-button><p v-if="feedbackId">本任务反馈回执：{{feedbackId}}。当前环境请另行检查。</p></el-form>
+    </template><p v-else>尚未生成草稿。</p>
     <el-button :disabled="busy" @click="openRaw">查看任务技术详情</el-button>
    </template>
    <el-button v-if="['queued','running'].includes(bundle.metadata.status)" :disabled="busy" @click="cancel">停止接收本任务结果</el-button>

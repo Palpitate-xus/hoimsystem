@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="住院费用管理" description="住院费用明细、日清单、费用结算" />
     <el-row :gutter="20">
       <el-col :span="5">
         <el-card>

@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="库存预警" description="监控药品库存，查看预警和效期提醒" />
     <div class="page-toolbar"><ai-action label="AI 库存分析" title="AI 库存原始资料与预测优化" :feature-keys="['inventory_optimization', 'supply_forecast']" initial-feature="inventory_optimization" /></div>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="库存不足预警" name="lowStock">

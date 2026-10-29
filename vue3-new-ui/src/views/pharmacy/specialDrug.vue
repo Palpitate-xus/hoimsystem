@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="特殊药品" description="毒麻精放药品专册登记，申请人与复核人必须为不同账号" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="药品"><el-select v-model="form.pharmaceutical_id" filterable placeholder="选择药品" style="width: 180px"><el-option v-for="item in drugs" :key="item.id" :label="item.name" :value="item.id" /></el-select></el-form-item>

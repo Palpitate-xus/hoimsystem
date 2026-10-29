@@ -4,7 +4,7 @@
     <p class="hash">本次完整集合 {{ preview.collection_digest }}</p>
     <p>分页只影响展示，捕获提交全部日期、全部相关成员和五个目标声明。四类物理事件只选择同一整件 flow 原件。未核实保持待填，不补零。</p>
     <details><summary>明确批量动作（作用于整个冻结候选集合）</summary>
-      <p>这些按钮按上述全部 {{ days.length }} 天或 {{ members.length }} 件执行；每次均写入当前完整 UUID、内容及治理摘要。唯一候选仍须主动核实，发布不等于覆盖完整。</p>
+      <p>这些按钮按上述全部 {{ days.length }} 天或 {{ members.length }} 件执行，每次保存所选记录及审核版本。请核实候选后提交。</p>
       <el-input v-model="batchBasis" aria-label="床位序列批量核实依据" type="textarea" placeholder="逐日、逐件采用共同依据时明确填写，至少20个非空白字符" :disabled="disabled" />
       <el-button :disabled="disabled||!bedBasisValid(batchBasis)" @click="uniqueDaily">明确采用每种仅一件合格兼容来源的日期</el-button>
       <el-button :disabled="disabled||!bedBasisValid(batchBasis)" @click="missingDaily">明确将尚未选择的日期记为缺失</el-button>

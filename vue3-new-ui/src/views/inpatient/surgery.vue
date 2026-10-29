@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="手术麻醉管理" description="手术申请、排台、麻醉记录管理" />
     <el-card>
       <template #header>
         <div class="page-toolbar">

@@ -19,7 +19,7 @@
         <p v-if="boundClinicalReferences.length">本次绑定资料：{{ boundClinicalReferences.join('、') }}。所选记录未注明对应就诊；选择就诊仅补充临床背景，不确认其归属。</p>
         <p v-if="boundPathwayReferences.length">本次绑定：{{ boundPathwayReferences.join('、') }}。住院关联以原记录核实；路径适用条件和已审核版本仍须核对。</p>
         <p v-if="boundNursingReferences.length && !needsRiskWindow">已关联本次住院的护理记录：{{ boundNursingReferences.join('、') }}。请核对标注的缺项和评分来源。</p>
-        <p v-if="needsSupport">本次整理所选单条记录，不代表完整交班。记录类型：{{ supportReferences.support_source_kind }}。</p><p v-if="supportFailure" role="alert">{{ supportFailure }}</p>
+        <p v-if="needsSupport">记录类型：{{ supportReferences.support_source_kind }}。</p><p v-if="supportFailure" role="alert">{{ supportFailure }}</p>
         <p v-if="sofaWasBound&&!needsSofa" role="alert">本次绑定SOFA原评估，须由超级管理员配置SOFA专用模式后再读取和计算。</p><p v-if="needsSofa">本任务只使用一件明确的完整24小时SOFA日评估或独立变化复核，逐源医生判读、记录协议、未知与假设分别保存；不使用旧观测窗。</p>
         <p v-if="needsRiskWindow">本任务使用明确选择的原住院观测窗；NEWS2/AKI/qSOFA模式另需核对明确原来源与适用性评估，补充文字或JSON不能填补原数据缺项。</p>
         <p v-if="safeInput.audio_asset_id">已关联所选录音，请核对录音登记的患者和就诊。</p>
@@ -36,7 +36,7 @@
             <el-option v-for="item in encounterOptions" :key="item.encounter_ref" :label="item.label" :value="item.encounter_ref" />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="needsIncident" label="不良事件标识"><el-input v-model="incidentId" :disabled="!!safeInput.adverse_event_id" maxlength="10" placeholder="明确选择本患者事件的正整数标识" /><p>事件未记录就诊关联，不能按上报日期推定属于某次门诊或住院。</p></el-form-item>
+        <el-form-item v-if="needsIncident" label="不良事件标识"><el-input v-model="incidentId" :disabled="!!safeInput.adverse_event_id" maxlength="10" placeholder="明确选择本患者事件的正整数标识" /><p>事件尚未关联具体就诊。</p></el-form-item>
         <ai-audio-input v-if="needsAudio && patientId" v-model="audioAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked="!!safeInput.audio_asset_id" @availability="audioReady = $event" />
         <ai-ecg-input v-if="needsEcg && patientId" v-model="ecgAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked="!!safeInput.ecg_asset_id" @availability="ecgReady = $event" />
         <ai-observation-window-input v-if="needsRiskWindow && patientId" :patient-id="patientId" :admission-id="encounterRef" :initial-window-id="String(safeInput.observation_window_id || '')" :disabled="submitting" @selection="riskWindowSelection = $event" @availability="riskWindowReady = $event" />
@@ -47,7 +47,7 @@
         <ai-image-input v-if="needsImage && patientId" v-model="imageAssetId" :patient-id="patientId" :encounter-ref="encounterRef" :locked-order-id="String(safeInput.imaging_order_id || '')" :disabled="submitting" @select="selectImage" @availability="imageReady = $event" />
         <el-form-item v-if="needsPathway && patientId && !safeInput.pathway_enrollment_id" label="院内路径（可选）">
           <el-select v-model="pathwayId" :disabled="!!safeInput.pathway_id || pathwayOptionsLoading" :clearable="!safeInput.pathway_id" filterable placeholder="选择待比选的院内路径；也可仅使用审核指南" style="width: 100%" aria-label="待比选院内路径"><el-option v-for="item in pathwayOptions.items || []" :key="item.pathway_id" :value="String(item.pathway_id)" :disabled="!item.reviewed_for_current_scope" :label="`${item.name} · #${item.pathway_id}${item.reviewed_for_current_scope ? '' : ' · 当前范围未审核'}`" /></el-select>
-          <p>{{ pathwayOptions.scope_note }}</p>
+          <p v-if="noticeText(pathwayOptions.scope_note)">{{ noticeText(pathwayOptions.scope_note) }}</p>
         </el-form-item>
         <el-form-item v-if="needsPrescription && patientId" label="待核查处方">
           <el-select v-model="prescriptionId" :clearable="!safeInput.prescription_id" :disabled="!!safeInput.prescription_id" placeholder="选择实际处方" style="width: 100%"><el-option v-for="item in prescriptions" :key="item.prescription_id" :label="item.label" :value="item.prescription_id" /></el-select>
@@ -74,7 +74,7 @@
             <el-form-item label="库存药品"><el-select v-model="inventoryDrugs" multiple filterable clearable :disabled="serviceOptions.inventory_scope_available === false" placeholder="选择真实目录药品"><el-option v-for="item in serviceOptions.inventory_drugs || []" :key="item.item_id" :value="item.item_id" :label="item.name" /></el-select></el-form-item>
             <el-form-item label="库存耗材"><el-select v-model="inventoryConsumables" multiple filterable clearable :disabled="serviceOptions.inventory_scope_available === false" placeholder="选择真实目录耗材"><el-option v-for="item in serviceOptions.inventory_consumables || []" :key="item.item_id" :value="item.item_id" :label="item.name" /></el-select></el-form-item>
           </template>
-          <p>{{ serviceOptions.scope_note }}</p>
+          <p v-if="noticeText(serviceOptions.scope_note)">{{ noticeText(serviceOptions.scope_note) }}</p>
         </template>
         <template v-if="needsAppointment">
           <el-form-item label="预约科室"><el-select v-model="serviceDepartment" clearable filterable :disabled="!!safeInput.schedule_id" placeholder="可选：限定科室"><el-option v-for="item in serviceOptions.departments || []" :key="item.department_id" :value="item.department_id" :label="item.name" /></el-select></el-form-item>
@@ -95,17 +95,6 @@
             <el-input v-model="extraInput" type="textarea" :rows="4" placeholder="可选：专用适配器的结构化输入 JSON，由服务契约规定" class="spaced" />
           </el-collapse-item>
         </el-collapse>
-        <el-alert v-if="needsCodingEvidence" type="info" :closable="false" title="仅复核明确原病案、编码绑定、对应字典和本地规则证据；模型主张须逐字引文核查，不提供官方DRG/DIP分组或支付结论。" class="spaced" />
-        <el-alert v-else-if="needsSurgery" type="info" :closable="false" title="固定程序核对原病例与阶段资源声明，保留实际搜索界与未知资料；候选不自动写入排台。" class="spaced" />
-        <el-alert v-else-if="needsBed" type="info" :closable="false" title="五项实占与流转目标独立核对，未来容量为审核情景；预测不决定个体收治、调床或出院。" class="spaced" />
-        <el-alert v-else-if="needsRoster" type="info" :closable="false" title="固定优化程序核对受审完整场景，区分数学界、可行候选与最优性证明；候选不自动发布或修改号源。" class="spaced" />
-        <el-alert v-else-if="needsForecast" type="info" :closable="false" title="本功能使用固定统计计算；Prompt仅用于来源审计，不由文本模型推测数值。" class="spaced" />
-        <el-alert v-else-if="needsSupply" type="info" :closable="false" title="物资原量预测逐项展示六种固定方法与28个滚动原点评价；不推断潜在需求、不自动选最优模型或生成采购量。" class="spaced" />
-        <el-alert v-else-if="needsSofa" type="info" :closable="false" title="SOFA固定六轴计算保留原量、部分范围和完整协议总分的区别；变化数值不提供脓毒症确诊、排除、概率或自动治疗。" class="spaced" />
-        <el-alert v-else-if="needsQsofa" type="info" :closable="false" title="qSOFA逐项核对原床旁数据及医生当前回顾声明；不作为单一脓毒症筛查，不提供确诊、排除、概率或自动治疗。" class="spaced" />
-        <el-alert v-else-if="needsAki" type="info" :closable="false" title="KDIGO AKI由固定代码核对所选资料；至少分期不表示未来概率、完整病程或自动处置，未达所选标准不等于排除AKI。" class="spaced" />
-        <el-alert v-else-if="needsNews2" type="info" :closable="false" title="NEWS2使用固定规则计算；Prompt不改变分数。规则分类及小计下界不表示风险概率或自动处置。" class="spaced" />
-        <el-alert v-else-if="selected.engine !== 'llm'" type="info" :closable="false" title="此能力通过专用模型处理，需要对应原始资料和已登记的适配服务。" class="spaced" />
         <div class="actions">
           <el-button v-if="selected.scope === 'patient'" :disabled="((codingLifecycle||codingWasBound)&&!codingModeReady)||((needsNativeInventory||nativeInventoryWasBound)&&!nativeInventoryModeReady)||((needsSupply||supplyWasBound)&&!supplyModeReady)||((needsSurgery||surgeryWasBound||surgeryCaseCohortBound)&&!surgeryModeReady)||((needsBed||bedWasBound)&&!bedModeReady)||((needsRoster||rosterWasBound)&&!rosterModeReady)||((needsSofa||sofaWasBound) && !sofaModeReady) || (needsSupport && !supportModeReady) || !patientId || patientLoading || pathwayOptionsLoading || (needsRiskWindow && !riskWindowReady) || (needsNews2 && !news2Ready) || (needsAki && !akiReady) || (needsQsofa && !qsofaReady) || (needsAudio && (!audioAssetId || !audioReady)) || (needsEcg && (!ecgAssetId || !ecgReady)) || (needsImage && (!imageAssetId || !imageOrderId || !imageReady))" @click="inspectContext">查看本次资料</el-button>
           <el-button v-if="needsOperations" :disabled="((codingLifecycle||codingWasBound)&&!codingModeReady)||((needsNativeInventory||nativeInventoryWasBound)&&!nativeInventoryModeReady)||((needsSupply||supplyWasBound)&&!supplyModeReady)||((needsSurgery||surgeryWasBound||surgeryCaseCohortBound)&&!surgeryModeReady)||((needsBed||bedWasBound)&&!bedModeReady)||((needsRoster||rosterWasBound)&&!rosterModeReady)||serviceOptionsLoading || (needsForecast && !forecastReady)" @click="inspectOperationalContext">查看本次运营资料</el-button>
@@ -158,7 +147,7 @@
       <ai-image-findings :findings="run.image_findings" :analysis="run.result?.image_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <ai-ecg-findings :findings="run.ecg_findings" :analysis="run.result?.ecg_analysis" :allow-copy="run.status === 'succeeded'" @inspect="inspectEvidence" @copy="copyDraft" />
       <div v-if="run.tool_findings?.billing_reconciliation" class="spaced">
-        <h4>原始账目与执行关联核对</h4><p>{{ run.tool_findings.billing_reconciliation.scope_note }}</p>
+        <h4>原始账目与执行关联核对</h4><p v-if="noticeText(run.tool_findings.billing_reconciliation.scope_note)">{{ noticeText(run.tool_findings.billing_reconciliation.scope_note) }}</p>
         <el-table v-if="run.tool_findings.billing_reconciliation.scope?.kind === 'inpatient'" :data="run.tool_findings.billing_reconciliation.checks" max-height="320" empty-text="本次范围暂无可核对住院费用">
           <el-table-column prop="item_name" label="收费项目" min-width="130" />
           <el-table-column label="账务状态" width="85"><template #default="{ row }">{{ ({ 0: '未结算', 1: '已结算', 2: '已退费' })[row.charge_status] || '未知' }}</template></el-table-column>
@@ -173,7 +162,7 @@
           <el-table-column label="原始依据" width="160"><template #default="{ row }"><el-button v-for="id in row.source_ids" :key="id" link @click="inspectEvidence(id)">{{ evidenceTitle(id) }}</el-button></template></el-table-column>
         </el-table>
         <template v-if="run.tool_findings.billing_reconciliation.executed_without_charge_link?.length">
-          <h4>已记录执行、未保存收费关联的待核实医嘱</h4><p>此列表不构成漏收费或应补费结论。</p>
+          <h4>已记录执行、未保存收费关联的待核实医嘱</h4><p>请核对各项执行记录与记账明细。</p>
           <el-table :data="run.tool_findings.billing_reconciliation.executed_without_charge_link" max-height="240">
             <el-table-column prop="order_id" label="医嘱标识" min-width="240" /><el-table-column prop="category" label="原分类" width="110" />
             <el-table-column label="原始依据" width="140"><template #default="{ row }"><el-button v-for="id in row.source_ids" :key="id" link @click="inspectEvidence(id)">查看执行汇总</el-button></template></el-table-column>
@@ -182,7 +171,7 @@
         <p v-if="run.tool_findings.billing_reconciliation.truncated_sources?.length">本次资料已截断，请结合完整业务清单核查。</p>
       </div>
       <div v-if="run.tool_findings?.icd_candidates" class="spaced">
-        <h4>院内字典文字匹配候选</h4><p>{{ run.tool_findings.icd_candidates.scope_note }}</p>
+        <h4>院内字典文字匹配候选</h4><p v-if="noticeText(run.tool_findings.icd_candidates.scope_note)">{{ noticeText(run.tool_findings.icd_candidates.scope_note) }}</p>
         <el-table :data="run.tool_findings.icd_candidates.candidates" max-height="290" empty-text="当前检索词未匹配到有效条目，请补充已记录的诊断或手术检索词">
           <el-table-column label="类型" width="90"><template #default="{ row }">{{ row.kind === 'diagnosis' ? '诊断' : '手术' }}</template></el-table-column>
           <el-table-column prop="code" label="字典编码" width="120" /><el-table-column prop="name" label="当前标准名称" min-width="200" />
@@ -191,18 +180,17 @@
         <p v-if="run.tool_findings.icd_candidates.truncated">候选较多，已限制展示范围，可补充更具体检索词。</p>
       </div>
       <template v-if="run.status === 'succeeded'">
-        <p class="result-review-note">{{ documentDraft ? '文书草稿，请核对正文和复核事项后使用。' : '请结合引用依据复核以下结果。' }}</p>
-        <p v-if="!documentDraft" class="plain-text">{{ run.result?.summary }}</p>
-        <el-alert v-for="(item, index) in run.result?.warnings || []" :key="'warning-' + index" type="warning" :closable="false" :title="item" class="spaced" />
-        <div v-if="run.result?.missing_data?.length" class="spaced"><strong>仍需补充或核实：</strong><ul><li v-for="(item, index) in run.result.missing_data" :key="index">{{ item }}</li></ul></div>
+        <p v-if="!documentDraft" class="plain-text">{{ noticeText(run.result?.summary) }}</p>
+        <el-alert v-for="(item, index) in noticeList(run.result?.warnings || [])" :key="'warning-' + index" type="warning" :closable="false" :title="item" class="spaced" />
+        <div v-if="noticeList(run.result?.missing_data).length" class="spaced"><strong>仍需补充或核实：</strong><ul><li v-for="(item, index) in noticeList(run.result.missing_data)" :key="index">{{ item }}</li></ul></div>
         <h4 v-if="documentDraft">文书正文</h4>
         <p v-if="documentDraft && !copyableDocumentSections.length">尚无可复制的文书正文，请先核对资料缺口。</p>
-        <section v-for="(section, index) in run.result?.sections || []" :key="index" class="result-section">
+        <section v-for="(section, index) in presentedSections" :key="index" class="result-section">
           <h4>{{ section.title }}</h4><p class="plain-text">{{ section.content }}</p>
           <el-button v-for="id in section.source_ids" :key="id" link type="primary" @click="inspectEvidence(id)">查看依据：{{ evidenceTitle(id) }}</el-button>
         </section>
         <div class="actions"><el-button v-if="!run.result?.transcription&&!codingLifecycle" :disabled="documentDraft && !copyableDocumentSections.length" @click="copyDraft">{{ documentDraft ? '复制文书正文' : '复制草稿' }}</el-button><el-button @click="feedbackDialog = true">记录复核反馈</el-button></div>
-        <el-collapse class="spaced"><el-collapse-item title="任务详情"><p v-if="documentDraft" class="plain-text">生成摘要：{{ run.result?.summary }}</p><p class="metadata">Prompt v{{ run.prompt_version }} · 模型配置 v{{ run.provider_revision }} · 任务记录输入/输出 {{ run.input_tokens ?? '未知' }}/{{ run.output_tokens ?? '未知' }} Token</p></el-collapse-item></el-collapse>
+        <el-collapse class="spaced"><el-collapse-item title="任务详情"><p v-if="documentDraft" class="plain-text">生成摘要：{{ noticeText(run.result?.summary) }}</p><p class="metadata">Prompt v{{ run.prompt_version }} · 模型配置 v{{ run.provider_revision }} · 任务记录输入/输出 {{ run.input_tokens ?? '未知' }}/{{ run.output_tokens ?? '未知' }} Token</p></el-collapse-item></el-collapse>
       </template>
     </el-card>
 
@@ -242,7 +230,7 @@
     <el-dialog v-model="feedbackDialog" title="人工复核反馈" width="540px"><el-radio-group v-model="feedback.outcome"><el-radio value="accepted">采纳</el-radio><el-radio value="rejected">驳回</el-radio><el-radio value="modified">修改后采纳</el-radio></el-radio-group><el-input v-model="feedback.comment" type="textarea" :rows="4" maxlength="2000" placeholder="说明核查结果或修改内容；反馈不会自动写入病历、处方或医嘱" class="spaced" /><template #footer><el-button @click="feedbackDialog = false">取消</el-button><el-button type="primary" @click="submitFeedback">保存反馈</el-button></template></el-dialog>
     <el-dialog v-model="documentCopyDialog" title="复制文书正文" width="min(760px, 96vw)" destroy-on-close @closed="clearDocumentCopy">
       <p>选择要复制的正文。生成说明、引用链接和下列复核事项不写入文书。</p>
-      <template v-if="run?.result?.summary"><h4>生成摘要（不复制）</h4><p class="plain-text" aria-label="文书生成摘要">{{ run.result.summary }}</p></template>
+      <template v-if="run?.result?.summary"><h4>生成摘要</h4><p class="plain-text" aria-label="文书生成摘要" v-if="noticeText(run.result.summary)">{{ noticeText(run.result.summary) }}</p></template>
       <el-checkbox-group v-model="documentCopySelection" aria-label="选择文书栏目"><el-checkbox v-for="section in copyableDocumentSections" :key="section.index" :value="section.index">{{ section.title || '正文第' + (section.index + 1) + '项' }}</el-checkbox></el-checkbox-group>
       <template v-if="documentCopyNotes.length"><h4>复制前需核对</h4><ul><li v-for="(note, index) in documentCopyNotes" :key="index" class="plain-text">{{ note }}</li></ul><el-checkbox v-model="documentCopyReviewed">我已核对上述事项和所选正文</el-checkbox></template>
       <h4>将复制的正文</h4><pre class="plain-text" aria-label="待复制文书正文">{{ documentCopyText }}</pre>
@@ -253,6 +241,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import ResearchCohortPanel from '@/components/ai/ResearchCohortPanel.vue';
 import DeidentificationPanel from '@/components/ai/DeidentificationPanel.vue';
 import { computed, defineAsyncComponent, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, watch } from "vue";
@@ -362,6 +351,10 @@ const patientId = ref(null), encounterRef = ref(""), prescriptionId = ref(null),
 const question = ref(""), codingQuery = ref(""), extraInput = ref(""), preview = ref(false), run = ref(null), history = ref([]);
 const documentDraft = computed(() => isDocumentDraft(run.value?.feature_key || featureKey.value));
 const copyableDocumentSections = computed(() => documentSections(run.value?.result));
+const presentedSections = computed(() => {
+  const sections = run.value?.result?.sections || [];
+  return documentDraft.value ? sections : sections.map(section => ({ ...section, content: noticeText(section.content) })).filter(section => section.content.trim());
+});
 const documentCopyNotes = computed(() => documentReviewNotes(run.value?.result));
 const documentCopyDialog = ref(false), documentCopySelection = ref([]), documentCopyReviewed = ref(false);
 const documentCopyText = computed(() => documentBody(run.value?.result, documentCopySelection.value));
@@ -880,11 +873,11 @@ async function copyDraft() {
   const transcript = run.value.result.transcription;
   const segments = transcript ? ["原录音转写草稿，待逐段听音与角色核对：", ...transcript.segments.map(item => `[${item.start_ms}–${item.end_ms}毫秒] ${item.speaker}（角色待核实）\n${item.text}${item.uncertain ? '\n不确定：' + item.uncertainty_note : ''}`)] : [];
   const ecg = run.value.result.ecg_analysis;
-  const ecgFindings = ecg ? ["原始心电候选草稿，待结合原波形和临床资料人工复核：", `原记录 ${ecg.asset_id}；原采样哈希 ${ecg.signal_hash}；原导联 ${ecg.processing.input_leads.join('、')}；实际使用 ${ecg.processing.used_leads.join('、')}`, ...ecg.findings.map(item => `${item.label}\n${item.description}\n导联：${item.leads.join('、')}；位置：${item.location === 'recording' ? '整段候选，不提供精确定位' : '原样本[' + item.start_sample + ', ' + item.end_sample_exclusive + ')'}；${item.score == null ? '未提供模型分数' : '模型原始分数 ' + item.score + '（非患病概率）'}；依据：${item.source_id}`)] : [];
+  const ecgFindings = ecg ? ["心电候选草稿：", `原记录 ${ecg.asset_id}；原采样哈希 ${ecg.signal_hash}；原导联 ${ecg.processing.input_leads.join('、')}；实际使用 ${ecg.processing.used_leads.join('、')}`, ...ecg.findings.map(item => `${noticeText(item.label)}\n${noticeText(item.description)}\n导联：${item.leads.join('、')}；位置：${item.location === 'recording' ? '整段候选，不提供精确定位' : '原样本[' + item.start_sample + ', ' + item.end_sample_exclusive + ')'}；${item.score == null ? '未提供模型分数' : '模型原始分数 ' + item.score + ''}；依据：${item.source_id}`)] : [];
   const image = run.value.result.image_analysis;
-  const imageFindings = image ? ["原始影像候选草稿，待医生在原像素上复核（单张影像，不代表整次检查）：", `原记录 ${image.asset_id}；像素哈希 ${image.pixel_hash}；实际分析区域 ${JSON.stringify(image.processing.analysis_region)}`, ...image.findings.map(item => `${item.label}\n${item.description}\n位置：${item.location === "image" ? "图像级，未提供病灶定位" : JSON.stringify(item.region)}；${item.score == null ? "未提供模型分数" : "模型原始分数 " + item.score + "（非患病概率）"}；依据：${item.source_id}`)] : [];
-  const text = [run.value.result.summary, ...run.value.result.sections.map(item => `${item.title}\n${item.content}`), ...segments, ...ecgFindings, ...imageFindings].join("\n\n");
-  try { await navigator.clipboard.writeText(text); ElMessage.success("草稿已复制，请核对后使用"); } catch { ElMessage.info("当前环境无法自动复制，请选中结果文本复制"); }
+  const imageFindings = image ? ["影像候选草稿：", `原记录 ${image.asset_id}；像素哈希 ${image.pixel_hash}；实际分析区域 ${JSON.stringify(image.processing.analysis_region)}`, ...image.findings.map(item => `${noticeText(item.label)}\n${noticeText(item.description)}\n位置：${item.location === "image" ? "图像级，未提供病灶定位" : JSON.stringify(item.region)}；${item.score == null ? "未提供模型分数" : "模型原始分数 " + item.score + ""}；依据：${item.source_id}`)] : [];
+  const text = [noticeText(run.value.result.summary), ...presentedSections.value.map(item => `${item.title}\n${item.content}`), ...segments, ...ecgFindings, ...imageFindings].filter(Boolean).join("\n\n");
+  try { await navigator.clipboard.writeText(text); ElMessage.success("草稿已复制"); } catch { ElMessage.info("当前环境无法自动复制，请选中结果文本复制"); }
 }
 function clearDocumentCopy() {
   documentCopyDialog.value = false;

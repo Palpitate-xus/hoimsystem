@@ -31,7 +31,7 @@
       <div v-loading="sourceDetailLoading">
         <template v-if="sourceDetail">
           <p>原评价 #{{ sourceDetail.review_id }} · {{ sourceDetail.department_name }} · {{ sourceDetail.review_time || '时间未记录' }}</p>
-          <p>{{ sourceDetail.scope_note }}</p><p v-if="sourceDetail.department_source === 'current_doctor'">此评价未关联挂号，科室取医生当前档案，不代表历史就诊科室。</p>
+          <p v-if="noticeText(sourceDetail.scope_note)">{{ noticeText(sourceDetail.scope_note) }}</p><p v-if="sourceDetail.department_source === 'current_doctor'">此评价未关联挂号，科室采用医生当前档案。</p>
           <h4>仅供本次审核的原评论</h4><p class="private-comment recorded-text">{{ sourceDetail.raw_comment || '无原文' }}</p>
           <el-form :disabled="saving" label-position="top">
             <el-form-item label="脱敏摘录或整理文本"><el-input v-model="draftText" type="textarea" :rows="6" maxlength="1000" show-word-limit placeholder="检查所有身份和间接线索，保留原意；自动建议仍需人工逐条审核" /></el-form-item>
@@ -51,7 +51,7 @@
           <h4>本版本文本</h4><p class="recorded-text">{{ excerptDetail.redacted_text }}</p><p>整理说明：{{ excerptDetail.change_note }}</p>
           <el-button :loading="excerptSourceLoading" :disabled="excerptDetail.source_state === 'unavailable'" @click="loadExcerptSource">读取原评价核对</el-button>
           <template v-if="excerptSource"><h4>仅供本次审核的原评价</h4><p class="private-comment recorded-text">{{ excerptSource.raw_comment || '无原文' }}</p><p>{{ comparableSource ? '当前原评价仍与成稿时一致，请逐项核对原意和识别线索。' : '原评价与成稿时版本已不一致，此稿不能发布，请另存新版本。' }}</p></template>
-          <p v-if="excerptDetail.reviewed_at">已记录审核时间：{{ excerptDetail.reviewed_at }}；既有审核不表示反馈事实已核实。</p>
+          <p v-if="excerptDetail.reviewed_at">已记录审核时间：{{ excerptDetail.reviewed_at }}。</p>
           <el-form label-position="top" :disabled="saving">
             <el-form-item v-if="excerptDetail.status === 'draft'" label="发布审核确认"><div class="review-checks"><p v-if="!comparableSource">先读取对应原评价，再核对并确认。</p><el-checkbox v-model="privacyChecked" :disabled="!comparableSource">已逐条检查身份、联系方式及间接识别线索</el-checkbox><el-checkbox v-model="faithfulnessChecked" :disabled="!comparableSource">已对照原评价核查原意，没有新增事实或责任判断</el-checkbox></div></el-form-item>
             <el-form-item v-if="['draft', 'published'].includes(excerptDetail.status)" label="本次审核或停用说明"><el-input v-model="reviewNote" type="textarea" :rows="3" maxlength="1000" /></el-form-item>
@@ -72,6 +72,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onActivated, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { createAIReviewExcerpt, getAIReviewExcerpt, getAIReviewExcerpts, getAIReviewSource, getAIReviewSources, reviewAIReviewExcerpt } from "@/api/ai";

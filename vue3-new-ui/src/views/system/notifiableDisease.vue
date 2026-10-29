@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="传染病报告卡" description="法定传染病院内登记与网直上报状态跟踪（上报状态机：待上报→已上报→已审核→订正）" />
     <el-card>
       <div class="page-toolbar">
         <el-select v-model="query.report_status" placeholder="上报状态" clearable style="width: 130px" @change="load">

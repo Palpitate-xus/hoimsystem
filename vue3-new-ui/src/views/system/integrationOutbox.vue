@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="集成可靠性中心" description="监控 LIS、PACS、医保与支付事件投递，处理重试和死信" />
     <el-row :gutter="16" style="margin-bottom: 16px">
       <el-col v-for="item in statusCards" :key="item.key" :span="6">
         <el-card><el-statistic :title="item.label" :value="counts[item.key] || 0" /></el-card>

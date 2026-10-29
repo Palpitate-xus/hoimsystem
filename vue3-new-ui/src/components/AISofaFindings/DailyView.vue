@@ -3,12 +3,12 @@
     <p>{{ title }}固定24小时 {{ source.start_at }} 至 {{ source.end_at }}；资料可用截止 {{ source.as_of }}；医生当前回顾 {{ source.evaluation_at }}。</p>
     <p aria-label="SOFA已知观测小计">已知观测轴小计：{{ analysis.known_subtotal??'未知（无可明确计分观测轴）' }}；可明确观测 {{ analysis.observed_scored_domain_count }}/6轴。</p>
     <p aria-label="SOFA总分上下界">总分上下界：{{ analysis.lower_bound }} 至 {{ analysis.upper_bound }}。</p>
-    <p aria-label="SOFA数值是否收敛">数值收敛：{{ analysis.exact_numeric_total??'尚未收敛' }}；收敛不等于实际记录协议完整。</p>
+    <p aria-label="SOFA数值是否收敛">数值收敛：{{ analysis.exact_numeric_total??'尚未收敛' }}。</p>
     <p aria-label="SOFA完整协议总分">完整协议总分：{{ analysis.complete_total_score===null?'未满足，不能把小计或收敛值称为完整SOFA':`${analysis.complete_total_score}/24` }}；协议完整 {{ analysis.protocol_complete_domain_count }}/6轴。</p>
-    <p>按原单位分支判读，mg/dL与SI边界不声明精确换算；kPa保留本地固定原生边界，不自动改成mmHg。分数不提供脓毒症诊断、排除、概率或自动治疗。</p>
+    <p>按原单位分别评分，kPa采用本地审核后的评分边界。</p>
     <el-table :data="analysis.domains" aria-label="SOFA六轴上下界与协议完整性"><el-table-column label="轴"><template #default="{row}">{{ sofaAxisLabels[row.axis] }}</template></el-table-column><el-table-column label="明确观测最高分"><template #default="{row}">{{ row.observed_max_score??'未知' }}</template></el-table-column><el-table-column label="上下界"><template #default="{row}">{{ row.lower_bound }} 至 {{ row.upper_bound }}</template></el-table-column><el-table-column label="数值收敛"><template #default="{row}">{{ row.exact_numeric_score??'未知' }}</template></el-table-column><el-table-column label="实际协议"><template #default="{row}">{{ row.protocol_complete?'完整':'未完整' }}</template></el-table-column><el-table-column label="核对"><template #default="{row}"><el-button @click="inspect(row.axis)">核对{{ sofaAxisLabels[row.axis] }}全部候选与证明</el-button></template></el-table-column></el-table>
     <details><summary>核对全部公开原量、原单位和不同时刻</summary><p>共 {{ facts.length }} 条公开原事实展示行，包含同原件的多个事实；仅界面分页，未裁剪完整投影。</p><el-table :data="visibleFacts" aria-label="SOFA完整公开原事实分页"><el-table-column prop="label" label="原事实" /><el-table-column prop="value" label="原值或原状态" /><el-table-column prop="unit" label="原单位" /><el-table-column prop="clock" label="真实原时刻" min-width="230" /><el-table-column prop="source_id" label="原技术来源" min-width="260" /></el-table><el-pagination v-if="facts.length>20" v-model:current-page="factPage" :page-size="20" :total="facts.length" layout="prev,pager,next" /></details>
-    <p v-for="warning in analysis.warnings" :key="warning">{{ warning }}</p>
+    <p v-for="warning in noticeList(analysis.warnings)" :key="warning">{{ warning }}</p>
     <el-dialog v-model="open" :title="`${title}${sofaAxisLabels[axis]||''}全部原候选与精确证明`" width="min(1150px,96vw)">
       <template v-if="domain"><p>本轴全部 {{ domain.candidates.length }} 个候选。原记录未知、冲突和已排除状态分别保留。</p><p>未完整事项：{{ domain.coverage_issues.map(reasonLabel).join('、')||'本记录协议未发现缺项' }}。</p><p>决定本轴已证明下界的全部来源共 {{ domain.deciding_source_ids.length }} 项，保留并列证据。</p><ul aria-label="SOFA全部并列决定来源"><li v-for="id in witnessIds" :key="id" class="hash">{{ id }}</li></ul><el-pagination v-if="domain.deciding_source_ids.length>20" v-model:current-page="witnessPage" :page-size="20" :total="domain.deciding_source_ids.length" layout="prev,pager,next" />
         <article v-for="item in candidates" :key="item.candidate_id" :aria-label="`SOFA原候选 ${item.candidate_id}`"><p class="hash">{{ item.candidate_id }}；{{ item.status }}；明确观测分 {{ item.score??'未知' }}；候选界 {{ item.lower_bound }} 至 {{ item.upper_bound }}。</p><p>{{ item.reason_codes.map(reasonLabel).join('、') }}</p><p class="hash">全部原来源 {{ item.source_ids.join('、')||'无合格原测量，不填正常' }}</p><div v-for="(proof,index) in item.calculations" :key="index"><p v-if="proof.kind==='continuous_tier'">原连续给入档位证明：{{ proof.start_at }} 至 {{ proof.end_at }}；实际持续 {{ proof.duration_microseconds }} µs；本版最短时长 {{ proof.meets_minimum?'已满足':'未满足' }}；档位 {{ proof.tier }}。</p><p v-else>精确证明 {{ proof.kind }}：{{ proof.exact.numerator }}/{{ proof.exact.denominator }} {{ proof.exact.unit }}，保留有理数，不用显示舍入改变判读。</p><p class="hash">证明原来源 {{ proof.source_ids.join('、') }}</p></div></article>
@@ -18,6 +18,7 @@
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import {computed,ref,watch} from "vue";
 import {sofaAxisLabels} from "@/api/aiSofa";
 const props=defineProps({source:{type:Object,required:true},analysis:{type:Object,required:true},title:{type:String,default:"本日"}});

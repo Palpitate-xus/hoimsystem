@@ -8,7 +8,7 @@
         <el-descriptions :column="1" border class="news2-description">
           <el-descriptions-item v-for="row in descriptions" :key="row[0]" :label="row[0]"><span class="digest">{{ row[1] }}</span></el-descriptions-item>
         </el-descriptions>
-        <p>{{ result.scope_note }}</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p>
       </template>
     </div>
     <template #footer>
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
@@ -36,10 +37,10 @@ const descriptions = computed(() => {
     ["固定规则", "RCP NEWS2 2017；六项生理参数及明确的补充氧状态，使用原脉率。"],
     ["选择策略", "单个明确原点测，不拼接异时最新值；相关同刻冲突不默选。"],
     ["适用性", "观察时年龄、妊娠状态及血氧分表须有明确核实来源；Scale 2另需血气与临床决定记录。"],
-    ["缺项与下界", "完整总分未知时保留已知分项及小计下界；不是概率、脓毒症诊断或自动处置。"],
+    ["缺项与下界", "完整总分未知时，显示已知分项及其小计。"],
     ["实际运行环境", `Python ${cap.python_version}；${Object.entries(cap.engine_versions || {}).map(([name, version]) => `${name} ${version}`).join(' ')}`],
     ["请求限制", `最大 ${cap.max_request_bytes} 字节；服务时限 ${cap.timeout_seconds} 秒，模型请求另留传输时间。`],
-    ["Prompt", "仅用于溯源，不改变固定规则分数。"],
+    ["Prompt", "记录本次评分版本。"],
     ["临床验证", `${cap.clinical_validation}：能力检查和数值测试不代替实际临床验证。`],
     ["规则摘要", cap.recipe_digest], ["运行摘要", cap.runtime_digest],
   ] : [];

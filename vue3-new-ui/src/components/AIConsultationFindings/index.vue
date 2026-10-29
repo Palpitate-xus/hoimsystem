@@ -1,6 +1,6 @@
 <template>
   <section v-if="findings && (findings.referrals?.length || findings.mdt_cases?.length)" class="consultation-findings">
-    <h4>转诊与MDT原记录</h4><p>{{ findings.scope_note }}</p>
+    <h4>转诊与MDT原记录</h4><p v-if="noticeText(findings.scope_note)">{{ noticeText(findings.scope_note) }}</p>
     <el-collapse>
       <el-collapse-item v-for="row in findings.referrals || []" :key="row.source_id" :name="row.source_id" :title="`转诊 #${row.referral_id} · ${row.recorded_status_meaning}`">
         <el-descriptions :column="1" border>
@@ -31,6 +31,7 @@
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 defineProps({ findings: { type: Object, default: null } });
 defineEmits(["inspect"]);
 const departmentLabel = item => item?.exists_in_current_directory ? item.name : item?.department_id ? `未核实（原标识 ${item.department_id}）` : "未注明";

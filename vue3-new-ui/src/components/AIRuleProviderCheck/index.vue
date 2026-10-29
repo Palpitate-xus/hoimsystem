@@ -8,7 +8,7 @@
         <el-descriptions :column="1" border class="qsofa-description">
           <el-descriptions-item v-for="row in descriptions" :key="row[0]" :label="row[0]"><span class="digest">{{ row[1] }}</span></el-descriptions-item>
         </el-descriptions>
-        <p>{{ result.scope_note }}</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p>
       </template>
     </div>
     <template #footer>
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
@@ -35,28 +36,28 @@ const result = ref(null), loading = ref(false);
 const descriptions = computed(() => {
   const cap = result.value?.capabilities;
   if(cap&&props.mode==="roster")return[
-    ['实际模型',cap.model_version],['固定优化目标','满足硬需求后最小化惩罚；或先最大化计划净服务量，再最小化惩罚，不混成任意权重。'],['完整原资料','完整本科人员、每人每会话配对、受审资格/可用性与全地点工时上下文；未知项保留。'],['最优性证明','确定域与显式放宽域分别保存实际界、间隙、节点和操作预算终止依据；放宽域数学值不作为实际可行排班。'],['候选用途','场景净容量不是实时库存或可预约余号；不自动发布排班、预约或修改号源。'],['实际运行环境',`Python ${cap.python_version}；${Object.entries(cap.engine_versions).map(([key,v])=>`${key} ${v}`).join(' ')}`],['时区库摘要',cap.timezone_database_digest],['请求限制',`最大${cap.max_request_bytes}字节；服务时限${cap.timeout_seconds}秒。`],['运营验证',`${cap.operational_validation}：来源审核、数值测试和能力声明均不代替实际运营效果验证。`],['Prompt','仅用于溯源，不改变固定目标、工时或证明。'],['规则摘要',cap.recipe_digest],['输入政策摘要',cap.input_policy_digest],['运行摘要',cap.runtime_digest],['四核心摘要',JSON.stringify(cap.core_sha256)]
+    ['实际模型',cap.model_version],['固定优化目标','满足硬需求后最小化惩罚；或先最大化计划净服务量，再最小化惩罚，不混成任意权重。'],['完整原资料','完整本科人员、每人每会话配对、受审资格/可用性与全地点工时上下文；未知项保留。'],['最优性证明','分别记录可行解、搜索边界、差距和终止原因。'],['候选用途','按审核后的容量情景生成排班候选。'],['实际运行环境',`Python ${cap.python_version}；${Object.entries(cap.engine_versions).map(([key,v])=>`${key} ${v}`).join(' ')}`],['时区库摘要',cap.timezone_database_digest],['请求限制',`最大${cap.max_request_bytes}字节；服务时限${cap.timeout_seconds}秒。`],['运营验证',`${cap.operational_validation}：来源审核、数值测试和能力声明均不代替实际运营效果验证。`],['Prompt','记录本次排班版本。'],['规则摘要',cap.recipe_digest],['输入政策摘要',cap.input_policy_digest],['运行摘要',cap.runtime_digest],['四核心摘要',JSON.stringify(cap.core_sha256)]
   ];
   if(cap&&props.mode==="sofa1")return[
     ["实际模型",cap.model_version],
-    ["固定规则","SOFA-1六轴固定24小时完整清单与本地原单位连续边界；不提供脓毒症确诊、排除、概率或自动治疗。"],
+    ["固定规则","SOFA-1六轴、24小时评估，按原单位评分。"],
     ["来源与协议","保留全部原成员、日前必要给药前缀、逐源医生用途判读、冲突和记录协议；不自动选择最近来源或补正常。"],
     ["部分与完整","明确观测小计、上下界、数值收敛与完整协议总分分别保留；基线未知与条件性零假设分开，变化保留负数。"],
     ["实际运行环境",`Python ${cap.python_version}；${Object.entries(cap.engine_versions||{}).map(([name,version])=>`${name} ${version}`).join(' ')}`],
     ["请求限制",`最大 ${cap.max_request_bytes} 字节；服务时限 ${cap.timeout_seconds} 秒。`],
-    ["Prompt","仅用于溯源，不改变固定计算或本地边界。"],
+    ["Prompt","记录本次计算版本。"],
     ["临床验证",`${cap.clinical_validation}：能力声明和数值测试不代替实际临床验证。`],
     ["规则摘要",cap.recipe_digest],["输入政策摘要",cap.policy_digest],["运行摘要",cap.runtime_digest]
   ];
   return cap ? [
     ["实际模型", cap.model_version],
-    ["固定规则", "Sepsis-3 2016 qSOFA三项独立固定计数；不是脓毒症诊断、排除或风险概率。"],
+    ["固定规则", "采用Sepsis-3 2016 qSOFA三项固定计数。"],
     ["选择策略", "明确原呼吸频率、收缩压和完整原GCS分项；同次检查须明确关联，不自动拼接最近记录。"],
-    ["适用性", "医生现在回顾核实原观察时的成人、非ICU与疑似/明确感染；不冒充原截止时已知的信息。"],
+    ["适用性", "采用医生本次回顾的年龄、病区和感染记录。"],
     ["缺项与下界", "缺项或NT不补1分或总GCS；保留已知小计下界，未达两项不能排除脓毒症。"],
     ["实际运行环境", `Python ${cap.python_version}；${Object.entries(cap.engine_versions || {}).map(([name, version]) => `${name} ${version}`).join(' ')}`],
     ["请求限制", `最大 ${cap.max_request_bytes} 字节；服务时限 ${cap.timeout_seconds} 秒，模型请求另留传输时间。`],
-    ["Prompt", "仅用于溯源，不改变固定判据或数值。"],
+    ["Prompt", "记录本次计算版本。"],
     ["筛查用途", "SSC 2026不推荐将qSOFA作为单一脓毒症筛查工具。"],
     ["临床验证", `${cap.clinical_validation}：能力检查和数值测试不代替实际临床验证。`],
     ["规则摘要", cap.recipe_digest], ["运行摘要", cap.runtime_digest],

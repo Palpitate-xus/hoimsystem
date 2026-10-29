@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="定时任务调度" description="查看库存预警、违约统计和备份任务状态，并支持管理员手动触发。" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" :loading="loading" @click="loadStatus">刷新状态</el-button>

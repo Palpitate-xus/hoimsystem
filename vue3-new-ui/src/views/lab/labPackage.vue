@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="检验套餐维护" description="维护检验套餐、项目组合及价格，供医生开立检验申请时选择" />
     <el-card>
       <template #header><div class="page-toolbar"><el-input v-model="keyword" placeholder="搜索套餐编码或名称" clearable size="small" style="width: 240px" @keyup.enter="loadList" /><el-button type="primary" size="small" @click="loadList">查询</el-button><el-button v-if="canMaintain" size="small" @click="openCreate">新增套餐</el-button></div></template>
       <el-table :data="packages" v-loading="loading" size="small" empty-text="暂无启用检验套餐">

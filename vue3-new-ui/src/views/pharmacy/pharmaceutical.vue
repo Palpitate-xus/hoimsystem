@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="药品管理" description="维护药品信息、库存查询和出入库管理" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增药品</el-button>

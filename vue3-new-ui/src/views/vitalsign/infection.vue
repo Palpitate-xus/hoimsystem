@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="院感监测" description="感染病例、暴发预警、消毒监测和职业暴露上报" />
     <el-tabs v-model="activeTab">
       <el-tab-pane label="感染病例" name="cases">
         <div class="page-toolbar"><el-button type="primary" @click="caseDialog = true">上报感染病例</el-button></div>

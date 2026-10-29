@@ -1,12 +1,12 @@
 <template>
   <section v-if="findings && (findings.current_templates?.length || findings.enrollments?.length)" class="pathway-findings">
-    <h4>院内路径与原入径记录</h4><p>{{ findings.scope_note }}</p>
+    <h4>院内路径与原入径记录</h4><p v-if="noticeText(findings.scope_note)">{{ noticeText(findings.scope_note) }}</p>
     <el-collapse>
       <el-collapse-item v-for="row in findings.current_templates || []" :key="row.source_id" :name="row.source_id" :title="`${row.name || '原模板未核实'} · 路径 #${row.pathway_id}${row.explicitly_selected ? ' · 本次所选' : ''}`">
         <p>当前目录状态：{{ row.exists_in_current_directory ? ({ 0: '启用', 1: '停用' })[row.recorded_status] || '未知' : '未核实' }}；原病种：{{ row.disease_name || '未记录' }}；原疾病编码：{{ row.disease_code || '未记录' }}。</p>
         <p v-if="row.reviewed_knowledge">本功能可引用的当前审核版本：{{ row.reviewed_knowledge.version }}。适用于该患者的条件仍待核对。</p>
         <p v-else class="data-gap">本功能和科室缺少当前匹配的已审核版本，未提供原步骤用于推荐。</p>
-        <p>原预计天数：{{ row.expected_days ?? '未记录' }}，不作个体出院目标。当前模板不是入径当时冻结版本。</p>
+        <p>原预计天数：{{ row.expected_days ?? '未记录' }}。当前模板版本见下方。</p>
         <p>{{ row.definition_note }}</p><el-button link @click="$emit('inspect', row.source_id)">查看当前模板元数据依据</el-button>
       </el-collapse-item>
       <el-collapse-item v-for="row in findings.enrollments || []" :key="row.source_id" :name="row.source_id" :title="`入径 #${row.enrollment_id} · ${row.recorded_status_meaning || '状态未知'}${row.explicitly_selected ? ' · 本次所选' : ''}`">
@@ -26,6 +26,7 @@
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 defineProps({ findings: { type: Object, default: null } });
 defineEmits(["inspect"]);
 const assignments = { current_encounter: "已核实对应本次住院", verified_historical_admission: "已核实历史住院，未指定本次就诊", not_recorded: "原记录未注明，不按日期推断" };

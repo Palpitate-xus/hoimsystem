@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="诊断模板" description="维护个人常用诊断及 ICD-10 编码" />
     <el-card>
       <div class="page-toolbar"><el-button type="primary" @click="openCreate">新建诊断模板</el-button></div>
       <el-table :data="templates" v-loading="loading" border empty-text="暂无诊断模板">

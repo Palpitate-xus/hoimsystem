@@ -63,7 +63,7 @@ export function useDocumentChangeSources(props){
   if(!checked||!valid()||after.content_hash!==before.content_hash||canonical(after.snapshot)!==canonical(before.snapshot)||after.governance.revision!==before.governance.revision+1||after.audit_event_ids.created!==before.audit_event_ids.created)throw new Error();
   if(revoke){if(after.governance.status!=='revoked'||after.governance.revoke_reason!==body.basis_note||['privacy_review','faithfulness_review','dependency_review','reviewed_by','reviewed_at','review_basis_note'].some(k=>after.governance[k]!==before.governance[k])||after.audit_event_ids.reviewed!==before.audit_event_ids.reviewed)throw new Error();}
   else if(after.governance.status!==(body.decision==='approve'?'published':'rejected')||['privacy_review','faithfulness_review','dependency_review'].some(k=>after.governance[k]!==body[k])||after.governance.review_basis_note!==body.basis_note)throw new Error();
-  detail.value={...selected,value:after};notice.value=revoke?'已明确撤销；旧范围可能已失效，未自动修改任何目标':'审核已保存；发布只表示本次明确人工声明，不表示临床验证';rawOpen.value=false;await refreshDirectories(valid);
+  detail.value={...selected,value:after};notice.value=revoke?'已明确撤销；旧范围可能已失效，未自动修改任何目标':'审核已保存。';rawOpen.value=false;await refreshDirectories(valid);
  });}
  watch(()=>canonical(form),()=>{invalidateWork();},{flush:'sync'});
  watch(()=>canonical(review),()=>{++detailVersion;},{flush:'sync'});

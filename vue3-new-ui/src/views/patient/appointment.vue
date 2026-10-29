@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="预约挂号" description="在线预约医生号源，管理预约记录" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="openDialog">预约挂号</el-button>

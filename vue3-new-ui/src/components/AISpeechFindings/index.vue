@@ -1,6 +1,6 @@
 <template>
   <section v-if="findings?.audio_source" class="speech-findings">
-    <h4>原录音资料与转写复核</h4><p>{{ findings.scope_note }}</p>
+    <h4>原录音资料与转写复核</h4><p v-if="noticeText(findings.scope_note)">{{ noticeText(findings.scope_note) }}</p>
     <p>原录音标识：{{ source.asset_id }}；原格式：{{ source.media_type }}；解码时长：{{ seconds(source.duration_ms) }}秒。</p>
     <p>原录音时间：{{ source.recorded_at || '未记录，不以登记或上传时间代替' }}。本区展示任务资料中的原版本。</p>
     <el-button link @click="$emit('inspect', source.source_id)">核查原录音元数据依据</el-button>
@@ -9,7 +9,7 @@
       <p>模型报告：{{ transcription.speech_detected ? '检出语音' : '未检出可转写语音' }}，仍须听音核实。说话人标签仅表示模型分组，身份与职业未经核实。</p>
       <template v-if="transcription.processing">
         <p>服务报告已处理 {{ seconds(transcription.processing.processed_duration_ms) }} 秒输入；原音解码时长 {{ seconds(transcription.processing.decoded_duration_ms) }} 秒。{{ transcription.processing.diarization ? '说话人分组仍须核实' : '本次未区分说话人' }}。</p>
-        <p class="data-gap">处理范围报告不保证逐字完整或识别准确；{{ transcription.processing.vad_filter ? '已启用语音活动筛选，可能漏检语音，请听完整原音核对。' : '请听完整原音核对遗漏。' }}</p>
+        <p class="data-gap">转写范围：{{ transcription.processing.vad_filter ? '已启用语音活动筛选，可能漏检语音，请听完整原音核对。' : '请听完整原音核对遗漏。' }}</p>
         <details><summary>查看识别版本</summary><p>引擎：{{ transcription.processing.engine }} {{ transcription.processing.engine_version }}；模型原版本：{{ transcription.processing.model_revision }}</p><p class="recorded-text">本次运行版本：{{ transcription.processing.runtime_digest }}</p></details>
       </template>
       <p v-else class="data-gap">服务未提供完整处理范围报告，请核对原音是否有遗漏。</p>
@@ -19,12 +19,13 @@
         <el-table-column label="转写草稿" min-width="240"><template #default="{ row }"><p class="recorded-text">{{ row.text }}</p><p v-if="row.uncertain" class="data-gap">不确定：{{ row.uncertainty_note }}</p></template></el-table-column>
         <el-table-column label="核对" width="100"><template #default="{ row }"><el-button link @click="player?.seekTo(row.start_ms)">听此片段</el-button><el-button link @click="$emit('inspect', row.source_id)">原音依据</el-button></template></el-table-column>
       </el-table>
-      <p>片段时间相对解码音频，不代表诊疗事件发生时间；不能据发言者标签认定医生意见、诊断或知情同意。</p>
+      <p>片段时间从音频起点计时。请核对转写内容和发言者。</p>
       <el-button v-if="allowCopy" @click="$emit('copy')">复制转写草稿</el-button>
     </template>
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, ref } from "vue";
 import AiAudioPlayer from "@/components/AIAudioPlayer/index.vue";
 const props = defineProps({ findings: { type: Object, default: null }, transcription: { type: Object, default: null }, allowCopy: Boolean });

@@ -9,7 +9,7 @@
     <p v-if="truncated">仅列近期50项，可从明确录音的业务入口选择旧记录。</p>
     <el-collapse v-if="!locked">
       <el-collapse-item title="登记新录音或使用麦克风采集">
-        <p>{{ options.scope_note }}</p>
+        <p v-if="noticeText(options.scope_note)">{{ noticeText(options.scope_note) }}</p>
         <p>支持WAV、MP3、M4A、Ogg、WebM；单文件{{ mib(options.max_bytes) }} MiB，最长{{ options.max_duration_seconds ?? '待读取' }}秒。本人登记用量{{ mib(options.used_bytes) }} / {{ mib(options.user_quota_bytes) }} MiB。</p>
         <el-alert v-if="options.processor_available === false" title="录音处理组件尚未就绪，请联系超级管理员核对部署。" type="warning" :closable="false" />
         <el-checkbox v-model="authorizationConfirmed" :disabled="recording || capturePending || uploading">我已核对该录音的采集、处理授权及所选患者和就诊</el-checkbox>
@@ -29,6 +29,7 @@
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onBeforeUnmount, onDeactivated, ref, shallowRef, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getAIAudioAsset, getAIAudioAssets, getAIAudioOptions, uploadAIAudio, withdrawAIAudio } from "@/api/ai";

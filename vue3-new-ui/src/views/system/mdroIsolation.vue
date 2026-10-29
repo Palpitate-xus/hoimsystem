@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="MDRO 隔离管理" description="多重耐药菌隔离登记与解除；床头隔离标识跟踪" />
     <el-card>
       <div class="page-toolbar">
         <el-select v-model="query.status" placeholder="状态" clearable style="width: 120px" @change="load">

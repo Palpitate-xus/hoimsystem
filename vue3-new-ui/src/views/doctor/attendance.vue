@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="医生考勤" description="每日签到签退，查看考勤记录和统计" />
     <el-row :gutter="20" style="margin-bottom: 20px;">
       <el-col :span="12">
         <el-card>

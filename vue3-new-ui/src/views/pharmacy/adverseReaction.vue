@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="药品不良反应监测" description="记录和跟踪药品不良反应事件" />
     <p>ADR处理与药物过敏分别登记；确认ADR不会自动新增过敏记录。历史结果缺少明确说明时，须核实是已处理还是已排除。</p>
     <el-card>
       <div class="page-toolbar">

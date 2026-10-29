@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="不良事件上报" description="上报和处理医疗安全不良事件" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增不良事件</el-button>

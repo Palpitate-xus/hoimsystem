@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="院区管理" description="维护多院区基础信息，删除前需先清理所属科室" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增院区</el-button>

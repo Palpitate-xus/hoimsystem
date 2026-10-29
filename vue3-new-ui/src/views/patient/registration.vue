@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="现场挂号" description="现场挂号就诊，查看挂号记录" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="openDialog">现场挂号</el-button>

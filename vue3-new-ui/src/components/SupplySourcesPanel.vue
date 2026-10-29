@@ -1,7 +1,7 @@
 <template>
   <section class="supply-sources">
     <h3>{{ governance?'全院库存原件审核与审计':'医院单SKU原始库存资料' }}</h3>
-    <p>请求量、毛实发量、确认实耗量分别登记。这里保留未知、缺项和原计数单位；不自动换算，不从当前库存反推历史，不直接发药、采购或调整库存。</p>
+    <p>请求量、毛实发量和确认实耗量分别登记，保留原计数单位及缺项。</p>
     <el-alert v-if="!allowed" type="info" :closable="false" :title="governance?'此治理入口仅限当前超级管理员。':'当前账户没有此原件登记范围权限。'" />
     <template v-else>
       <el-alert v-if="error" type="error" :title="error" :closable="false" />
@@ -14,7 +14,7 @@
       </div>
       <div class="toolbar"><el-select v-model="recordKind" aria-label="库存原件种类"><el-option value="unit" label="原计数单位定义" /><el-option value="daily" label="原独立日数量" /></el-select><el-button :loading="loading" @click="reload">刷新原件目录</el-button><el-button v-if="localId&&options?.can_record" :disabled="loading||saving" @click="openCreate">登记{{ recordKind==='unit'?'原计数单位':'原独立日数量' }}</el-button></div>
       <p v-if="!governance&&!localId">先明确选择一个真实品种。未选择时不自动使用目录第一项。</p>
-      <el-table v-loading="loading" :data="rows" row-key="source_record_id" empty-text="当前范围暂无已登记原件；不表示数量为零">
+      <el-table v-loading="loading" :data="rows" row-key="source_record_id" empty-text="当前范围暂无已登记原件">
         <el-table-column prop="item_kind" label="实际品种类型" /><el-table-column prop="item_id" label="实际SKU标识" /><el-table-column label="原口径"><template #default="{row}">{{ supplySourceTargets[row.target]||'计数单位定义' }}</template></el-table-column>
         <el-table-column label="治理状态"><template #default="{row}">{{ supplySourceStates[row.status] }}</template></el-table-column><el-table-column prop="date" label="原业务日期" /><el-table-column prop="professional_status" label="原专业确认" /><el-table-column prop="recorded_at" label="服务器登记UTC6" width="245" /><el-table-column label="操作" width="135"><template #default="{row}"><el-button @click="inspect(row)">核对原件</el-button></template></el-table-column>
       </el-table>
@@ -29,10 +29,10 @@
       <template v-if="detail">
         <p>{{ supplySourceStates[detail.status] }} · {{ detail.source_record_id }} · {{ detail.item_kind }} #{{ detail.item_id }}</p>
         <p>原观察UTC6：{{ detail.observed_at??'本单位定义无观察时刻' }}；服务器登记UTC6：{{ detail.recorded_at }}；审核UTC6：{{ detail.reviewed_at??'尚未审核' }}</p>
-        <p>原专业确认：{{ detail.professional_status }}；原签署账户：{{ detail.signer_user_id??'未知' }}。治理发布不表示运营验证或执照验证。</p>
+        <p>原专业确认：{{ detail.professional_status }}；原签署账户：{{ detail.signer_user_id??'未知' }}。</p>
         <p v-if="detail.payload?.quantity">原数量：{{ detail.payload.quantity.value===null?'null · '+detail.payload.quantity.absent_reason:detail.payload.quantity.value }}；原单位：{{ detail.payload.original_unit_text??'null · 未知' }}；原供应约束：{{ detail.payload.stock_constraint }}</p>
         <p v-if="detail.payload&&detail.record_kind==='unit'">原计数单位：{{ detail.payload.original_unit_text }}</p>
-        <el-alert v-if="!detail.eligible" type="info" :closable="false" :title="detail.payload===null?'当前来源已失效或终止，普通入口已隐去原文。':'当前原件只供草稿审核或冻结审计；不能据此声明完整可用。'" />
+        <el-alert v-if="!detail.eligible" type="info" :closable="false" :title="detail.payload===null?'当前来源已失效或终止，普通入口已隐去原文。':'当前资料用于草稿审核和历史审计。'" />
         <p>完整原件SHA：{{ detail.content_hash }}</p><p>当前治理SHA：{{ detail.governance_hash }}</p>
         <el-button @click="()=>loadList()">重新核对当前来源目录</el-button>
         <el-button v-if="detail.payload" @click="showOriginal=!showOriginal">{{ showOriginal?'收起院内完整原件':'展开院内完整原件' }}</el-button>

@@ -4,7 +4,7 @@
   <p v-else-if="!v.scopeRequest" role="status">请先选择项目和患者。</p>
   <p v-else-if="!v.authorized" role="status">当前会话或用途读取条件不足，全文与选择已清除。</p>
   <template v-else>
-   <p>本次资料仅用于去标识复核；模型处理和导出需分别取得许可。</p>
+   <p>模型处理和导出分别需要对应许可。</p>
    <p v-if="v.pending&&!v.anchor">待核对引用 {{ v.pending }}，尚未读取或选中。</p>
    <el-button v-if="v.pending" :disabled="v.busy" @click="v.readPending">显式重读所引用完整来源</el-button>
    <el-button :disabled="v.busy" @click="v.openSources">打开当前范围来源与人工复核</el-button>

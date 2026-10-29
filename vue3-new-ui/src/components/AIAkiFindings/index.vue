@@ -1,34 +1,35 @@
 <template>
   <section aria-label="成人AKI确定性标准复核">
-    <p>依据KDIGO 2012的成人AKI已观测标准，独立软件实现，未获KDIGO认证或背书。这里核对所选评估资料，不预测未来风险，不替代最终诊断或自动治疗。</p>
+
     <p v-if="!scoped" role="alert">AKI来源与原患者、住院、窗口或冻结原资料不一致，拒绝展示其他范围数值。</p>
     <template v-else>
-      <p>评估 {{ source.assessment_id }} · 原住院 {{ scope.admission_id }} · 原窗 {{ source.window_id }}<br />评估时刻 {{ source.evaluation_at }}；冻结可用截止 {{ source.as_of }}。检验采样时刻与评估时刻分别保留，不表示同时发生。</p>
-      <p>声明评估时年龄 {{ source.age_at_evaluation_years }}；规则 {{ source.rule_id }} · {{ source.rule_profile_id }}。人工声明与来源治理不构成独立临床验证。</p>
+      <p>评估 {{ source.assessment_id }} · 原住院 {{ scope.admission_id }} · 原窗 {{ source.window_id }}<br />评估时刻 {{ source.evaluation_at }}；冻结可用截止 {{ source.as_of }}。</p>
+      <p>声明评估时年龄 {{ source.age_at_evaluation_years }}；规则 {{ source.rule_id }} · {{ source.rule_profile_id }}。</p>
       <p class="hash">规则摘要 {{ source.recipe_digest }}<br />原评估摘要 {{ source.content_hash }}</p>
       <el-button link @click="$emit('inspect', source.source_id)">核对AKI评估原依据</el-button><el-button link @click="$emit('inspect', source.rule_profile_source_id)">核对AKI审核规则依据</el-button>
       <el-table :data="creatinineRows" aria-label="AKI所选肌酐原值"><el-table-column prop="label" label="选定用途" /><el-table-column label="原值"><template #default="{ row }">{{ row.item.value ?? '非数值或未提供' }} {{ row.item.unit }}</template></el-table-column><el-table-column prop="originalAdmission" label="实际原住院" min-width="250" /><el-table-column prop="item.collected_at_utc" label="原采样UTC" min-width="220" /><el-table-column prop="item.available_at" label="受控登记可用时刻" min-width="220" /><el-table-column label="原依据"><template #default="{ row }"><el-button link @click="$emit('inspect', row.item.source_id)">核对原肌酐来源</el-button></template></el-table-column></el-table>
       <p>基线策略 {{ baselineLabels[source.baseline_mode] || source.baseline_mode }}；血清/血浆用途{{ source.creatinine_review.serum_creatinine_confirmed ? '已有临床声明，仍须复核' : '未确认' }}。只比较相同原单位和已审核项目身份；不自动选择最低、最近或估计基线，不自动换算单位。</p>
       <p v-if="source.weight" aria-label="AKI原体重">原体重 {{ source.weight.value ?? `未测（${source.weight.absent_reason}）` }} {{ source.weight.unit }} · {{ source.weight.observed_at }}；对整段适用{{ source.weight_applicability_confirmed ? '已人工声明' : '未确认' }}。0保留为原值，不能作为计算分母。</p><p v-else>未选择原体重；不补默认、理想或最近体重。</p>
       <el-table :data="source.urine_intervals" aria-label="AKI所选原尿量区间"><el-table-column prop="start_at" label="原区间开始" min-width="220" /><el-table-column prop="end_at" label="原区间结束" min-width="220" /><el-table-column label="原尿量"><template #default="{ row }">{{ row.volume_ml ?? `未测（${row.absent_reason}）` }} mL</template></el-table-column><el-table-column prop="collection_completeness" label="原收集完整性" /><el-table-column label="原患者总量声明"><template #default="{ row }">{{ row.patient_total === true ? '是' : row.patient_total === false ? '否' : '未知' }}</template></el-table-column><el-table-column label="原依据"><template #default="{ row }"><el-button link @click="$emit('inspect', row.source_id)">核对原尿量区间</el-button></template></el-table-column></el-table>
-      <p>尿量策略为完整原区间的平均量；不裁剪、不分摊、不虚构逐小时记录，不证明每小时持续少尿。原体重、重叠、遗漏、间隙或收集完整性缺口会保留。</p><p v-for="issue in source.urine_coverage_issues" :key="issue">原覆盖缺口：{{ issueLabels[issue] || issue }}</p>
+      <p>尿量按完整记录区间计算平均值，覆盖缺口见下方。</p><p v-for="issue in source.urine_coverage_issues" :key="issue">原覆盖缺口：{{ issueLabels[issue] || issue }}</p>
       <p>RRT原临床声明 {{ rrtLabels[source.rrt.status] || source.rrt.status }}；原启动 {{ source.rrt.started_at ?? '未提供' }}。不从医嘱推断启动，不将维持性RRT当作新发AKI。</p>
-      <p v-if="!analysis">尚未提供确定性计算报告；原资料不等于已检出标准或已排除AKI。</p>
+      <p v-if="!analysis">尚无计算报告，请先完成评估。</p>
       <p v-else-if="!bound" role="alert">AKI标准、最低分期、运行版本或原来源绑定不一致，计算结果已拒绝展示。</p>
       <template v-else>
         <p>计算状态 {{ calculationLabels[analysis.calculation_status] }}；声明范围 {{ scopeLabels[analysis.scope_status] }}。</p>
-        <p v-if="analysis.detection === 'met'" aria-label="AKI最低达到分期">所选资料支持至少达到AKI {{ analysis.minimum_stage }}期。{{ analysis.stage_is_lower_bound ? '这是已支持标准的最低分期，其他资料仍可能不完整。' : '已达到本分期规则上限，不代表整个AKI病程资料完整。' }}</p>
-        <p v-else-if="analysis.detection === 'not_met_in_selected_data'" aria-label="AKI所选标准未满足">所选资料未满足已评估标准；不能据此排除AKI，也不代表当前病程无AKI。</p>
+        <p v-if="analysis.detection === 'met'" aria-label="AKI最低达到分期">所选资料支持至少达到AKI {{ analysis.minimum_stage }}期。</p>
+        <p v-else-if="analysis.detection === 'not_met_in_selected_data'" aria-label="AKI所选标准未满足">本次所选资料未满足AKI判据。</p>
         <p v-else-if="analysis.detection === 'outside_scope'">超出本软件声明的成人标准范围；不输出分期，不将未知视为正常。</p>
         <p v-else aria-label="AKI资料不足">资料不足，无法给出完整标准判断；不输出0期或“无AKI”。</p>
         <el-table :data="analysis.criteria" aria-label="AKI八项标准与原依据"><el-table-column label="标准"><template #default="{ row }">{{ criterionLabels[row.key] }}</template></el-table-column><el-table-column label="状态"><template #default="{ row }">{{ statusLabels[row.status] }}</template></el-table-column><el-table-column label="支持分期"><template #default="{ row }">{{ row.stage ?? '未给出' }}</template></el-table-column><el-table-column prop="reason_code" label="原因编码" min-width="180" /><el-table-column label="实际原量与区间" min-width="310"><template #default="{ row }"><p v-for="entry in evidenceRows(row.evidence)" :key="entry[0]">{{ entry[0] }}：{{ entry[1] }}</p><el-button v-for="id in row.source_ids" :key="id" link @click="$emit('inspect', id)">核对标准原依据</el-button></template></el-table-column></el-table>
-        <p v-for="(item, index) in analysis.missing_data" :key="`missing:${index}`">缺项：{{ item }}</p><p v-for="(item, index) in analysis.warnings" :key="`warning:${index}`">复核：{{ item }}</p>
-        <p aria-label="AKI运行与规则版本" class="hash">实际引擎 {{ analysis.local_runtime.engine }} · {{ analysis.local_runtime.model_version }}<br />运行摘要 {{ analysis.local_runtime.runtime_digest }}<br />完整Prompt摘要 {{ analysis.instructions_digest }}<br />Prompt仅用于溯源，不改变固定标准。未提供本项目独立临床验证。</p><p>{{ analysis.attribution }}</p><p v-for="reference in analysis.rule_references" :key="reference" class="hash">规则原始依据：{{ reference }}</p>
+        <p v-for="(item, index) in noticeList(analysis.missing_data)" :key="`missing:${index}`">缺项：{{ item }}</p><p v-for="(item, index) in noticeList(analysis.warnings)" :key="`warning:${index}`">复核：{{ item }}</p>
+        <p aria-label="AKI运行与规则版本" class="hash">实际引擎 {{ analysis.local_runtime.engine }} · {{ analysis.local_runtime.model_version }}<br />运行摘要 {{ analysis.local_runtime.runtime_digest }}<br />完整Prompt摘要 {{ analysis.instructions_digest }}<br /></p><p>{{ analysis.attribution }}</p><p v-for="reference in analysis.rule_references" :key="reference" class="hash">规则原始依据：{{ reference }}</p>
       </template>
     </template>
   </section>
 </template>
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed } from "vue";
 import { akiAssessmentMatches, akiCanonical } from "@/api/aiAki";
 import { observationTime } from "@/api/inpatientObservations";

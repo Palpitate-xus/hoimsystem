@@ -14,7 +14,7 @@
    <template v-else-if="isSuper&&selectedScope">
     <el-button :disabled="busy" @click="readDeclaredPatients">查看项目内患者</el-button>
     <el-select v-if="declaredPatients.length" v-model="selectedPatient" aria-label="明确项目已声明患者" :disabled="busy" clearable @change="scopeChanged"><el-option v-for="id in declaredPatients" :key="id" :value="id" :label="'项目声明患者 '+id"/></el-select>
-    <p>这只是项目原件声明的有限集合，逐患者用途与模型许可仍由当前Case读取重新核验。</p>
+    <p>按所选项目的患者范围核验用途和模型处理许可。</p>
    </template>
    <p v-else-if="selectedPatient===null" role="status">缺少实际授权患者入口。请从真实患者业务行进入，或显式读取已有Case；不提供全院患者目录。</p>
    <el-button v-if="pending" :disabled="busy" @click="readInitial">按当前用途重读明确Case引用</el-button>

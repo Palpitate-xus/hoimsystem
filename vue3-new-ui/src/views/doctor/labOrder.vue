@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="检查检验申请" description="为患者申请检查和检验项目" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增申请</el-button>

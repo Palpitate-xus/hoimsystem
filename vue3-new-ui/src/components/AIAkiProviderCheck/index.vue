@@ -8,7 +8,7 @@
         <el-descriptions :column="1" border class="aki-description">
           <el-descriptions-item v-for="row in descriptions" :key="row[0]" :label="row[0]"><span class="digest">{{ row[1] }}</span></el-descriptions-item>
         </el-descriptions>
-        <p>{{ result.scope_note }}</p>
+        <p v-if="noticeText(result.scope_note)">{{ noticeText(result.scope_note) }}</p>
       </template>
     </div>
     <template #footer>
@@ -19,6 +19,7 @@
 </template>
 
 <script setup>
+import { noticeText, noticeList } from "@/utils/noticeText.cjs";
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
@@ -36,10 +37,10 @@ const descriptions = computed(() => {
     ["固定规则", "KDIGO 2012成人所选资料判据；独立数值实现，非未来风险概率。"],
     ["选择策略", "明确肌酐/基线、原体重与完整原尿量区间，不自动选择最低/最新值或按时长分摊。"],
     ["适用性", "明确成人年龄、血清/血浆肌酐及可比性；旧基线急升与非未知RRT须有临床资格和依据。"],
-    ["缺项与下界", "保留已满足标准的至少分期；其他轴缺失不清除阳性，所选资料未达标不等于排除AKI。"],
+    ["缺项与下界", "按已满足的判据给出最低分期，并列出缺项。"],
     ["实际运行环境", `Python ${cap.python_version}；${Object.entries(cap.engine_versions || {}).map(([name, version]) => `${name} ${version}`).join(' ')}`],
     ["请求限制", `最大 ${cap.max_request_bytes} 字节；服务时限 ${cap.timeout_seconds} 秒，模型请求另留传输时间。`],
-    ["Prompt", "仅用于溯源，不改变固定判据或数值。"],
+    ["Prompt", "记录本次计算版本。"],
     ["临床验证", `${cap.clinical_validation}：能力检查和数值测试不代替实际临床验证。`],
     ["规则摘要", cap.recipe_digest], ["运行摘要", cap.runtime_digest],
   ] : [];

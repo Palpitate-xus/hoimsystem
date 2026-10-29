@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="病案归档/借阅" description="病案首页归档、借阅审批（申请→审批→借出→归还）及封存管理" />
     <el-card>
       <template #header>
         <div class="page-toolbar">

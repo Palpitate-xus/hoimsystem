@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="手术护理记录" description="按术前、术中、术后三个阶段记录核查、器械清点、标本和伤口情况" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="手术排台"><el-select v-model="form.schedule_id" filterable placeholder="选择手术排台" style="width: 260px" @change="selectSchedule"><el-option v-for="item in schedules" :key="item.schedule_id" :label="`${item.patient_name}｜${item.surgery_name}`" :value="item.schedule_id" /></el-select></el-form-item>

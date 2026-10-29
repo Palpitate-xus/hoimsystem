@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="护理计划" description="围绕护理诊断制定目标和措施，完成后保留闭环记录" />
     <el-card>
       <el-form :model="form" inline @submit.prevent>
         <el-form-item label="住院患者"><el-select v-model="form.admission_id" aria-label="住院患者" filterable placeholder="选择在院患者" style="width: 240px" @change="selectAdmission"><el-option v-for="item in admissions" :key="item.admission_id" :label="`${item.patient_name}（${item.admission_no}）`" :value="item.admission_id" /></el-select></el-form-item>

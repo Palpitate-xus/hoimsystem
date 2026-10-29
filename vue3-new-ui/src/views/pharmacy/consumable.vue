@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <vab-page-header title="耗材管理" description="管理医疗耗材信息和库存" />
     <el-card>
       <div class="page-toolbar">
         <el-button type="primary" @click="handleAdd">新增耗材</el-button>

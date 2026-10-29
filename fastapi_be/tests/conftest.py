@@ -1,6 +1,8 @@
 import datetime
+import logging
 import os
 import sys
+from contextlib import contextmanager
 
 import pytest
 import pytest_asyncio
@@ -68,6 +70,34 @@ def isolate_module_database():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
+
+
+@pytest.fixture(autouse=True)
+def isolate_logging_disable_state():
+    """Keep Alembic's process-wide logging changes inside its owning test."""
+
+    @contextmanager
+    def preserve_state():
+        manager = logging.root.manager
+        previous_threshold = manager.disable
+        loggers = [logging.root, *(logger for logger in manager.loggerDict.values() if isinstance(logger, logging.Logger))]
+        previous = {logger: (logger.disabled, logger.level, logger.handlers[:], logger.filters[:], logger.propagate) for logger in loggers}
+        try:
+            yield
+        finally:
+            logging.disable(previous_threshold)
+            for logger, (disabled, level, handlers, filters, propagate) in previous.items():
+                logger.disabled = disabled
+                logger.setLevel(level)
+                logger.handlers[:] = handlers
+                logger.filters[:] = filters
+                logger.propagate = propagate
+            for logger in tuple(manager.loggerDict.values()):
+                if isinstance(logger, logging.Logger) and logger not in previous:
+                    logger.disabled = False
+
+    with preserve_state():
+        yield preserve_state
 
 
 @pytest.fixture

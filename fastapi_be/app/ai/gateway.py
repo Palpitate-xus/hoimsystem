@@ -62,6 +62,89 @@ class AIExecutionError(Exception):
         super().__init__(message)
 
 
+def _text_response_error(inputs=None, outputs=None):
+    error = AIExecutionError("INVALID_PROVIDER_RESPONSE", "模型返回格式或用量记录无效，请检查模型接口与输出格式")
+    error.input_tokens, error.output_tokens = inputs, outputs
+    return error
+
+
+def _text_usage(kind, value):
+    usage = value.get("usage")
+    if usage is None:
+        return None, None
+    if type(usage) is not dict:
+        raise _text_response_error()
+    keys = ("prompt_tokens", "completion_tokens") if kind == "chat" else ("input_tokens", "output_tokens")
+    counts, invalid = [], False
+    for key in keys:
+        count = usage.get(key)
+        if count is not None and (type(count) is not int or not 0 <= count <= 2_000_000):
+            invalid = True
+            count = None
+        counts.append(count)
+    total = usage.get("total_tokens")
+    if total is not None:
+        invalid |= type(total) is not int or not 0 <= total <= 4_000_000
+        if not invalid and all(count is not None for count in counts):
+            invalid = total != sum(counts)
+    if invalid:
+        raise _text_response_error(*counts)
+    return tuple(counts)
+
+
+def _parse_text_response(kind, value):
+    inputs, outputs = _text_usage(kind, value)
+    try:
+        if value.get("error") is not None or value.get("required_action") is not None:
+            raise ValueError("unexpected provider action")
+        if kind == "chat":
+            choices = value.get("choices")
+            if type(choices) is not list or len(choices) != 1 or type(choices[0]) is not dict:
+                raise ValueError("one complete text choice is required")
+            choice = choices[0]
+            message = choice.get("message")
+            if type(message) is not dict:
+                raise ValueError("text message is required")
+            if message.get("refusal") or choice.get("finish_reason") == "content_filter":
+                raise AIExecutionError("MODEL_REFUSAL", "模型未提供可用结果，请检查输入内容或联系管理员调整模型")
+            if choice.get("finish_reason") != "stop":
+                raise AIExecutionError("INCOMPLETE_RESPONSE", "模型输出未完成，请联系管理员检查输出长度和模型状态")
+            if message.get("tool_calls") or message.get("function_call"):
+                raise ValueError("unexpected model tool call")
+            raw = message.get("content")
+        else:
+            if value.get("status") != "completed":
+                raise AIExecutionError("INCOMPLETE_RESPONSE", "模型输出未完成，请联系管理员检查输出长度和模型状态")
+            items = value.get("output")
+            if type(items) is not list or any(type(item) is not dict for item in items):
+                raise ValueError("output messages are required")
+            if any(item.get("type") not in {"message", "reasoning"} for item in items):
+                raise ValueError("unexpected model output action")
+            messages = [item for item in items if item.get("type") == "message"]
+            if len(messages) != 1:
+                raise ValueError("one complete output message is required")
+            message = messages[0]
+            if message.get("status", "completed") != "completed":
+                raise AIExecutionError("INCOMPLETE_RESPONSE", "模型输出未完成，请联系管理员检查输出长度和模型状态")
+            content = message.get("content")
+            if type(content) is not list or any(type(part) is not dict for part in content):
+                raise ValueError("text content blocks are required")
+            if any(part.get("type") == "refusal" for part in content):
+                raise AIExecutionError("MODEL_REFUSAL", "模型未提供可用结果，请检查输入内容或联系管理员调整模型")
+            if any(part.get("type") != "output_text" or type(part.get("text")) is not str for part in content):
+                raise ValueError("only complete text blocks are accepted")
+            raw = "".join(part["text"] for part in content)
+        if type(raw) is not str:
+            raise ValueError("model content must be text")
+        output = json.loads(raw, object_pairs_hook=_unique_response_pairs, parse_constant=_finite_response_constant)
+        return output, inputs, outputs
+    except AIExecutionError as error:
+        error.input_tokens, error.output_tokens = inputs, outputs
+        raise
+    except (ValueError, TypeError, KeyError, IndexError, UnicodeError, RecursionError) as error:
+        raise _text_response_error(inputs, outputs) from error
+
+
 def result_json_schema(schema_type=GenerationResult) -> dict:
     """Make all output properties required for strict Structured Outputs."""
     schema = copy.deepcopy(schema_type.model_json_schema())
@@ -871,21 +954,8 @@ def _parse_response(provider: AIProvider, spec: FeatureSpec, value: dict) -> tup
             return parse_sofa_envelope(value, provider.model)
         except (ValidationError, ValueError, TypeError, KeyError) as exc:
             raise AIExecutionError("ADAPTER_CONTRACT_MISMATCH", "SOFA独立服务的版本、互斥原件结果或用量回执不符合严格协议") from exc
-    if provider.kind == "responses":
-        if value.get("status") != "completed":
-            raise AIExecutionError("INCOMPLETE_RESPONSE", "模型响应未完成，请检查输出额度或模型状态")
-        content = [part for item in value.get("output", []) if item.get("type") == "message" for part in item.get("content", [])]
-        if any(part.get("type") == "refusal" for part in content):
-            raise AIExecutionError("MODEL_REFUSAL", "模型未提供可用结果")
-        raw = "".join(part.get("text", "") for part in content if part.get("type") == "output_text")
-        usage = value.get("usage") or {}
-        return json.loads(raw), int(usage.get("input_tokens") or 0), int(usage.get("output_tokens") or 0)
-    if provider.kind == "chat":
-        choice = value["choices"][0]
-        if choice.get("finish_reason") != "stop" or choice["message"].get("refusal"):
-            raise AIExecutionError("INCOMPLETE_RESPONSE", "模型未返回完整结果，请检查输出额度或模型状态")
-        usage = value.get("usage") or {}
-        return json.loads(choice["message"]["content"]), int(usage.get("prompt_tokens") or 0), int(usage.get("completion_tokens") or 0)
+    if provider.kind in {"chat", "responses"}:
+        return _parse_text_response(provider.kind, value)
     news2_mode = spec.number == 41 and provider.model.startswith("news2:")
     aki_mode = spec.number == 43 and provider.model.startswith("aki:")
     qsofa_mode = spec.number == 42 and provider.model.startswith("qsofa:")
@@ -931,8 +1001,8 @@ async def generate(
     audio: BinaryIO | None = None,
     ecg: BinaryIO | None = None,
     image: BinaryIO | None = None,
-) -> tuple[GenerationResult, int, int]:
-    """Call only a configured endpoint; never retry billable tasks or follow redirects."""
+) -> tuple[GenerationResult, int | None, int | None]:
+    """Call a configured endpoint with bounded text retries and no redirects."""
     rca_context = data.get("context", {})
     if (
         spec.number == 77
@@ -1097,7 +1167,7 @@ async def generate(
             draft, inputs, outputs = parse_provider_draft(provider.kind, parsed)
             return result_for_draft(data["context"]["coding_source"], draft, data["context"]["coding_binding"]["projection_hash"]), inputs, outputs
         output, inputs, outputs = _parse_response(provider, spec, parsed)
-        if min(inputs, outputs) < 0 or max(inputs, outputs) > 2000000:
+        if any(count is not None and (type(count) is not int or not 0 <= count <= 2_000_000) for count in (inputs, outputs)):
             raise ValueError("invalid token accounting")
         result = validate_generation(
             output,
@@ -1125,7 +1195,8 @@ async def generate(
         )
         return result, inputs, outputs
     except AIExecutionError as exc:
-        exc.input_tokens, exc.output_tokens = inputs, outputs
+        if inputs is not None or outputs is not None:
+            exc.input_tokens, exc.output_tokens = inputs, outputs
         raise
     except httpx.TimeoutException as exc:
         raise AIExecutionError("PROVIDER_TIMEOUT", "模型服务响应超时，请稍后重试或调整模型配置") from exc

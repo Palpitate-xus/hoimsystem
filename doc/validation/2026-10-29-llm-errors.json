@@ -1,0 +1,137 @@
+{
+  "generated_at": "2026-10-29T04:38:02.132558+00:00",
+  "implementation_commit": "4e3203680f11b95b39772b2f0000b94bf43c5d27",
+  "scope": "LLM provider errors, bounded text retries, usage accounting, generic task storage recovery and UI query recovery",
+  "backend": {
+    "suites": [
+      {
+        "suite": "final_core",
+        "passed": 262,
+        "failed": 0,
+        "skipped": 0,
+        "junit_file": ".local-preview/llm-errors-final-core.xml",
+        "sha256": "4fd0a91929bd088d26a3f79cf5a96b0f923b3d452f9148544cf89d67913efbca"
+      },
+      {
+        "suite": "gateways_and_native_retry",
+        "passed": 703,
+        "failed": 0,
+        "skipped": 0,
+        "junit_file": ".local-preview/llm-gateway-native-regression.xml",
+        "sha256": "4ddf49bdb83932ef5cd72c8ea6200478d00fe0cf0950ce05be8936318ca5374c"
+      },
+      {
+        "suite": "worker_and_native_runtime",
+        "passed": 187,
+        "failed": 0,
+        "skipped": 0,
+        "junit_file": ".local-preview/ai-generic-storage-regression.xml",
+        "sha256": "830a94b97a596d5752e09747a349d1ef1c7cb42026a0ddc8c0d32349dfdbbe55"
+      },
+      {
+        "suite": "final_error_boundaries",
+        "passed": 78,
+        "failed": 0,
+        "skipped": 0,
+        "junit_file": ".local-preview/llm-guidance-complete.xml",
+        "sha256": "c460cee286c7aa4726a61d212d3bc478d12708a86df4be2109cef7098f19728e"
+      }
+    ],
+    "unique_passed_across_suites": 1029,
+    "failed": 0,
+    "skipped": 0,
+    "deployed_source": {
+      "matches": true,
+      "files": {
+        "app/ai/gateway.py": "7a5e510a67ad142251b77cdadb6d50d11fd39127484dc3bd08796b8fddf98506",
+        "app/ai/text_retry.py": "ec99bc79bb9833fefb305ff7870f42cd71bb0a7dde4283f44331aa198c7b1f3b",
+        "app/ai/failure_policy.py": "b56ba2db5d129cd0a05f4dc1829db2153a84895f91eb1c9de1f6a65dae588d0d",
+        "app/ai/runtime.py": "b53a62dd00ce5effd099fd0a4447372a729b5c5c72167cc91f54ac726bff37b3",
+        "app/ai/worker.py": "af2901556fbc23d5223741cd88c858cad5b979b7b83ba622d3d63b2cde9c8059"
+      }
+    }
+  },
+  "frontend": {
+    "unit_passed": 320,
+    "source_browser_passed": 58,
+    "final_recovery_browser_passed": 5,
+    "final_production_native_passed": 26,
+    "budget": {
+      "largestJavaScript": {
+        "file": "element-plus.ec51a237.js",
+        "bytes": 662581
+      },
+      "totalJavaScript": 5990884,
+      "totalAssets": 6937275,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "deployed_artifact": {
+      "matches": true,
+      "sha256": "a23ab50e27699b5929749cbec4575362b35aafd230fbb7f18ac182a2c359c121",
+      "local_preview": true
+    }
+  },
+  "preview": {
+    "url": "http://172.20.137.133:51891",
+    "bind_address": "0.0.0.0",
+    "api_port": 51800,
+    "frontend_port": 51891,
+    "simulated": true,
+    "model_inference": false,
+    "admin_retry_configuration_restored_to": 3,
+    "http_worker_cases": [
+      {
+        "case": "single_attempt_failure",
+        "status": "failed",
+        "error_code": "PROVIDER_HTTP_ERROR",
+        "input_tokens": null,
+        "output_tokens": null,
+        "attempts": 1,
+        "max_attempts": 1,
+        "earlier_usage_unknown": false
+      },
+      {
+        "case": "retry_after_one_prior_failure",
+        "status": "succeeded",
+        "error_code": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "attempts": 2,
+        "max_attempts": 3,
+        "earlier_usage_unknown": true
+      },
+      {
+        "case": "two_503_then_success",
+        "status": "succeeded",
+        "error_code": null,
+        "input_tokens": null,
+        "output_tokens": null,
+        "attempts": 3,
+        "max_attempts": 3,
+        "earlier_usage_unknown": true
+      },
+      {
+        "case": "known_simulator_zero",
+        "status": "succeeded",
+        "error_code": null,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "attempts": 1,
+        "max_attempts": 3,
+        "earlier_usage_unknown": false
+      }
+    ],
+    "browser_checks": [
+      "preview login prefill",
+      "authenticated AI workbench",
+      "real failed task history",
+      "specific backend guidance preserved",
+      "error code and HTTP/attempt details",
+      "no page errors"
+    ]
+  }
+}

@@ -1,20 +1,24 @@
 # 第一阶段：构建前端
-FROM public.ecr.aws/docker/library/node:24-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c AS builder
+FROM public.ecr.aws/docker/library/node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS builder
 
 WORKDIR /app
+ARG VUE_APP_LOCAL_PREVIEW=false
+ENV VUE_APP_LOCAL_PREVIEW=$VUE_APP_LOCAL_PREVIEW
 
 # 复制 package 文件
 COPY package.json package-lock.json ./
+COPY layouts/ ./layouts/
 
 # 安装依赖（npm ci 按 lockfile 精确安装，供应链更可控）
-RUN npm ci --legacy-peer-deps
+RUN --mount=type=cache,id=hoim-web-npm,target=/root/.npm,sharing=locked \
+    npm ci --legacy-peer-deps --prefer-offline
 
 # 复制源码并构建
 COPY . .
 RUN npm run build
 
 # 第二阶段：使用 nginx  serve 静态文件
-FROM public.ecr.aws/docker/library/nginx:1.30.6-alpine@sha256:47928bf67eb62a1863cb08d9ecb52d3e704304ba614eaee17884204677702951
+FROM public.ecr.aws/docker/library/nginx:1.30.6-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949
 RUN apk upgrade --no-cache
 
 # 复制构建产物

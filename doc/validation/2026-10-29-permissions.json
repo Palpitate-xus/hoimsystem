@@ -1,0 +1,358 @@
+{
+  "generated_at": "2026-10-29T04:12:15.254012+00:00",
+  "implementation_commit": "318e2c7524792c4b6b707bd32713bd273f59b119",
+  "backend": {
+    "collected": 14723,
+    "main_lane": {
+      "passed": 14623,
+      "skipped": 100
+    },
+    "workers": 32,
+    "source_sha256": "ba70530f7cdf49d725e75e0a7b32beed856c04ef947cb9efc1283769c1e7210e",
+    "supplemental_lanes": [
+      {
+        "name": "PostgreSQL",
+        "passed": 75,
+        "additional_unique_passes": 75,
+        "junit_sha256": "ec07af165c690853efb905a557276d81ea86a6535af5c3428ef7aabf1b4b0dc3"
+      },
+      {
+        "name": "CPU imaging preprocessing",
+        "passed": 73,
+        "additional_unique_passes": 20,
+        "junit_sha256": "b8c715371aa00bed9e9c448bdfc66aa933ab83f2bc69a509e958fdeb5ef73933"
+      }
+    ],
+    "unique_results": {
+      "passed": 14718,
+      "skipped": 5
+    },
+    "conditional_model_tests": [
+      {
+        "module": "tests.test_ai_imaging_model",
+        "name": "test_real_public_weights_synthetic_cpu_forward_only_when_explicitly_requested",
+        "reason": "set HOIM_IMAGING_REAL_MODEL to a prepared fixed public model; synthetic smoke only"
+      },
+      {
+        "module": "tests.test_ai_imaging_preprocessing",
+        "name": "test_real_public_weights_can_consume_prepared_synthetic_native_pixels_only_when_requested",
+        "reason": "Requires HOIM_IMAGING_REAL_MODEL and prepared fixed public imaging weights; CPU preprocessing passed separately."
+      },
+      {
+        "module": "tests.test_ai_local_speech_real",
+        "name": "test_synthetic_audio_registration_to_actual_recognition_and_frozen_review",
+        "reason": "Requires explicitly prepared local weights and optional speech runtime"
+      },
+      {
+        "module": "tests.test_ai_local_imaging_real",
+        "name": "test_original_synthetic_dicom_to_actual_cpu_child_and_frozen_unvalidated_preview",
+        "reason": "Requires explicitly prepared pinned imaging weights and optional offline CPU runtime"
+      },
+      {
+        "module": "tests.test_ai_local_ecg_real",
+        "name": "test_synthetic_ecg_registration_to_actual_cpu_classifier_and_frozen_preview",
+        "reason": "Requires explicitly prepared pinned ECG weights and optional CPU runtime"
+      }
+    ],
+    "collection_and_source_audit": {
+      "exit_code": 0,
+      "expected_count": 14723,
+      "report_exists": true,
+      "elapsed_seconds": 796.549,
+      "source_unchanged": true,
+      "actual_count": 14723,
+      "statuses": {
+        "passed": 14623,
+        "skipped": 100
+      },
+      "missing": [],
+      "extra": [],
+      "exact_coverage": true,
+      "failures": []
+    }
+  },
+  "frontend": {
+    "unit_passed": 298,
+    "source_browser_passed": 17,
+    "production_native_passed": 26,
+    "xhr_and_sse_passed": 24,
+    "live_permission_checks": [
+      "live catalog includes all 11 roles and all protected endpoint permissions",
+      "preview doctor policy starts inherited and enabled",
+      "RSA transport login succeeds",
+      "real administrator UI saves permission policy",
+      "saved configuration removes write and persists assigned scope",
+      "existing doctor token keeps permitted read",
+      "existing doctor token loses write immediately",
+      "current authorization snapshot matches policy",
+      "stale policy version is rejected with 409",
+      "grant exceeding clinical role is rejected with 422",
+      "explicit empty policy saves",
+      "empty policy denies business reads",
+      "empty policy preserves own authorization query",
+      "SSE permission withdrawal refreshes active browser to denied page",
+      "403 refresh preserves current login token",
+      "read permissions restore before browser refresh",
+      "restored permissions recover after browser refresh",
+      "disable policy saves",
+      "disabled account existing token is revoked",
+      "disabled account cannot log in",
+      "original doctor configuration restored",
+      "restored account can log in immediately",
+      "restored account business read works",
+      "ordinary administrator cannot configure super administrator",
+      "ordinary administrator cannot reset super administrator password",
+      "ordinary administrator cannot delete super administrator",
+      "large permission audits keep bounded rows and pagination",
+      "policy audit records contain before and after changes",
+      "audit dialog retains exact complete values in a bounded scroll area",
+      "browser has no JavaScript errors",
+      "browser UI has no unexpected HTTP errors"
+    ],
+    "live_policy_restored": true,
+    "javascript_errors": 0,
+    "unexpected_ui_http_failures": 0,
+    "audit_geometry": {
+      "document_height": 1100,
+      "max_row_height": 59
+    }
+  },
+  "postgresql_authorization_concurrency": {
+    "generated_at": "2026-10-29T03:24:21.376133+00:00",
+    "database": "disposable PostgreSQL on loopback port 51946",
+    "passed": true,
+    "migration": {
+      "from": "20261028_audit_covering",
+      "to": "20261029_session_binding",
+      "legacy_accounts_backfilled": 2,
+      "subjects_unique_nonnull": true,
+      "policy_tables_and_single_guard": true
+    },
+    "version_conflict": {
+      "http_statuses": [
+        200,
+        409
+      ],
+      "policy_audits": 1,
+      "distinct_postgres_connections": 2
+    },
+    "concurrent_admin_revocation": {
+      "super_revocation_status": 200,
+      "queued_admin_write_status": 403,
+      "rejected_write_audits": 0
+    },
+    "concurrent_reads": {
+      "requests": 50,
+      "concurrency": 50,
+      "correct_responses": 50,
+      "total_ms": 816.78,
+      "p95_ms": 800.12,
+      "max_ms": 805.99,
+      "transport": "ASGI FastAPI with real TCP PostgreSQL"
+    },
+    "existing_token_revocation": {
+      "before_status": 200,
+      "next_request_status": 403,
+      "token_reissued": false
+    },
+    "user_and_guard_lock_order": {
+      "policy_status": 409,
+      "account_status": 200,
+      "deadlock": false
+    }
+  },
+  "assets": {
+    "largest_javascript_bytes": 662581,
+    "total_javascript_bytes": 5983449,
+    "total_asset_bytes": 6929630,
+    "limits": {
+      "largest_javascript_bytes": 700000,
+      "total_javascript_bytes": 6000000,
+      "total_asset_bytes": 7000000
+    },
+    "index_sha256": "7c8a5c2ecd1ee04ac470ae7f52295139101793098f34335d095b5c9edcfdccea"
+  },
+  "preview": {
+    "url": "http://172.20.137.133:51891/#/system/permission",
+    "bind": "0.0.0.0",
+    "migration_head": "20261029_session_binding",
+    "accounts": 11,
+    "distinct_account_bindings": 11,
+    "http_resource_verification": {
+      "checked_at": "2026-10-29T03:52:10.617470+00:00",
+      "disk_index_sha256": "7c8a5c2ecd1ee04ac470ae7f52295139101793098f34335d095b5c9edcfdccea",
+      "origins": [
+        {
+          "origin": "http://127.0.0.1:51891",
+          "status": 200,
+          "index_sha256": "7c8a5c2ecd1ee04ac470ae7f52295139101793098f34335d095b5c9edcfdccea",
+          "matches_disk": true,
+          "initial_assets": [
+            {
+              "path": "/css/styles.ef3498a8.css",
+              "status": 200,
+              "bytes": 340442,
+              "sha256": "89511435c5e5992f91b9c2726ad41bf452206aad2af0c66f7f7b7bf75b041308",
+              "matches_disk": true
+            },
+            {
+              "path": "/css/vab-layouts.3cd9889b.css",
+              "status": 200,
+              "bytes": 26878,
+              "sha256": "c5ec8f687ee48ca1a01577cfeafeeb256122209961cd165efa9f6982532054ea",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/styles.ffe1cc1f.js",
+              "status": 200,
+              "bytes": 910,
+              "sha256": "ac07325678534f6106af8e08792fcbc7858eb1c10779a113674eb585c80206fd",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/vab-layouts.c4d1c863.js",
+              "status": 200,
+              "bytes": 33837,
+              "sha256": "80139db12dbdc6a1373ac25d284e0cc2cec87ea1b985fa13b132919fb93c676a",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/vendors.89db03a8.js",
+              "status": 200,
+              "bytes": 91958,
+              "sha256": "e7fe5619be9efac84e0daa68f59d69c7072e4eb62dde24af6fb9809d06428979",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/element-plus.ec51a237.js",
+              "status": 200,
+              "bytes": 662581,
+              "sha256": "539fc838fba9d6e4a00cc6804810d37acc4489bca0a32af59a418d7cbf105e4e",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/vue.e42dc7d9.js",
+              "status": 200,
+              "bytes": 38207,
+              "sha256": "9b2fb45ccaba9d0f6f69a2373618b9f54d786cfb0b99ad04734a600e20d765b8",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/739.da2c46cd.js",
+              "status": 200,
+              "bytes": 258439,
+              "sha256": "c32b5b43a2bd29f6c858d6aab90c50ffbfc0666a510c9dcc478602577ddc475c",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/app.522c8488.js",
+              "status": 200,
+              "bytes": 138473,
+              "sha256": "38a56fb8a4ade6d240aae2ac478e34d146a461a51d0fc8a5e13f5ab869b678a7",
+              "matches_disk": true
+            }
+          ]
+        },
+        {
+          "origin": "http://172.20.137.133:51891",
+          "status": 200,
+          "index_sha256": "7c8a5c2ecd1ee04ac470ae7f52295139101793098f34335d095b5c9edcfdccea",
+          "matches_disk": true,
+          "initial_assets": [
+            {
+              "path": "/css/styles.ef3498a8.css",
+              "status": 200,
+              "bytes": 340442,
+              "sha256": "89511435c5e5992f91b9c2726ad41bf452206aad2af0c66f7f7b7bf75b041308",
+              "matches_disk": true
+            },
+            {
+              "path": "/css/vab-layouts.3cd9889b.css",
+              "status": 200,
+              "bytes": 26878,
+              "sha256": "c5ec8f687ee48ca1a01577cfeafeeb256122209961cd165efa9f6982532054ea",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/styles.ffe1cc1f.js",
+              "status": 200,
+              "bytes": 910,
+              "sha256": "ac07325678534f6106af8e08792fcbc7858eb1c10779a113674eb585c80206fd",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/vab-layouts.c4d1c863.js",
+              "status": 200,
+              "bytes": 33837,
+              "sha256": "80139db12dbdc6a1373ac25d284e0cc2cec87ea1b985fa13b132919fb93c676a",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/vendors.89db03a8.js",
+              "status": 200,
+              "bytes": 91958,
+              "sha256": "e7fe5619be9efac84e0daa68f59d69c7072e4eb62dde24af6fb9809d06428979",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/element-plus.ec51a237.js",
+              "status": 200,
+              "bytes": 662581,
+              "sha256": "539fc838fba9d6e4a00cc6804810d37acc4489bca0a32af59a418d7cbf105e4e",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/vue.e42dc7d9.js",
+              "status": 200,
+              "bytes": 38207,
+              "sha256": "9b2fb45ccaba9d0f6f69a2373618b9f54d786cfb0b99ad04734a600e20d765b8",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/739.da2c46cd.js",
+              "status": 200,
+              "bytes": 258439,
+              "sha256": "c32b5b43a2bd29f6c858d6aab90c50ffbfc0666a510c9dcc478602577ddc475c",
+              "matches_disk": true
+            },
+            {
+              "path": "/js/app.522c8488.js",
+              "status": 200,
+              "bytes": 138473,
+              "sha256": "38a56fb8a4ade6d240aae2ac478e34d146a461a51d0fc8a5e13f5ab869b678a7",
+              "matches_disk": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "evidence_sha256": {
+    "permissions-parallel-full.xml": "a20ab81c7f158dde8e78e22452f40aaeda35f5513512622be24904143bc109fb",
+    "permissions-parallel-full.log": "d3292c0758e67170e7b937846805568ea81141713e3333267fb51faa4bf6c73b",
+    "permissions-parallel-gold.xml": "c188a2f1c99de86dd96ffd13961b6f1d99bc28f568a6d0de51a68602dfa91594",
+    "permissions-parallel-gold.log": "38e660b0bd6ef80b8f9ec8beae3eb12de43061c314ec55443298307a9fc3dd2e",
+    "permissions-parallel-gold-audit.json": "bd45f71446287ab4d9f2fffc931b2605971a382110fa79aadaa7ad23fbd2fedd",
+    "permissions-parallel-gold-run.json": "77174993d011f87a06f8977d2e30027a1fb709235cbc88d7a769e99977ee2572",
+    "permissions-postgres-lane.xml": "ec07af165c690853efb905a557276d81ea86a6535af5c3428ef7aabf1b4b0dc3",
+    "permissions-postgres-lane-summary.json": "80ea8394359e70a348273225e72b31f80586e9780636b1334087326d5a0529ac",
+    "permissions-imaging-preprocessing-20261029/junit.xml": "b8c715371aa00bed9e9c448bdfc66aa933ab83f2bc69a509e958fdeb5ef73933",
+    "permissions-audit-final-unit.log": "58dcb0a5187a2892d8ff873b2ef98e0037e061a6340b35233c68449e86d6f831",
+    "permissions-audit-source-browser.log": "8e1af323a5530184af8a9989c7410a2bc419d5251ef669617207de1e1b904f60",
+    "permissions-audit-final-production-native.log": "7758648d2bc3b50560bfc26579658121deda598c3c1b4e141a4049b565823e7c",
+    "permissions-sse-access-browser.log": "8d71cf087d6c2fb2ed171274f16f34b98adfef8396161b95e14931211ce6c7a1",
+    "permissions-audit-final-build.log": "5fb9e13511a48c77e9b444b16dfd3d3b4609a84b9104c0cd89caeac3e5f50852",
+    "permissions-audit-final-budget.log": "edf6a5868b8ab5b31bfd2e21afb5d38a6fc592e76f77196e0134b4d0e6d9608e",
+    "permissions-release-final.log": "f4678017dc7d00d0e954c14b3cfc8da54898a3de8ee9553e4f5b95ac9743cc30",
+    "permissions-postgres-verification.json": "bd8ef512eef6ebe08ce72b120f0269460f3bc7fb8f2dc729b64b50129bde809f",
+    "permissions-final-ruff.log": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18",
+    "permissions-preview-browser-20261029/verification.json": "4adb90f8f79d3133006f88d99e0c0f1bea9e5a1f422dfe9f2ee2ef5678e16082",
+    "permissions-basic-preview-20261029/deployment.json": "84a27df1d1a8da0bb9a21fb03edd89cbd75982faeb58a339165d757780e2ee92",
+    "permissions-preview-browser-20261029/eleven-role-policies.png": "f2d9c66a365428221067239a821ea561bcb9939b495e8e86b90bb0dae33ff3bf",
+    "permissions-preview-browser-20261029/live-permission-withdrawal.png": "e30c540ae7929eea0c0b3ed0a1daacf017c5ff7a1a5b689710d728d815f0fc18",
+    "permissions-preview-browser-20261029/permission-audit-details.png": "c8a1a32428d0a3a0ba0d8ceb004f98af85fe32bc4516b6181b028e6861a14ab8",
+    "permissions-preview-browser-20261029/permission-audit.png": "aba54178318f724f491e63e5a3e8015e4afaff252f851cba8305c5d6cfc93fcd",
+    "permissions-preview-browser-20261029/role-operation-policy.png": "0aa20e520d4cb1ce377c8aff04eab537714f58ac602950773470650203175e54",
+    "permissions-preview-browser-20261029/user-operation-policy.png": "17a2b5f583d76e4f8c327c0468487d3136cd86a52d7e1fa213b727718a7c9ef0"
+  }
+}

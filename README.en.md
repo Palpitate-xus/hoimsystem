@@ -6,7 +6,7 @@ A comprehensive hospital information management system for small and medium-size
 
 The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM tasks, plus speech, imaging, ECG, risk assessment, forecasting, optimization and fixed local statistics. Staff can submit tasks from business pages or the AI workbench. Super administrators manage models, prompts, knowledge, sources, permissions and usage in one place. The workbench groups tasks by workflow and stores favorites separately for each account and role. See the [AI usage guide](doc/ai-guide.md) for configuration and workflows.
 
-Administrators configure role and individual access to API operations, AI capabilities, patient-directory fields and clinical data scopes. Navigation and backend checks use the same effective permissions. See the [permission management guide](doc/permission-management.md) for setup.
+Administrators configure role and individual access to API operations, AI capabilities, patient-directory fields and clinical data scopes. Navigation and backend checks use the same effective permissions. See the [permission management guide](doc/permission-management.md) for setup and the [verification record](doc/validation/2026-10-29-permissions.md) for authorization, revocation and concurrency results.
 
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

@@ -6,7 +6,7 @@
 
 AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM 任务，以及语音、影像、心电、风险评估、预测优化和本地固定统计。医护人员可从业务页面或 AI 工作台发起任务，超级管理员统一管理模型、Prompt、知识、来源、权限和用量。工作台按业务分类展示任务，常用收藏按账号和角色保存在本机；个人中心展示账号与使用偏好。配置与使用方法见 [AI 使用指南](doc/ai-guide.md)。
 
-管理员可按岗位和用户配置接口操作、AI 能力、患者列表字段及临床数据范围，前端导航与后端校验使用同一份有效权限。操作步骤见 [权限管理指南](doc/permission-management.md)。
+管理员可按岗位和用户配置接口操作、AI 能力、患者列表字段及临床数据范围，前端导航与后端校验使用同一份有效权限。操作步骤见 [权限管理指南](doc/permission-management.md)，权限、撤权与并发的执行结果见 [验证记录](doc/validation/2026-10-29-permissions.md)。
 
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

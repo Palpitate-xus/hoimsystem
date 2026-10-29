@@ -9,6 +9,11 @@ import pytest
 from app.routers import events
 
 
+@pytest.fixture(autouse=True)
+def isolate_frame_format_from_account_authority(monkeypatch):
+    monkeypatch.setattr(events, "_current_event_visibility", lambda *_args: True)
+
+
 @pytest.mark.asyncio
 async def test_idle_event_stream_sends_a_comment_before_waiting_for_events(monkeypatch):
     waiting = asyncio.Event()

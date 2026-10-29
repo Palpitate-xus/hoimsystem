@@ -14,7 +14,7 @@ const resolverSource = fs.readFileSync(path.join(root, 'src/utils/icons.js'), 'u
 const compiledResolver = babel.transformSync(resolverSource, {
   configFile: false,
   babelrc: false,
-  presets: [[require.resolve('@babel/preset-env'), { targets: { node: 'current' } }]],
+  presets: [[require.resolve('@babel/preset-env'), { targets: { node: 'current' }, modules: 'commonjs' }]],
 }).code;
 
 function loadResolver(polluted = false) {

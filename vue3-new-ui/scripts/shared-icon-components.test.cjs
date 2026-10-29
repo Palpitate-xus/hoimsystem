@@ -3,7 +3,7 @@ const {test}=require('node:test');
 const babel=require('@babel/core'),vue=require('vue'),original=require('@element-plus/icons-vue');
 const {renderToString}=require('@vue/server-renderer');
 const source=fs.readFileSync(path.resolve(__dirname,'../src/components/sharedIconComponents.js'),'utf8');
-const compiled=babel.transformSync(source,{configFile:false,babelrc:false,presets:[[require.resolve('@babel/preset-env'),{targets:{node:'current'}}]]}).code;
+const compiled=babel.transformSync(source,{configFile:false,babelrc:false,presets:[[require.resolve('@babel/preset-env'),{targets:{node:'current'},modules:'commonjs'}]]}).code;
 const moduleValue={exports:{}};
 vm.runInNewContext(compiled,{module:moduleValue,exports:moduleValue.exports,require:name=>name==='vue'?vue:name==='@/assets/element-plus-icon-gallery.svg'?'':(()=>{throw Error('Unexpected dependency '+name)})()});
 const actual=moduleValue.exports;

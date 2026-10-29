@@ -18,6 +18,7 @@ function isValueLiteral(p, filename = '') {
   const t = babel.types, parent = p.parent;
   if (!eligible(p.node.value, filename)) return false;
   if (t.isImportDeclaration(parent) || t.isExportNamedDeclaration(parent) || t.isExportAllDeclaration(parent) || t.isImportSpecifier(parent) || t.isExportSpecifier(parent)) return false;
+  if (t.isImportExpression(parent) && p.key === 'source') return false;
   if ((t.isObjectProperty(parent) || t.isObjectMethod(parent) || t.isClassMethod(parent) || t.isClassProperty(parent)) && p.key === 'key' && !parent.computed) return false;
   if ((t.isCallExpression(parent) || t.isNewExpression(parent)) && p.listKey === 'arguments' && p.key === 0 && (t.isImport(parent.callee) || t.isIdentifier(parent.callee, {name:'require'}) || t.isIdentifier(parent.callee, {name:'URL'}) || t.isMemberExpression(parent.callee) && (t.isIdentifier(parent.callee.object, {name:'require'}) || t.isMetaProperty(parent.callee.object)))) return false;
   return true;

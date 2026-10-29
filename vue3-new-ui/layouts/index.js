@@ -10,7 +10,7 @@ const webpackBanner =
  * @description 在控制台打印项目信息
  */
 function donationConsole() {
-  const chalk = require('chalk')
+  const { default: chalk } = require('chalk')
   console.log(
     chalk.green(
       `> 欢迎使用vue-admin-better，github开源地址：https://github.com/zxwk1998/vue-admin-better`

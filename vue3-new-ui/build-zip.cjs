@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const archiver = require('archiver');
+const { ZipArchive } = require('archiver');
 
 // 创建zip文件的函数
 async function createZip() {
@@ -20,7 +20,7 @@ async function createZip() {
   const output = fs.createWriteStream(zipPath);
   
   // 创建一个archiver实例
-  const archive = archiver('zip', {
+  const archive = new ZipArchive({
     zlib: { level: 9 } // 设置压缩级别
   });
 

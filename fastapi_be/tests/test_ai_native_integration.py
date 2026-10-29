@@ -42,7 +42,7 @@ print(json.dumps({'features':len(p['features']),'version':p['catalog_version'],'
     value = subprocess.run([sys.executable, "-I", "-S", "-c", script], cwd=ROOT, capture_output=True, text=True, check=True)
     assert json.loads(value.stdout) == {
         "features": 80,
-        "version": "2026.10.26.1",
+        "version": "2026.10.29.1",
         "overrides": [
             "charge_reconciliation",
             "clinical_training",

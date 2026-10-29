@@ -6,6 +6,8 @@ A comprehensive hospital information management system for small and medium-size
 
 The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM tasks, plus speech, imaging, ECG, risk assessment, forecasting, optimization and fixed local statistics. Staff can submit tasks from business pages or the AI workbench. Super administrators manage models, prompts, knowledge, sources, permissions and usage in one place. The workbench groups tasks by workflow and stores favorites separately for each account and role. See the [AI usage guide](doc/ai-guide.md) for configuration and workflows.
 
+Administrators configure role and individual access to API operations, AI capabilities, patient-directory fields and clinical data scopes. Navigation and backend checks use the same effective permissions. See the [permission management guide](doc/permission-management.md) for setup.
+
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
@@ -18,9 +20,9 @@ The AI platform provides [80 capabilities](doc/ai-capabilities.md): 63 text LLM 
 
 | Metric | Count |
 |:------:|:-----:|
-| Backend Router Modules | **134** mounted modules |
-| API Endpoints | **1,087** RBAC route methods; see the [access matrix](doc/api-rbac-matrix.md) |
-| Database Table Definitions | **266** ORM table definitions, including AI sources and governance |
+| Backend Router Modules | **135** mounted modules |
+| API Endpoints | **1,092** RBAC route methods; see the [access matrix](doc/api-rbac-matrix.md) |
+| Database Table Definitions | **269** ORM table definitions, including AI sources and governance |
 | Frontend Pages | **161** Vue page files |
 | User Roles | **11**, including super admin, lab technician, and registrar |
 | AI Capability Catalog | **80** capabilities, including **63** text LLM tasks |
@@ -41,7 +43,7 @@ Source inventory: routes are checked against the RBAC matrix, tables are counted
 - **Lab & Physical Exam** — Lab Orders, Results, Exam Packages, Appointments, Records, Reports
 - **Surgery** — Surgery Application, Scheduling, Anesthesia Records
 - **Patient Services** — Health Records, EMR Query, Prescription Query, Prepaid Account, Two-way Referral, Follow-up, Satisfaction Survey
-- **System Platform** — User & Permissions, Operation Logs (auto-recorded by middleware), Dictionary, Parameters, Messages, Notices, Backup, Adverse Events (with RCA root-cause analysis), Slot Pool, Reports, Department Performance
+- **System Platform** — Configurable Role/User Permissions, Patient-directory Fields, Account Suspension and Permission Audit, Operation Logs (auto-recorded by middleware), Dictionary, Parameters, Messages, Notices, Backup, Adverse Events (with RCA root-cause analysis), Slot Pool, Reports, Department Performance
 
 ### Specialized Workflows and Management
 
@@ -194,7 +196,7 @@ python -m app.db_migrate
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Visit http://localhost:8000/docs for the auto-generated Swagger UI.
+Visit http://localhost:8000/docs for the auto-generated Swagger UI. The current migration head is `20261029_session_binding`. Sign in again once after upgrading: JWT sessions bind the user ID and a unique account identity.
 
 To process queued AI tasks, open another terminal at the repository root and use the same virtual environment and database configuration:
 
@@ -276,10 +278,12 @@ For production, create the first super administrator interactively with a strong
 
 ## Roles
 
+The 11 roles define default business qualifications. Role policies and user policies determine the effective permissions for each account.
+
 | Role | Permissions |
 |:----:|:------------|
-| **Admin** | Users, staff, patients, departments, pharmacy, billing, notifications and system settings |
-| **Super Admin** | AI configuration, prompts, knowledge, source governance, grants and audit; private source access still requires purpose authorization |
+| **Admin** | Users, staff, patients, departments, pharmacy, billing, notifications, system settings and ordinary role/user permission policies |
+| **Super Admin** | Administrator permissions, AI configuration, prompts, knowledge, source governance and audit; source content uses purpose-specific authorization |
 | **Director** | Department management, scheduling, prescription review |
 | **Doctor** | EMR writing, prescription, lab orders |
 | **Nurse** | Triage, vital signs, nursing, follow-up |
@@ -300,8 +304,9 @@ For production, create the first super administrator interactively with a strong
 | [Architecture](doc/architecture.md) | System architecture & design decisions |
 | [Frontend Development](vue3-new-ui/README.en.md) | Frontend setup, API configuration, business entries and build checks |
 | [Requirements](doc/demandDoc.md) | Functional & non-functional requirements |
-| [API Doc](doc/apiDoc.md) | Core definitions; [access matrix](doc/api-rbac-matrix.md) covers 1,087 RBAC route methods |
-| [Database Doc](doc/databaseDoc.md) | Core definitions; 266 ORM table definitions are maintained in model source |
+| [API Doc](doc/apiDoc.md) | Core definitions; [access matrix](doc/api-rbac-matrix.md) covers 1,092 RBAC route methods |
+| [Database Doc](doc/databaseDoc.md) | Core definitions; 269 ORM table definitions are maintained in model source |
+| [Permission Management](doc/permission-management.md) | Role/user policies, API and field permissions, data scopes, suspension, audit and session migration |
 | [AI Usage Guide](doc/ai-guide.md) | Workbench, super-admin configuration, sources and activation |
 | [AI Capability Catalog](doc/ai-capabilities.md) | All 80 capabilities, inputs, outputs and default roles |
 | [Default Prompts](doc/ai-prompts.json) | Task instructions, catalog version and fixed system contracts |

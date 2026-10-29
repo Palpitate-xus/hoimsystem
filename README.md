@@ -6,6 +6,8 @@
 
 AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM 任务，以及语音、影像、心电、风险评估、预测优化和本地固定统计。医护人员可从业务页面或 AI 工作台发起任务，超级管理员统一管理模型、Prompt、知识、来源、权限和用量。工作台按业务分类展示任务，常用收藏按账号和角色保存在本机；个人中心展示账号与使用偏好。配置与使用方法见 [AI 使用指南](doc/ai-guide.md)。
 
+管理员可按岗位和用户配置接口操作、AI 能力、患者列表字段及临床数据范围，前端导航与后端校验使用同一份有效权限。操作步骤见 [权限管理指南](doc/permission-management.md)。
+
 [![Version](https://img.shields.io/badge/version-2.1.0-blue)](CHANGELOG.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Vue](https://img.shields.io/badge/Vue-3.x-4FC08D)](https://vuejs.org/)
@@ -18,9 +20,9 @@ AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM
 
 | 维度 | 数量 |
 |:----:|:----:|
-| 后端路由模块 | **134** 个已挂载模块 |
-| API 接口 | **1,087** 个 RBAC 路由方法（见 [访问矩阵](doc/api-rbac-matrix.md)） |
-| 数据库表定义 | **266** 个 ORM 表定义（含 AI 来源与治理表） |
+| 后端路由模块 | **135** 个已挂载模块 |
+| API 接口 | **1,092** 个 RBAC 路由方法（见 [访问矩阵](doc/api-rbac-matrix.md)） |
+| 数据库表定义 | **269** 个 ORM 表定义（含 AI 来源与治理表） |
 | 前端页面 | **161** 个 Vue 页面文件 |
 | 用户角色 | **11** 种（含超级管理员、检验技师和挂号员） |
 | AI 能力目录 | **80** 项，其中 **63** 项使用文本 LLM |
@@ -124,7 +126,7 @@ AI 平台提供 [80 项能力](doc/ai-capabilities.md)，包括 63 项文本 LLM
 #### 系统平台
 | 模块 | 功能说明 |
 |:----:|:--------|
-| 用户权限 | 角色管理、密码重置、用户删除 |
+| 用户权限 | 岗位与个人接口权限、AI 使用权限、患者列表字段、数据范围、账号停用、角色调整、密码重置与变更审计 |
 | 操作日志 | 全量操作审计、按用户/操作筛选（中间件自动记录） |
 | 数据字典 | 业务字典维护 |
 | 系统参数 | 配置项管理 |
@@ -393,7 +395,7 @@ python -m app.db_migrate
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-启动后访问 http://localhost:8000/docs 查看自动生成的 Swagger 文档。
+启动后访问 http://localhost:8000/docs 查看自动生成的 Swagger 文档。当前迁移头为 `20261029_session_binding`；从旧版本升级后重新登录一次，登录令牌绑定用户编号与账号唯一标识。
 
 需要处理 AI 排队任务时，从仓库根目录另开终端，使用相同虚拟环境和数据库配置运行：
 
@@ -474,12 +476,12 @@ python seed_default_accounts.py
 
 ## 系统角色
 
-系统支持 11 种角色，覆盖医院核心岗位：
+系统支持 11 种角色。岗位提供默认业务资格，管理员配置角色策略与用户策略后形成实际可用权限：
 
 | 角色 | 主要权限 |
 |:----:|:--------|
-| **管理员** (admin) | 常规业务管理：用户、医生、病人、科室、药品、通知、收费、系统配置 |
-| **超级管理员** (super_admin) | 最高管理角色，管理 AI 配置、Prompt、知识、来源治理、授权与审计；私有来源访问仍核对用途许可 |
+| **管理员** (admin) | 常规业务管理：用户、医生、病人、科室、药品、通知、收费、系统配置，以及普通岗位和用户的权限配置 |
+| **超级管理员** (super_admin) | 管理管理员权限、AI 配置、Prompt、知识、来源治理和审计；来源正文按用途授权访问 |
 | **科室主任** (director) | 科室管理：本科室排班、医生管理、发布通知、处方点评 |
 | **医生** (doctor) | 诊疗工作：病历书写、处方开立、检查申请、排班查看 |
 | **护士** (nurse) | 护理工作：预检分诊、生命体征录入、住院护理、随访 |
@@ -500,8 +502,9 @@ python seed_default_accounts.py
 | [架构文档](doc/architecture.md) | 系统架构、技术选型、设计原则 |
 | [前端开发](vue3-new-ui/README.md) | 前端启动、API 配置、业务入口与构建检查 |
 | [需求文档](doc/demandDoc.md) | 功能需求、业务流程、非功能需求 |
-| [API 文档](doc/apiDoc.md) | 核心接口定义；当前 1,087 个 RBAC 路由方法见 [访问矩阵](doc/api-rbac-matrix.md) |
-| [数据库文档](doc/databaseDoc.md) | 核心表结构说明；当前 266 个 ORM 表定义以模型源码为准 |
+| [API 文档](doc/apiDoc.md) | 核心接口定义；当前 1,092 个 RBAC 路由方法见 [访问矩阵](doc/api-rbac-matrix.md) |
+| [数据库文档](doc/databaseDoc.md) | 核心表结构说明；当前 269 个 ORM 表定义以模型源码为准 |
+| [权限管理](doc/permission-management.md) | 岗位与用户策略、接口与字段权限、数据范围、停用、审计和会话升级 |
 | [AI 使用指南](doc/ai-guide.md) | 工作台、超管配置、来源准备与功能启用 |
 | [AI 能力清单](doc/ai-capabilities.md) | 全部 80 项功能、输入、产出及默认角色 |
 | [默认 Prompt](doc/ai-prompts.json) | 任务文本、目录版本及固定系统契约 |

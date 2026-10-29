@@ -170,7 +170,7 @@ def test_download_is_pinned_bounded_and_atomically_published_only_after_verifica
 @pytest.fixture
 def descriptor_runtime(monkeypatch):
     manifest = SimpleNamespace(repository=ecg_model.REPOSITORY, revision=ecg_model.REVISION, digest="a" * 64)
-    versions = {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}
+    versions = dict(ecg_config.CPU_ENGINE_VERSIONS)
     implementation = {name: ("synthetic reviewed source: " + name).encode() for name in ("ecg_model.py", "ecg_network.py", "ecg_worker.py")}
     paths, reads = [], []
     original_read = Path.read_bytes
@@ -218,7 +218,7 @@ def test_short_service_key_fails_before_model_or_dependency_access(tmp_path, mon
         runtime_descriptor(config)
 
 
-@pytest.mark.parametrize("package,value", [("torch", "2.14.1+cu128"), ("torch", "2.14.1"), ("torch", "2.13.0+cpu"), ("safetensors", "0.7.0")])
+@pytest.mark.parametrize("package,value", [("torch", "2.15.0+cu128"), ("torch", "2.15.0"), ("torch", "2.14.1+cpu"), ("safetensors", "0.7.0"), ("numpy", "2.4.4")])
 def test_runtime_rejects_unpinned_cpu_dependencies(package, value, tmp_path, descriptor_runtime):
     descriptor_runtime[1][package] = value
     with pytest.raises(ValueError, match="CPU"):
@@ -234,7 +234,9 @@ def test_runtime_identity_tracks_model_recipe_implementation_dependencies_and_in
     elif change == "recipe":
         monkeypatch.setattr(ecg_config, "PREPROCESSING", {**ecg_config.PREPROCESSING, "normalization_epsilon": 1e-5})
     elif change == "numpy":
-        descriptor_runtime[1]["numpy"] = "2.5.4"
+        # Simulate a later explicitly adopted version, never an unpinned runtime.
+        descriptor_runtime[1]["numpy"] = "2.5.5"
+        monkeypatch.setattr(ecg_config, "CPU_ENGINE_VERSIONS", dict(descriptor_runtime[1]))
     elif change.endswith("_source"):
         descriptor_runtime[2]["ecg_" + change.removesuffix("_source") + ".py"] += b"\nchanged implementation"
     else:

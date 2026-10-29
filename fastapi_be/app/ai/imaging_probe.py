@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_valida
 
 from app.ai.gateway import AIExecutionError
 from app.ai.governance import provider_credential, validate_endpoint
+from app.ai.imaging_config import CPU_ENGINE_VERSIONS, HISTORICAL_CPU_ENGINE_VERSIONS
 from app.ai.imaging_model import LABELS, RELEASE_FILES, ImagingModelManifest, canonical_json
 
 
@@ -41,7 +42,7 @@ class ImagingCapabilities(BaseModel):
         manifest = ImagingModelManifest(files={name: {"size": size, "sha256": value} for name, (size, value) in RELEASE_FILES.items()})
         if (
             self.model_version != "xrv:" + self.runtime_digest
-            or self.engine_versions != {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}
+            or self.engine_versions not in (CPU_ENGINE_VERSIONS, HISTORICAL_CPU_ENGINE_VERSIONS)
             or self.model_digest != manifest.digest
             or self.labels != LABELS
             or canonical_json(self.preprocessing) != canonical_json(PREPROCESSING)

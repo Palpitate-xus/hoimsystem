@@ -12,6 +12,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.ai.imaging_model import LABELS, canonical_json, verify_model
 from app.ai.imaging_preprocessing import PREPROCESSING
 
+CPU_ENGINE_VERSIONS = {"torch": "2.15.0+cpu", "numpy": "2.5.4", "safetensors": "0.8.0"}
+# Parsing old frozen results does not replace their versions or runtime digest.
+HISTORICAL_CPU_ENGINE_VERSIONS = {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}
+
 
 class ImagingSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="IMAGING_", env_file=None, extra="ignore")
@@ -32,7 +36,7 @@ def runtime_descriptor(config):
         raise ValueError("本地影像服务须配置至少32字符的独立密钥")
     manifest = verify_model(config.model_dir)
     versions = {name: version(name) for name in ("torch", "numpy", "safetensors")}
-    if versions != {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}:
+    if versions != CPU_ENGINE_VERSIONS:
         raise ValueError("请使用固定的可选CPU影像运行依赖")
     preprocessing_digest = hashlib.sha256(canonical_json(PREPROCESSING).encode()).hexdigest()
     files = ("imaging_model.py", "imaging_network.py", "imaging_contract.py", "imaging_preprocessing.py", "imaging_config.py", "imaging_worker.py", "imaging_server.py")

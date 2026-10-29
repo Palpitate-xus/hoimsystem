@@ -1,5 +1,5 @@
 # Optional isolated offline CPU runtime. No remote model code or auto-download.
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.14.1+cpu
+torch==2.15.0+cpu
 safetensors==0.8.0
-numpy==2.4.4
+numpy==2.5.4

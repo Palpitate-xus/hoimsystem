@@ -92,7 +92,7 @@ def convert(reference, output):
     import torch
     from safetensors.torch import load_file, save_file
 
-    if torch.__version__ != "2.14.1+cpu" or safetensors.__version__ != "0.8.0":
+    if torch.__version__ not in {"2.14.1+cpu", "2.15.0+cpu"} or safetensors.__version__ != "0.8.0":
         raise ValueError("Conversion requires pinned CPU torch and safetensors versions")
     torch.set_num_threads(4)
     allowed = {}

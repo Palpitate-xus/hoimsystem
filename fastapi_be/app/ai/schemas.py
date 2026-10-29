@@ -474,15 +474,13 @@ class LocalECGRuntime(StrictRequest):
 
     @model_validator(mode="after")
     def reviewed_runtime_only(self):
+        from app.ai.ecg_config import CPU_ENGINE_VERSIONS, HISTORICAL_CPU_ENGINE_VERSIONS
         from app.ai.ecg_model import LABELS, LEADS
 
         if (
             self.required_leads != LEADS
             or self.labels != LABELS
-            or set(self.engine_versions) != {"torch", "numpy", "safetensors"}
-            or self.engine_versions.get("torch") != "2.14.1+cpu"
-            or self.engine_versions.get("safetensors") != "0.8.0"
-            or any(not re.fullmatch(r"[0-9A-Za-z.+_-]{1,40}", version) for version in self.engine_versions.values())
+            or self.engine_versions not in (CPU_ENGINE_VERSIONS, HISTORICAL_CPU_ENGINE_VERSIONS)
         ):
             raise ValueError("本地研究模型的原导联、标签或运行依赖不一致")
         return self
@@ -579,10 +577,11 @@ class LocalImagingRuntime(StrictRequest):
     def reviewed_runtime_only(self):
         import hashlib
 
+        from app.ai.imaging_config import CPU_ENGINE_VERSIONS, HISTORICAL_CPU_ENGINE_VERSIONS
         from app.ai.imaging_model import LABELS, canonical_json
         from app.ai.imaging_preprocessing import PREPROCESSING
 
-        if self.labels != LABELS or self.engine_versions != {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}:
+        if self.labels != LABELS or self.engine_versions not in (CPU_ENGINE_VERSIONS, HISTORICAL_CPU_ENGINE_VERSIONS):
             raise ValueError("胸片研究模型标签顺序或固定CPU依赖不一致")
         if canonical_json(self.preprocessing) != canonical_json(PREPROCESSING) or self.preprocessing_digest != hashlib.sha256(canonical_json(PREPROCESSING).encode()).hexdigest():
             raise ValueError("胸片研究模型预处理与已审查固定profile不一致")

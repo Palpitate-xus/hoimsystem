@@ -11,6 +11,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.ai.ecg_model import LABELS, LEADS, PREPROCESSING, canonical_json, verify_model
 
+CPU_ENGINE_VERSIONS = {"torch": "2.15.0+cpu", "numpy": "2.5.4", "safetensors": "0.8.0"}
+# Historical results keep their recorded engine identity after a runtime upgrade.
+HISTORICAL_CPU_ENGINE_VERSIONS = {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}
+
 
 class ECGSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="ECG_", env_file=None, extra="ignore")
@@ -31,7 +35,7 @@ def runtime_descriptor(config):
         raise ValueError("本地心电服务须配置至少32字符的独立密钥")
     manifest = verify_model(config.model_dir)
     versions = {name: version(name) for name in ("torch", "numpy", "safetensors")}
-    if versions["torch"] != "2.14.1+cpu" or versions["safetensors"] != "0.8.0":
+    if versions != CPU_ENGINE_VERSIONS:
         raise ValueError("请使用已固定的可选CPU心电运行依赖")
     preprocessing_digest = hashlib.sha256(canonical_json(PREPROCESSING).encode()).hexdigest()
     code = {name: hashlib.sha256(Path(__file__).with_name(name).read_bytes()).hexdigest() for name in ("ecg_model.py", "ecg_network.py", "ecg_worker.py", "ecg_config.py", "ecg_contract.py")}

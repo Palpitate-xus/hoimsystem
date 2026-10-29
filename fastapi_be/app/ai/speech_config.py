@@ -9,6 +9,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.ai.speech_model import canonical_json, verify_model
 
+ENGINE_VERSIONS = {"faster-whisper": "1.2.1", "ctranslate2": "4.8.4", "onnxruntime": "1.31.1", "av": "18.1.0", "tokenizers": "0.23.3", "numpy": "2.5.4"}
+
 
 class SpeechSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="SPEECH_", env_file=None, extra="ignore")
@@ -43,7 +45,7 @@ def runtime_descriptor(config: SpeechSettings):
         raise ValueError("本地语音服务须配置至少32字符的独立服务密钥")
     manifest = verify_model(config.model_dir)
     versions = {name: version(name) for name in ("faster-whisper", "ctranslate2", "onnxruntime", "av", "tokenizers", "numpy")}
-    if versions["faster-whisper"] != "1.2.1":
+    if versions != ENGINE_VERSIONS:
         raise ValueError("请使用已固定的语音运行依赖版本")
     identity = {"model_digest": manifest.digest, "versions": versions, "options": config.decoding_options(), "device": "cpu", "compute_type": "int8", "cpu_threads": config.cpu_threads}
     fingerprint = hashlib.sha256(canonical_json(identity).encode()).hexdigest()

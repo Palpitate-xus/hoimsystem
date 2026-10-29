@@ -48,7 +48,7 @@ print('isolated image settings and imports passed')
 @pytest.mark.parametrize("change", ["cpu_threads", "max_bytes", "timeout_seconds", "model", "dependencies", "implementation", "recipe"])
 async def test_actual_runtime_descriptor_and_config_changes_disable_stale_service(change, tmp_path, monkeypatch):
     manifest = SimpleNamespace(digest="a" * 64, repository=REPOSITORY, revision=REVISION)
-    versions = {"torch": "2.14.1+cpu", "numpy": "2.4.4", "safetensors": "0.8.0"}
+    versions = dict(imaging_config.CPU_ENGINE_VERSIONS)
     monkeypatch.setattr(imaging_config, "verify_model", lambda _: manifest)
     monkeypatch.setattr(imaging_config, "version", lambda name: versions[name])
     service_config, calls = config(tmp_path), []
@@ -66,7 +66,7 @@ async def test_actual_runtime_descriptor_and_config_changes_disable_stale_servic
     elif change == "model":
         manifest.digest = "b" * 64
     elif change == "dependencies":
-        versions["numpy"] = "2.5.4"
+        versions["numpy"] = "2.5.5"
     elif change == "implementation":
         original_read = Path.read_bytes
         monkeypatch.setattr(Path, "read_bytes", lambda path: original_read(path) + (b"\nsynthetic implementation change" if path.name == "imaging_worker.py" else b""))

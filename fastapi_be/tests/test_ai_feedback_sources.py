@@ -68,7 +68,7 @@ def test_original_registration_department_controls_scope_and_no_text_or_individu
     serialized = encode_json({"context": bundle.data, "evidence": bundle.evidence})
     for forbidden in ("13800138000", "患者姓名、电话", "评价原医生", "patient_id", "doctor_id", "review_id", "visit_id", seed_data["patient"].identity):
         assert forbidden not in serialized
-    assert any("不能生成投诉主题" in text for text in bundle.data["missing_data"])
+    assert any("当前范围暂无已审核的评价摘录" in text for text in bundle.data["missing_data"])
 
 
 def test_missing_out_of_range_and_unobserved_days_are_not_zero_filled(seed_data, db_session, rating_case):

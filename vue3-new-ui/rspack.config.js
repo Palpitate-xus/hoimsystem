@@ -199,6 +199,7 @@ module.exports = {
       "process.env.BASE_URL": JSON.stringify(process.env.BASE_URL),
       "process.env.VUE_APP_TITLE": JSON.stringify(process.env.VUE_APP_TITLE),
       "process.env.VUE_APP_MOCK_ENABLE": JSON.stringify(process.env.VUE_APP_MOCK_ENABLE === "true"),
+      "process.env.VUE_APP_LOCAL_PREVIEW": JSON.stringify(process.env.VUE_APP_LOCAL_PREVIEW === "true"),
       "process.env.VUE_APP_AUTHOR": JSON.stringify(process.env.VUE_APP_AUTHOR),
       "process.env.VUE_APP_UPDATE_TIME": JSON.stringify(
         process.env.VUE_APP_UPDATE_TIME

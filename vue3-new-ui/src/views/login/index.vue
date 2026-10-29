@@ -96,11 +96,11 @@ import { Hide, View, User, Lock } from "@element-plus/icons-vue";
 const router = useRouter();
 const store = useStore();
 
-// 响应式状态（生产环境不预填任何默认凭据）
+// 本地演示预填账号；普通构建保持空白。
 const state = reactive({
   form: {
-    username: "",
-    password: "",
+    username: process.env.VUE_APP_LOCAL_PREVIEW ? "super01" : "",
+    password: process.env.VUE_APP_LOCAL_PREVIEW ? "123456" : "",
   },
   rules: {
     username: [{ required: true, trigger: "blur", message: "请输入用户名" }],

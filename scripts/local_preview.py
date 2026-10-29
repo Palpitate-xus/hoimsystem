@@ -38,7 +38,7 @@ def main():
     if args.action == "start":
         prepare()
         if not args.skip_frontend_build:
-            subprocess.run(["npm", "run", "build"], cwd=ROOT / "vue3-new-ui", check=True)
+            subprocess.run(["npm", "run", "build"], cwd=ROOT / "vue3-new-ui", env={**os.environ, "VUE_APP_LOCAL_PREVIEW": "true"}, check=True)
         if not (ROOT / "vue3-new-ui/dist/index.html").is_file():
             raise SystemExit("Missing frontend build. Install dependencies with npm ci --legacy-peer-deps, then run start again.")
     elif not ENV_FILE.is_file():

@@ -8,7 +8,8 @@ const roleNames = { super_admin: '超级管理员', admin: '管理员', doctor: 
 const roles = Object.entries(roleNames).map(([key, label]) => ({ key, label, manageable: !['super_admin', 'admin'].includes(key), scope_options: [{ value: 'existing', label: '现有业务范围' }, { value: 'assigned', label: '本人负责患者' }] }));
 const permissions = Array.from({ length: 95 }, (_, i) => ({ code: `clinical:${i}`, label: `病历接口 ${i}`, module: 'clinical', module_label: '临床病历', method: i % 2 ? 'POST' : 'GET', path: `/clinical/action${i}`, default_roles: ['doctor'], action: i % 2 ? 'write' : 'read' }));
 const users = [{ user_id: 1, username: 'synthetic-super', user_role: 'super_admin' }, { user_id: 2, username: 'synthetic-doctor', user_role: 'doctor' }, { user_id: 3, username: 'synthetic-other-super', user_role: 'super_admin' }];
-async function open(page, { initialRoles = ['super_admin'], conflict = false } = {}) {
+async function open(page, { initialRoles = ['super_admin'], conflict = false, auditDetail = { version: 2 }, auditCount = 1 } = {}) {
+  const catalog = auditCount > 1 ? Array.from({ length: 650 }, (_, i) => ({ ...permissions[i % permissions.length], code: `clinical:${i}`, label: `病历接口 ${i}`, method: i % 2 ? 'POST' : 'GET', path: `/clinical/action${i}` })) : permissions;
   const state = { calls: [], writes: [], accountWrites: [], errors: [], policies: 0 };
   page.on('pageerror', error => state.errors.push(error.message));
   await page.addInitScript(value => { window.__permissionInitial = { roles: value }; }, initialRoles);
@@ -17,10 +18,10 @@ async function open(page, { initialRoles = ['super_admin'], conflict = false } =
     const request = route.request(), pathname = new URL(request.url()).pathname;
     state.calls.push({ path: pathname, method: request.method() });
     let data = [];
-    if (pathname === '/api/access/catalog') data = { roles, permissions, actor: { user_id: 1, role: initialRoles[0] }, catalog_revision: 'synthetic' };
+    if (pathname === '/api/access/catalog') data = { roles, permissions: catalog, actor: { user_id: 1, role: initialRoles[0] }, catalog_revision: 'synthetic' };
     else if (pathname === '/api/user/getList') data = users;
     else if (pathname === '/api/user/updateRole') state.accountWrites.push(request.postDataJSON());
-    else if (pathname === '/api/access/audit') data = { list: [{ id: 1, actor: 'synthetic-super', subject: 'role:doctor', action: 'policy_update', created_at: '2026-10-29T12:00:00Z', detail: { version: 2 } }], total: 1 };
+    else if (pathname === '/api/access/audit') data = { list: Array.from({ length: auditCount }, (_, i) => ({ id: i + 1, actor: 'synthetic-super', subject: 'role:doctor', action: 'policy_update', created_at: '2026-10-29T12:00:00Z', detail: auditDetail })), total: auditCount };
     else if (pathname.startsWith('/api/access/policies/')) {
       const [, kind, key] = pathname.split('/').slice(-3);
       if (request.method() === 'PUT') { state.writes.push(request.postDataJSON()); if (conflict) return route.fulfill({ status: 409, json: { code: 409, detail: 'synthetic concurrent edit' } }); data = {}; }
@@ -128,4 +129,76 @@ test('API grant revocation disables account and policy writes while the administ
   const row = page.getByRole('row').filter({ hasText: 'synthetic-doctor' });
   for (const name of ['修改角色', '重置密码', '删除']) await expect(row.getByRole('button', { name, exact: true })).toBeDisabled();
   expect(state.writes).toEqual([]); expect(state.accountWrites).toEqual([]);
+});
+
+const largeAudit = {
+  before: { allowed_permissions: Array.from({ length: 519 }, (_, i) => `clinical:${i}`), data_scope: 'existing', disabled: false },
+  after: { allowed_permissions: Array.from({ length: 519 }, (_, i) => `clinical:${i + 100}`), data_scope: 'assigned', disabled: true },
+  version: 9,
+};
+for (const height of [720, 1000]) test(`large permission audits keep compact rows and complete scrollable labeled details at ${height}px`, async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height });
+  const raw = JSON.stringify(largeAudit), state = await open(page, { auditDetail: raw, auditCount: 20 });
+  await page.getByRole('tab', { name: '权限审计', exact: true }).click();
+  const table = page.locator('.audit-table');
+  await expect(table.getByRole('button', { name: '查看详情', exact: true })).toHaveCount(20);
+  const dimensions = await table.evaluate(node => ({ height: node.getBoundingClientRect().height, rows: [...node.querySelectorAll('.el-table__body tr')].map(row => row.getBoundingClientRect().height), page: document.documentElement.scrollHeight, viewport: innerHeight }));
+  expect(dimensions.height).toBeLessThanOrEqual(height * 0.6 + 10);
+  expect(Math.max(...dimensions.rows)).toBeLessThan(110);
+  expect(dimensions.page).toBeLessThan(dimensions.viewport * 1.4);
+  await expect(page.locator('.el-tab-pane[aria-labelledby="tab-audit"] .el-pagination')).toBeInViewport();
+  await table.getByRole('button', { name: '查看详情', exact: true }).first().click();
+  const dialog = page.getByRole('dialog', { name: '权限变更详情', exact: true });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: '新增配置项（100 项）', exact: true })).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: '撤销配置项（100 项）', exact: true })).toBeAttached();
+  await expect(dialog.getByText('病历接口 519', { exact: true })).toBeVisible();
+  await expect(dialog.getByText('POST /clinical/action519', { exact: true })).toBeVisible();
+  await expect(dialog.getByText('GET /clinical/action0', { exact: true })).toBeAttached();
+  const content = dialog.locator('[aria-label="权限配置变化"]');
+  const scroll = await content.evaluate(node => ({ visible: node.clientHeight, full: node.scrollHeight }));
+  expect(scroll.visible).toBeLessThanOrEqual(height * 0.5 + 10);
+  expect(scroll.full).toBeGreaterThan(scroll.visible * 5);
+  await dialog.getByRole('tab', { name: '完整审计原值', exact: true }).click();
+  await expect(dialog.locator('.audit-raw')).toBeVisible();
+  expect(await dialog.locator('.audit-raw').textContent()).toBe(raw);
+  expect(JSON.parse(await dialog.locator('.audit-raw').textContent())).toEqual(largeAudit);
+  await expect(dialog.getByRole('button', { name: '关闭详情', exact: true })).toBeInViewport();
+  await dialog.getByRole('button', { name: '关闭详情', exact: true }).click();
+  await expect(dialog).toBeHidden();
+  expect(state.errors).toEqual([]);
+});
+
+test('audit comparison distinguishes inheriting permissions from explicitly denying all business access', async ({ page }) => {
+  const detail = { before: { allowed_permissions: null, data_scope: 'existing', disabled: false }, after: { allowed_permissions: [], data_scope: 'assigned', disabled: true } };
+  const state = await open(page, { auditDetail: detail });
+  await page.getByRole('tab', { name: '权限审计', exact: true }).click();
+  await expect(page.locator('.audit-summary')).toHaveText('继承 → 禁止全部业务；既有业务范围 → 本人接诊患者；启用 → 停用');
+  await page.getByRole('button', { name: '查看详情', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: '权限变更详情', exact: true });
+  await expect(dialog.getByRole('heading', { name: '变更前：继承', exact: true })).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: '变更后：禁止全部业务', exact: true })).toBeVisible();
+  await expect(dialog.getByText('撤销配置项', { exact: false })).toHaveCount(0);
+  await dialog.getByRole('tab', { name: '完整审计原值', exact: true }).click();
+  expect(JSON.parse(await dialog.locator('.audit-raw').textContent())).toEqual(detail);
+  await page.evaluate(() => window.__permissionProbe.store.commit('user/permissions', ['doctor']));
+  await expect(dialog).toBeHidden();
+  expect(state.errors).toEqual([]);
+});
+
+
+test('revoking audit access closes the detail and clears protected records without changing the administrator identity', async ({ page }) => {
+  const state = await open(page, { auditDetail: largeAudit });
+  await page.getByRole('tab', { name: '权限审计', exact: true }).click();
+  await page.getByRole('button', { name: '查看详情', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: '权限变更详情', exact: true });
+  await expect(dialog).toBeVisible();
+  const requests = state.calls.filter(call => call.path === '/api/access/audit').length;
+  await page.evaluate(() => window.__permissionProbe.store.commit('user/authorization', { version: 'audit-revoked', permission_codes: ['GET /api/access/catalog'], denied_route_names: [], data_scope: 'existing' }));
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole('tab', { name: '权限审计', exact: true })).toHaveCount(0);
+  await expect(page.locator('.audit-table')).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: '用户权限', exact: true })).toHaveAttribute('aria-selected', 'true');
+  expect(state.calls.filter(call => call.path === '/api/access/audit')).toHaveLength(requests);
+  expect(state.errors).toEqual([]);
 });

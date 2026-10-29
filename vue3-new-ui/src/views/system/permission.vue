@@ -29,19 +29,47 @@
             <el-table-column label="操作" width="140"><template #default="{row}"><el-button size="small" @click="openPolicy('role', row.key)">{{ row.manageable ? '配置权限' : '查看权限' }}</el-button></template></el-table-column>
           </el-table>
         </el-tab-pane>
-        <el-tab-pane label="权限审计" name="audit">
+        <el-tab-pane v-if="canReadAudit" label="权限审计" name="audit">
           <el-button @click="fetchAudit">刷新记录</el-button>
-          <el-table :data="audit" empty-text="暂无权限变更记录">
+          <el-table :data="auditRows" max-height="60vh" class="audit-table" empty-text="暂无权限变更记录">
             <el-table-column prop="created_at" label="时间" min-width="180" />
             <el-table-column prop="actor" label="操作人" min-width="100" />
             <el-table-column prop="subject" label="对象" min-width="140" />
             <el-table-column prop="action" label="操作" min-width="130" />
-            <el-table-column label="变更内容" min-width="220"><template #default="{row}"><pre class="audit-detail">{{ typeof row.detail === 'string' ? row.detail : JSON.stringify(row.detail) }}</pre></template></el-table-column>
+            <el-table-column label="变更摘要" min-width="280"><template #default="{row}"><span class="audit-summary">{{ row.change.summary }}</span></template></el-table-column>
+            <el-table-column label="详情" width="110"><template #default="{row}"><el-button size="small" @click="openAudit(row)">查看详情</el-button></template></el-table-column>
           </el-table>
           <el-pagination v-model:current-page="auditPage" :page-size="20" :total="auditTotal" layout="prev, pager, next, total" @current-change="fetchAudit" />
         </el-tab-pane>
       </el-tabs>
     </el-card>
+    <el-dialog v-model="auditVisible" title="权限变更详情" width="min(1000px, 94vw)" top="6vh" destroy-on-close>
+      <template v-if="auditDetail">
+        <p class="audit-meta">#{{ auditDetail.id }} · {{ auditDetail.actor }} · {{ auditDetail.subject }} · {{ auditDetail.created_at }}</p>
+        <p>{{ auditDetail.change.summary }}</p>
+        <el-tabs v-model="auditView">
+          <el-tab-pane label="配置变化" name="changes">
+            <div class="audit-content" aria-label="权限配置变化">
+              <template v-if="auditDetail.change.before">
+                <template v-if="auditDetail.change.explicit">
+                  <section v-for="group in auditGroups" :key="group.label"><h4>{{ group.label }}（{{ group.codes.length }} 项）</h4>
+                    <div v-for="code in group.codes" :key="code" class="audit-permission"><span>{{ permissionLabels.get(code)?.label || code }}</span><code>{{ permissionLabels.get(code) ? `${permissionLabels.get(code).method} ${permissionLabels.get(code).path}` : code }}</code></div>
+                  </section>
+                </template>
+                <template v-else>
+                  <section v-for="side in ['before', 'after']" :key="side"><h4>{{ side === 'before' ? '变更前' : '变更后' }}：{{ auditStrategy(auditDetail.change[side].allowed_permissions) }}</h4>
+                    <div v-for="code in auditDetail.change[side].allowed_permissions || []" :key="code" class="audit-permission"><span>{{ permissionLabels.get(code)?.label || code }}</span><code>{{ permissionLabels.get(code) ? `${permissionLabels.get(code).method} ${permissionLabels.get(code).path}` : code }}</code></div>
+                  </section>
+                </template>
+              </template>
+              <p v-else>此记录保留原始审计内容。</p>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="完整审计原值" name="raw" lazy><pre class="audit-content audit-raw">{{ auditDetail.change.raw }}</pre></el-tab-pane>
+        </el-tabs>
+      </template>
+      <template #footer><el-button @click="auditVisible = false">关闭详情</el-button></template>
+    </el-dialog>
     <el-dialog v-model="roleVisible" title="修改用户角色" width="420px" destroy-on-close>
       <el-form label-width="90px">
         <el-form-item label="用户名">{{ currentUser.username }}</el-form-item>
@@ -86,15 +114,22 @@ import { useStore } from 'vuex';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getUserList, updateUserRole, resetUserPassword, deleteUser as apiDeleteUser } from '@/api/user';
 import { getAccessCatalog, getAccessPolicy, saveAccessPolicy, getAccessAudit } from '@/api/access';
+import { accessAudit, strategy as auditStrategy } from '@/utils/accessAudit.cjs';
 const store = useStore(), tab = ref('users'), loading = ref(false), saving = ref(false), roles = ref([]), permissions = ref([]), users = ref([]), roleFilter = ref(''), audit = ref([]), auditPage = ref(1), auditTotal = ref(0);
 const roleVisible = ref(false), currentUser = ref({}), newRole = ref(''), policyVisible = ref(false), policyLoading = ref(false), policy = ref(null), inherit = ref(true), selected = ref([]), scope = ref('existing'), disabled = ref(false), conflict = ref(false), module = ref(''), search = ref(''), permissionPage = ref(1);
 let generation = 0, policyRequest = 0, userRequest = 0, auditRequest = 0, policyTarget;
+const auditVisible = ref(false), auditDetail = ref(null), auditView = ref('changes');
+const auditRows = computed(() => audit.value.map(row => ({ ...row, change: accessAudit(row.detail) })));
+const permissionLabels = computed(() => new Map(permissions.value.map(item => [item.code, item])));
+const auditGroups = computed(() => [{ label: '新增配置项', codes: auditDetail.value?.change.added || [] }, { label: '撤销配置项', codes: auditDetail.value?.change.removed || [] }]);
+function openAudit(row) { if (!canReadAudit.value) return; auditDetail.value = row; auditView.value = 'changes'; auditVisible.value = true; }
 const actor = ref(null), isSuper = computed(() => actor.value?.role === 'super_admin');
 const identity = computed(() => JSON.stringify([store.state.user.accessToken, store.getters['user/username'], store.getters['user/permissions']]));
 const authorized = computed(() => !!store.state.user.accessToken && (store.getters['user/permissions'] || []).some(role => ['admin', 'super_admin'].includes(role)));
 const roleLabel = key => roles.value.find(role => role.key === key)?.label || key;
 const manageable = key => !!roles.value.find(role => role.key === key)?.manageable;
 const canCall = code => !store.getters['user/authorization'] || store.getters['user/authorization'].permission_codes.includes(code);
+const canReadAudit = computed(() => authorized.value && canCall('GET /api/access/audit'));
 const accountPaths = { role: 'updateRole', password: 'resetPassword', delete: 'delete' };
 const accountAllowed = (row, operation) => authorized.value && canCall(`POST /api/user/${accountPaths[operation]}`) && (operation === 'password' || row.user_id !== actor.value?.user_id) && (isSuper.value || manageable(row.user_role));
 const available = computed(() => new Set(policy.value?.available_permissions || []));
@@ -107,7 +142,7 @@ const canEdit = computed(() => policy.value?.editable && canCall('PUT /api/acces
 const canSelect = computed(() => canEdit.value && !inherit.value && !saving.value && !conflict.value);
 function notify(error, fallback) { if (error !== 'cancel' && error !== 'close') ElMessage.error(error?.response?.data?.detail || error?.msg || fallback); }
 async function fetchUsers() { const serial = generation, request = ++userRequest; try { const res = await getUserList(roleFilter.value ? { role: roleFilter.value } : {}); if (serial === generation && request === userRequest && authorized.value) users.value = res.data || []; } catch (error) { if (serial === generation) notify(error, '用户查询失败'); } }
-async function fetchAudit() { const serial = generation, request = ++auditRequest; try { const res = await getAccessAudit({ page: auditPage.value, page_size: 20 }); if (serial === generation && request === auditRequest && authorized.value) { audit.value = res.data.list; auditTotal.value = res.data.total; } } catch (error) { if (serial === generation) notify(error, '审计查询失败'); } }
+async function fetchAudit() { if (!canReadAudit.value) return; const serial = generation, request = ++auditRequest; try { const res = await getAccessAudit({ page: auditPage.value, page_size: 20 }); if (serial === generation && request === auditRequest && canReadAudit.value) { audit.value = res.data.list; auditTotal.value = res.data.total; } } catch (error) { if (serial === generation) notify(error, '审计查询失败'); } }
 function changeTab(value) { if (value === 'audit') fetchAudit(); }
 function openRole(row) { if (!accountAllowed(row, 'role')) return; currentUser.value = { ...row }; newRole.value = row.user_role; roleVisible.value = true; }
 async function submitRole() { if (!accountAllowed(currentUser.value, 'role') || !isSuper.value && !manageable(newRole.value)) return; const serial = generation; saving.value = true; try { await updateUserRole({ user_id: currentUser.value.user_id, user_role: newRole.value }); if (serial !== generation) return; roleVisible.value = false; ElMessage.success('角色已保存'); await fetchUsers(); } catch (error) { notify(error, '角色保存失败'); } finally { saving.value = false; } }
@@ -127,8 +162,9 @@ async function submitPolicy() {
   saving.value = true;
   try { await saveAccessPolicy(target.kind, target.key, { expected_version: target.version, allowed_permissions: inherit.value ? null : selected.value.filter(code => available.value.has(code)), data_scope: scope.value, disabled: target.kind === 'user' && disabled.value }); if (serial === generation && request === policyRequest) { ElMessage.success('权限已保存'); await openPolicy(target.kind, target.key); } } catch (error) { if (serial === generation && request === policyRequest) { if (error?.response?.status === 409) conflict.value = true; else notify(error, '权限保存失败'); } } finally { saving.value = false; }
 }
+watch(canReadAudit, value => { if (!value) { auditRequest++; auditVisible.value = false; auditDetail.value = null; audit.value = []; auditTotal.value = 0; if (tab.value === 'audit') tab.value = 'users'; } });
 watch(policyVisible, value => { if (!value) { policyRequest++; policyTarget = null; policy.value = null; policyLoading.value = false; } });
-watch(identity, async () => { const serial = ++generation; policyRequest++; policyVisible.value = false; roleVisible.value = false; policy.value = null; actor.value = null; roles.value = []; permissions.value = []; users.value = []; audit.value = []; auditTotal.value = 0; if (!authorized.value) return; loading.value = true; try { const { data } = await getAccessCatalog(); if (serial !== generation || !authorized.value) return; actor.value = data.actor; roles.value = data.roles; permissions.value = data.permissions; await fetchUsers(); } catch (error) { if (serial === generation) notify(error, '权限目录加载失败'); } finally { if (serial === generation) loading.value = false; } }, { immediate: true });
+watch(identity, async () => { const serial = ++generation; policyRequest++; policyVisible.value = false; roleVisible.value = false; auditVisible.value = false; auditDetail.value = null; policy.value = null; actor.value = null; roles.value = []; permissions.value = []; users.value = []; audit.value = []; auditTotal.value = 0; if (!authorized.value) return; loading.value = true; try { const { data } = await getAccessCatalog(); if (serial !== generation || !authorized.value) return; actor.value = data.actor; roles.value = data.roles; permissions.value = data.permissions; await fetchUsers(); } catch (error) { if (serial === generation) notify(error, '权限目录加载失败'); } finally { if (serial === generation) loading.value = false; } }, { immediate: true });
 </script>
 
 <style scoped>
@@ -141,6 +177,12 @@ watch(identity, async () => { const serial = ++generation; policyRequest++; poli
 .permission-list :deep(.el-checkbox__label) { white-space: normal; overflow-wrap: anywhere; }
 .permission-list code { display: block; font-size: 12px; color: var(--el-text-color-secondary); }
 .selection-count { color: var(--el-text-color-secondary); }
-.audit-detail { margin: 0; white-space: pre-wrap; font: inherit; overflow-wrap: anywhere; }
+.audit-summary { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; max-height: 4.5em; }
+.audit-content { height: 50vh; overflow: auto; }
+.audit-raw { margin: 0; white-space: pre-wrap; font: inherit; overflow-wrap: anywhere; }
+.audit-meta { color: var(--el-text-color-secondary); overflow-wrap: anywhere; }
+.audit-permission { padding: 8px 0; border-bottom: 1px solid var(--el-border-color-lighter); overflow-wrap: anywhere; }
+.audit-permission code { display: block; font-size: 12px; color: var(--el-text-color-secondary); }
+.audit-content h4 { margin: 12px 0; }
 .permission-page :deep(.el-pagination), :deep(.el-drawer .el-pagination) { margin-top: 16px; }
 </style>

@@ -44,7 +44,8 @@ walk(parse(path.join(root, 'src/router/index.js')), node => {
   if (name === '*' || title === '*') return;
   let component;
   walk(property(node, 'component'), value => { if (value.type === 'CallExpression' && value.callee.type === 'Import') component = literal(value.arguments[0]); });
-  routes.push({ name, title, component, parent: !!property(node, 'children') });
+  const permissions = property(property(node, 'meta'), 'permissions');
+  routes.push({ name, title, component, parent: !!property(node, 'children'), roles: permissions?.elements?.map(value => literal(value)) });
 });
 // Read only the imported API functions and child components. Following the global
 // router/store graph would incorrectly count unrelated pages as evidence.
@@ -94,18 +95,22 @@ function supports(evidence, code) {
   return evidence.some(item => item.method === method && new RegExp('^' + item.path.split('*').map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('[^/]+') + '$').test(endpoint));
 }
 const basicPages = ['Account', 'Index', 'HtmlEditor', 'Error401', 'Error404'];
-test('backend route map covers every actual titled route and keeps only basic local pages ungated', () => {
+const publicPages = {
+  Triage: { code: 'POST /api/triage/suggest', roles: ['patient', 'guide'] },
+  CheckInPage: { code: 'GET /api/checkIn/getAppointments', roles: ['admin', 'patient'] },
+};
+test('backend route map covers every actual titled route and keeps basic or public pages ungated', () => {
   assert.equal(routes.length, 144);
   assert.deepEqual(Object.keys(mapping).sort(), routes.map(route => route.name).sort());
   for (const route of routes) {
     assert.ok(Array.isArray(mapping[route.name]), route.name);
     assert.equal(new Set(mapping[route.name]).size, mapping[route.name].length, `${route.name}: duplicate permissions`);
-    if (route.parent || basicPages.includes(route.name)) assert.deepEqual(mapping[route.name], [], route.name);
+    if (route.parent || basicPages.includes(route.name) || Object.hasOwn(publicPages, route.name)) assert.deepEqual(mapping[route.name], [], route.name);
     else assert.ok(mapping[route.name].length, `${route.name}: business page lacks a gate`);
   }
 });
-test('every route permission exists in the real backend METHOD + path matrix', () => {
-  const codes = new Set(matrix.map(row => `${row.method} ${row.path}`));
+test('every route permission exists in the protected backend METHOD + path catalog', () => {
+  const codes = new Set(matrix.filter(row => row.auth !== 'PUBLIC').map(row => `${row.method} ${row.path}`));
   for (const [name, permissions] of Object.entries(mapping)) for (const code of permissions) assert.ok(codes.has(code), `${name}: unknown ${code}`);
 });
 test('every mapped permission has AST evidence in the actual page, imported API function or child component', () => {
@@ -130,6 +135,17 @@ test('primary business lists remain the gate when auxiliary patient and departme
     for (const auxiliary of ['GET /api/patientManagement/getList', 'GET /api/departmentManagement/getList', 'GET /api/admission/getList']) if (`GET /api/${endpoint}` !== auxiliary) assert.ok(!mapping[name].includes(auxiliary), `${name}: auxiliary endpoint would keep a denied main page visible`);
   }
   assert.deepEqual(mapping.Permission, ['GET /api/access/catalog']);
-  assert.deepEqual(mapping.Triage, ['POST /api/triage/suggest']);
   assert.deepEqual(mapping.Review, ['POST /api/review/create']);
+});
+
+test('pages using public endpoints retain their original role boundaries without an ungrantable permission gate', () => {
+  for (const [name, expected] of Object.entries(publicPages)) {
+    const route = routes.find(item => item.name === name);
+    assert.deepEqual(mapping[name], [], name);
+    assert.deepEqual(route.roles, expected.roles, `${name}: original route roles`);
+    const endpoint = matrix.find(row => `${row.method} ${row.path}` === expected.code);
+    assert.equal(endpoint?.auth, 'PUBLIC', expected.code);
+    const evidence = apiEvidence(sourceFile(route.component, path.join(root, 'src/router/index.js')), [expected.code]);
+    assert.ok(supports(evidence, expected.code), `${name}: actual public operation`);
+  }
 });

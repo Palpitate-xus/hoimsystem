@@ -40,9 +40,7 @@
     "POST /api/dataImportExport/import/{entity}"
   ],
   "Patient": [],
-  "Triage": [
-    "POST /api/triage/suggest"
-  ],
+  "Triage": [],
   "Navigation": [
     "GET /api/navigation/route/departments"
   ],
@@ -226,9 +224,7 @@
     "GET /api/emergency/medicalRecord/list"
   ],
   "CheckIn": [],
-  "CheckInPage": [
-    "GET /api/checkIn/getAppointments"
-  ],
+  "CheckInPage": [],
   "BreachRecord": [
     "GET /api/breach/getList"
   ],

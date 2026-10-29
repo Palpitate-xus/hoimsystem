@@ -1202,5 +1202,5 @@ async def generate(
         raise AIExecutionError("PROVIDER_TIMEOUT", "模型服务响应超时，请稍后重试或调整模型配置") from exc
     except httpx.HTTPError as exc:
         raise AIExecutionError("PROVIDER_UNAVAILABLE", "无法连接模型服务，请联系管理员检查部署") from exc
-    except (ValueError, TypeError, KeyError, IndexError, UnicodeError) as exc:
+    except (ValueError, TypeError, KeyError, IndexError, UnicodeError, RecursionError) as exc:
         raise AIExecutionError("INVALID_PROVIDER_RESPONSE", "模型返回了无法解析的响应，未生成可用建议") from exc

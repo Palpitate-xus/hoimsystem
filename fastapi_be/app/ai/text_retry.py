@@ -4,19 +4,23 @@ import asyncio
 import functools
 import inspect
 import json
+import logging
 import math
+import random
 from contextvars import ContextVar
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 
 import httpx
 
+from app.ai.failure_policy import classify_failure
 from app.ai.retry_policy import configured_attempts
 
 TRANSIENT_STATUSES = frozenset({429, 502, 503, 504})
 BASE_DELAY_SECONDS = 0.25
 MAX_DELAY_SECONDS = 2.0
 _LEASE_CHECK = ContextVar("text_retry_lease_check", default=None)
+logger = logging.getLogger("ai.text_retry")
 
 
 def _task_state(db, run_id, lease):
@@ -135,7 +139,10 @@ def _get(provider, key, default=None):
 
 
 def retry_delay(value, attempts):
-    delay = min(BASE_DELAY_SECONDS * 2 ** (attempts - 1), MAX_DELAY_SECONDS)
+    ceiling = min(BASE_DELAY_SECONDS * 2 ** (attempts - 1), MAX_DELAY_SECONDS)
+    # Equal jitter spreads concurrent retries. Retry-After is a minimum and
+    # never gets shortened by jitter or by this request's remaining budget.
+    delay = random.uniform(ceiling / 2, ceiling)
     if value:
         if value.isascii() and value.isdecimal() and len(value) > 10:
             return None
@@ -169,7 +176,12 @@ class _DeadlineStream(httpx.AsyncByteStream):
         except TimeoutError as exc:
             self.policy.stop_reason = "deadline"
             self.policy.exhausted = True
+            self.policy.cause = "delivery_unknown"
             raise httpx.ReadTimeout("Text provider total deadline exceeded", request=self.request) from exc
+        except httpx.HTTPError:
+            self.policy.stop_reason = "delivery_interrupted"
+            self.policy.cause = "delivery_unknown"
+            raise
 
     async def aclose(self):
         if self.closed:
@@ -180,7 +192,12 @@ class _DeadlineStream(httpx.AsyncByteStream):
                 await self.stream.aclose()
         except TimeoutError as exc:
             self.policy.stop_reason, self.policy.exhausted = "deadline", True
+            self.policy.cause = "delivery_unknown"
             raise httpx.ReadTimeout("Text provider total deadline exceeded", request=self.request) from exc
+        except httpx.HTTPError:
+            self.policy.stop_reason = "delivery_interrupted"
+            self.policy.cause = "delivery_unknown"
+            raise
 
 
 class TextRetryTransport(httpx.AsyncBaseTransport):
@@ -195,6 +212,18 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
         self.deadline = None
         self.lease_check = _LEASE_CHECK.get()
         self.closed = False
+        self.http_status = None
+        self.cause = None
+
+    def details(self, code=None, *, succeeded=False):
+        category, _ = classify_failure(code, http_status=self.http_status, stop_reason=self.stop_reason, cause=self.cause)
+        details = dict(attempts=self.attempts, max_attempts=self.max_attempts, earlier_usage_unknown=self.usage_unknown, stop_reason=self.stop_reason, failure_category="success" if succeeded else category)
+        if self.http_status is not None:
+            details["http_status"] = self.http_status
+        return details
+
+    def log_retry(self, delay):
+        logger.info("text_model_retry attempt=%d max_attempts=%d http_status=%s cause=%s delay_seconds=%.3f", self.attempts, self.max_attempts, self.http_status, self.cause or "temporary_http", delay)
 
     async def handle_async_request(self, request):
         loop = asyncio.get_running_loop()
@@ -221,10 +250,12 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
                         raise httpx.ReadTimeout("Text provider total deadline exceeded", request=request)
                     self.attempts += 1
                     self.stop_reason = "response_received"
+                    self.http_status = self.cause = None
                     try:
                         response = await self.transport.handle_async_request(request)
                     except (httpx.ConnectError, httpx.ConnectTimeout):
                         self.stop_reason = "connection_failure"
+                        self.cause = "connection_failure"
                         if self.attempts >= allowed:
                             self.exhausted = True
                             raise
@@ -233,8 +264,14 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
                             self.exhausted = True
                             self.stop_reason = "deadline"
                             raise
+                        self.log_retry(delay)
                         await asyncio.sleep(delay)
                         continue
+                    except httpx.HTTPError:
+                        self.stop_reason = "delivery_interrupted"
+                        self.cause = "delivery_unknown"
+                        raise
+                    self.http_status = response.status_code
                     if response.status_code in TRANSIENT_STATUSES:
                         self.stop_reason = "temporary_http"
                         delay = retry_delay(response.headers.get("retry-after"), self.attempts)
@@ -249,13 +286,20 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
                             # possible billable usage cannot be reconstructed
                             # from a later successful attempt's receipt.
                             self.usage_unknown = True
-                            await response.aclose()
+                            try:
+                                await response.aclose()
+                            except httpx.HTTPError:
+                                self.stop_reason = "delivery_interrupted"
+                                self.cause = "delivery_unknown"
+                                raise
+                            self.log_retry(delay)
                             await asyncio.sleep(delay)
                             continue
                     response.stream = _DeadlineStream(response.stream, self, request)
                     return response
         except TimeoutError as exc:
             self.stop_reason, self.exhausted = "deadline", True
+            self.cause = "delivery_unknown"
             raise httpx.ReadTimeout("Text provider total deadline exceeded", request=request) from exc
 
     async def aclose(self):
@@ -268,7 +312,12 @@ class TextRetryTransport(httpx.AsyncBaseTransport):
                     await self.transport.aclose()
             except TimeoutError as exc:
                 self.stop_reason, self.exhausted = "deadline", True
+                self.cause = "delivery_unknown"
                 raise httpx.ReadTimeout("Text provider total deadline exceeded") from exc
+            except httpx.HTTPError:
+                self.stop_reason = "delivery_interrupted"
+                self.cause = "delivery_unknown"
+                raise
 
 
 def _unknown_receipt(value):
@@ -278,7 +327,7 @@ def _unknown_receipt(value):
 class _Reply(tuple):
     def __new__(cls, values, policy):
         reply = super().__new__(cls, values)
-        reply.retry_details = dict(attempts=policy.attempts, max_attempts=policy.max_attempts, earlier_usage_unknown=policy.usage_unknown)
+        reply.retry_details = policy.details(succeeded=True)
         return reply
 
 
@@ -316,6 +365,7 @@ def text_retries(*, provider_argument="provider", frozen_snapshot=False):
                     exc.max_attempts = policy.max_attempts
                     exc.retry_exhausted = policy.exhausted
                     exc.retry_stop_reason = policy.stop_reason
+                    exc.retry_details = policy.details(getattr(exc, "code", None))
                     if policy.usage_unknown:
                         exc.input_tokens = exc.output_tokens = None
                         for field in ("usage", "usage_receipt"):
@@ -323,12 +373,12 @@ def text_retries(*, provider_argument="provider", frozen_snapshot=False):
                             if isinstance(receipt, dict):
                                 setattr(exc, field, _unknown_receipt(receipt))
                     if hasattr(exc, "message"):
-                        message = exc.message.replace("未自动重试", "未继续重试").replace("未重试", "未继续重试")
-                        if policy.stop_reason == "task_authority_changed":
-                            message = "任务当前权限、模型配置或租约已改变，已停止后续模型调用"
-                        stop = "自动重试次数或本次总时限已用完，可核对后手动重新生成" if policy.exhausted else "本次已停止自动尝试，请核对后手动重新生成"
-                        exc.message = f"{message}（已尝试{policy.attempts}/{policy.max_attempts}次；{stop}）"
+                        _, guidance = classify_failure(getattr(exc, "code", None), http_status=policy.http_status, stop_reason=policy.stop_reason, cause=policy.cause)
+                        message = guidance or exc.message.replace("未自动重试", "未继续重试").replace("未重试", "未继续重试")
+                        status = f"HTTP {policy.http_status}；" if policy.http_status is not None and policy.http_status != 200 else ""
+                        exc.message = f"{message}（{status}已尝试{policy.attempts}/{policy.max_attempts}次）"
                         exc.args = (exc.message,)
+                    logger.warning("text_model_failed category=%s attempt=%d max_attempts=%d http_status=%s stop_reason=%s", exc.retry_details["failure_category"], policy.attempts, policy.max_attempts, policy.http_status, policy.stop_reason)
                 raise
 
         return bounded

@@ -1,0 +1,329 @@
+{
+  "recorded_at": "2026-10-29T02:31:14.539162+00:00",
+  "application_version": "2.1.0",
+  "catalog_version": "2026.10.29.1",
+  "changes": {
+    "removed_page_introductions": 121,
+    "shared_header_pages": [
+      "vue3-new-ui/src/views/account/index.vue",
+      "vue3-new-ui/src/views/admin/campusManagement.vue",
+      "vue3-new-ui/src/views/admin/chargeRecords.vue",
+      "vue3-new-ui/src/views/admin/dataImportExport.vue",
+      "vue3-new-ui/src/views/admin/departmentManagement.vue",
+      "vue3-new-ui/src/views/admin/doctorManagement.vue",
+      "vue3-new-ui/src/views/admin/navigationManagement.vue",
+      "vue3-new-ui/src/views/admin/noticeManagement.vue",
+      "vue3-new-ui/src/views/admin/patientManagement.vue",
+      "vue3-new-ui/src/views/admin/slotPool.vue",
+      "vue3-new-ui/src/views/charge/chargeItem.vue",
+      "vue3-new-ui/src/views/charge/chargeList.vue",
+      "vue3-new-ui/src/views/charge/dailySettlement.vue",
+      "vue3-new-ui/src/views/charge/insurance.vue",
+      "vue3-new-ui/src/views/charge/insuranceCatalog.vue",
+      "vue3-new-ui/src/views/charge/invoice.vue",
+      "vue3-new-ui/src/views/charge/patientCard.vue",
+      "vue3-new-ui/src/views/charge/windowAppointment.vue",
+      "vue3-new-ui/src/views/charge/windowRegistration.vue",
+      "vue3-new-ui/src/views/checkin/breachRecord.vue",
+      "vue3-new-ui/src/views/checkin/checkIn.vue",
+      "vue3-new-ui/src/views/doctor/attendance.vue",
+      "vue3-new-ui/src/views/doctor/clinicalPathway.vue",
+      "vue3-new-ui/src/views/doctor/diagnosisTemplate.vue",
+      "vue3-new-ui/src/views/doctor/labOrder.vue",
+      "vue3-new-ui/src/views/doctor/mdt.vue",
+      "vue3-new-ui/src/views/doctor/medicalRecord.vue",
+      "vue3-new-ui/src/views/doctor/prescription.vue",
+      "vue3-new-ui/src/views/doctor/prescriptionTemplate.vue",
+      "vue3-new-ui/src/views/doctor/referralApproval.vue",
+      "vue3-new-ui/src/views/doctor/schedule.vue",
+      "vue3-new-ui/src/views/doctor/scheduleChange.vue",
+      "vue3-new-ui/src/views/equipment/index.vue",
+      "vue3-new-ui/src/views/exam/exam.vue",
+      "vue3-new-ui/src/views/followup/followUp.vue",
+      "vue3-new-ui/src/views/inpatient/admission.vue",
+      "vue3-new-ui/src/views/inpatient/allergy.vue",
+      "vue3-new-ui/src/views/inpatient/discharge.vue",
+      "vue3-new-ui/src/views/inpatient/dispenseVerification.vue",
+      "vue3-new-ui/src/views/inpatient/emar.vue",
+      "vue3-new-ui/src/views/inpatient/emr.vue",
+      "vue3-new-ui/src/views/inpatient/homeIcdWorkbench.vue",
+      "vue3-new-ui/src/views/inpatient/icd10.vue",
+      "vue3-new-ui/src/views/inpatient/infusion.vue",
+      "vue3-new-ui/src/views/inpatient/injection.vue",
+      "vue3-new-ui/src/views/inpatient/inpatientCharge.vue",
+      "vue3-new-ui/src/views/inpatient/inpatientOrder.vue",
+      "vue3-new-ui/src/views/inpatient/medicalRecordArchive.vue",
+      "vue3-new-ui/src/views/inpatient/medicalRecordHome.vue",
+      "vue3-new-ui/src/views/inpatient/medicalRecordHomeQuality.vue",
+      "vue3-new-ui/src/views/inpatient/nursingStation.vue",
+      "vue3-new-ui/src/views/inpatient/opsExtension.vue",
+      "vue3-new-ui/src/views/inpatient/shiftHandover.vue",
+      "vue3-new-ui/src/views/inpatient/skinTest.vue",
+      "vue3-new-ui/src/views/inpatient/surgery.vue",
+      "vue3-new-ui/src/views/inpatient/wardManagement.vue",
+      "vue3-new-ui/src/views/lab/imaging.vue",
+      "vue3-new-ui/src/views/lab/labPackage.vue",
+      "vue3-new-ui/src/views/lab/labQc.vue",
+      "vue3-new-ui/src/views/lab/labResult.vue",
+      "vue3-new-ui/src/views/patient/appointment.vue",
+      "vue3-new-ui/src/views/patient/charge.vue",
+      "vue3-new-ui/src/views/patient/familyMember.vue",
+      "vue3-new-ui/src/views/patient/healthRecord.vue",
+      "vue3-new-ui/src/views/patient/medicalRecord.vue",
+      "vue3-new-ui/src/views/patient/navigation.vue",
+      "vue3-new-ui/src/views/patient/prepaid.vue",
+      "vue3-new-ui/src/views/patient/prescription.vue",
+      "vue3-new-ui/src/views/patient/queueProgress.vue",
+      "vue3-new-ui/src/views/patient/referral.vue",
+      "vue3-new-ui/src/views/patient/registration.vue",
+      "vue3-new-ui/src/views/patient/review.vue",
+      "vue3-new-ui/src/views/patient/triage.vue",
+      "vue3-new-ui/src/views/pharmacy/adverseReaction.vue",
+      "vue3-new-ui/src/views/pharmacy/antibiotic.vue",
+      "vue3-new-ui/src/views/pharmacy/consumable.vue",
+      "vue3-new-ui/src/views/pharmacy/dispense.vue",
+      "vue3-new-ui/src/views/pharmacy/dispenseStats.vue",
+      "vue3-new-ui/src/views/pharmacy/drugDamage.vue",
+      "vue3-new-ui/src/views/pharmacy/inventoryAdjustment.vue",
+      "vue3-new-ui/src/views/pharmacy/pharmaceutical.vue",
+      "vue3-new-ui/src/views/pharmacy/prescriptionReview.vue",
+      "vue3-new-ui/src/views/pharmacy/purchase.vue",
+      "vue3-new-ui/src/views/pharmacy/rxReviewRule.vue",
+      "vue3-new-ui/src/views/pharmacy/specialDrug.vue",
+      "vue3-new-ui/src/views/pharmacy/stockAlert.vue",
+      "vue3-new-ui/src/views/pharmacy/stockCheck.vue",
+      "vue3-new-ui/src/views/queue/emergencyGreenChannel.vue",
+      "vue3-new-ui/src/views/queue/emergencyMedicalRecord.vue",
+      "vue3-new-ui/src/views/queue/emergencyObservation.vue",
+      "vue3-new-ui/src/views/queue/emergencyRescue.vue",
+      "vue3-new-ui/src/views/queue/emergencyTriage.vue",
+      "vue3-new-ui/src/views/queue/patrolRecord.vue",
+      "vue3-new-ui/src/views/queue/queueList.vue",
+      "vue3-new-ui/src/views/queue/triageDesk.vue",
+      "vue3-new-ui/src/views/report/departmentPerformance.vue",
+      "vue3-new-ui/src/views/report/operations.vue",
+      "vue3-new-ui/src/views/report/reports.vue",
+      "vue3-new-ui/src/views/system/adverseEvent.vue",
+      "vue3-new-ui/src/views/system/backup.vue",
+      "vue3-new-ui/src/views/system/config.vue",
+      "vue3-new-ui/src/views/system/dict.vue",
+      "vue3-new-ui/src/views/system/digitalSignature.vue",
+      "vue3-new-ui/src/views/system/integrationOutbox.vue",
+      "vue3-new-ui/src/views/system/logs.vue",
+      "vue3-new-ui/src/views/system/mdroIsolation.vue",
+      "vue3-new-ui/src/views/system/messageCenter.vue",
+      "vue3-new-ui/src/views/system/monitor.vue",
+      "vue3-new-ui/src/views/system/notifiableDisease.vue",
+      "vue3-new-ui/src/views/system/permission.vue",
+      "vue3-new-ui/src/views/system/qualityManagement.vue",
+      "vue3-new-ui/src/views/system/scheduler.vue",
+      "vue3-new-ui/src/views/vitalsign/blood.vue",
+      "vue3-new-ui/src/views/vitalsign/criticalCareRecord.vue",
+      "vue3-new-ui/src/views/vitalsign/infection.vue",
+      "vue3-new-ui/src/views/vitalsign/nursingAssessment.vue",
+      "vue3-new-ui/src/views/vitalsign/nursingPlan.vue",
+      "vue3-new-ui/src/views/vitalsign/surgeryNursingRecord.vue",
+      "vue3-new-ui/src/views/vitalsign/vitalSign.vue"
+    ],
+    "removed_ai_introduction_pages": [
+      "vue3-new-ui/src/views/ai/workbench.vue",
+      "vue3-new-ui/src/views/system/aiManagement.vue"
+    ],
+    "reviewed_ui_copy_edits": 334,
+    "server_notice_edits": 60,
+    "default_task_prompts": 80
+  },
+  "verification": {
+    "backend": {
+      "passed": 317,
+      "failed": 0,
+      "skipped": 0,
+      "modules": [
+        "tests.test_ai_adr_sources",
+        "tests.test_ai_billing_sources",
+        "tests.test_ai_catalog",
+        "tests.test_ai_consultation_sources",
+        "tests.test_ai_context",
+        "tests.test_ai_contextual_retrieval",
+        "tests.test_ai_document_change_sources",
+        "tests.test_ai_document_evidence_sources",
+        "tests.test_ai_ecg_files",
+        "tests.test_ai_incident_sources",
+        "tests.test_ai_inventory_sources",
+        "tests.test_ai_nursing_sources",
+        "tests.test_ai_operational_sources",
+        "tests.test_ai_operational_validation",
+        "tests.test_ai_outpatient_billing",
+        "tests.test_ai_procedural_sources",
+        "tests.test_ai_readiness",
+        "tests.test_ai_roster_sources_api",
+        "tests.test_ai_service_sources",
+        "tests.test_ai_surgical_resources",
+        "tests.test_ai_task_writing",
+        "tests.test_security_controls"
+      ]
+    },
+    "frontend_unit": {
+      "tests": 262,
+      "pass": 262,
+      "fail": 0,
+      "skipped": 0
+    },
+    "browser_acceptance": {
+      "passed": 128,
+      "failed": 0,
+      "skipped": 0,
+      "mode": "single final 128-case run against the production build"
+    },
+    "copy_and_document_scope_recheck": {
+      "passed": 13,
+      "included_in_acceptance": true
+    },
+    "live_browser": {
+      "recorded_at": "2026-10-29T02:04:55.908Z",
+      "checks": [
+        {
+          "name": "login",
+          "role": "super_admin",
+          "passed": true
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "super_admin",
+          "route": "/equipment/index",
+          "passed": true,
+          "screenshot": "super_admin-_equipment_index.png"
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "super_admin",
+          "route": "/admin/patientManagement",
+          "passed": true,
+          "screenshot": "super_admin-_admin_patientManagement.png"
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "super_admin",
+          "route": "/pharmacy/pharmaceutical",
+          "passed": true,
+          "screenshot": "super_admin-_pharmacy_pharmaceutical.png"
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "super_admin",
+          "route": "/ai/manage",
+          "passed": true,
+          "screenshot": "super_admin-_ai_manage.png"
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "super_admin",
+          "route": "/ai/workbench",
+          "passed": true,
+          "screenshot": "super_admin-_ai_workbench.png"
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "super_admin",
+          "route": "/account",
+          "passed": true,
+          "screenshot": "super_admin-_account.png"
+        },
+        {
+          "name": "login",
+          "role": "doctor",
+          "passed": true
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "doctor",
+          "route": "/doctor/medicalRecord",
+          "passed": true,
+          "screenshot": "doctor-_doctor_medicalRecord.png"
+        },
+        {
+          "name": "login",
+          "role": "patient",
+          "passed": true
+        },
+        {
+          "name": "page_content_without_redundant_banner",
+          "role": "patient",
+          "route": "/account",
+          "passed": true,
+          "screenshot": "patient-_account.png"
+        }
+      ],
+      "page_errors": [],
+      "server_errors": [],
+      "passed": true,
+      "initial_harness_issue": "The patient account page uses .account-page rather than .app-container; its actual account content was verified.",
+      "completed_at": "2026-10-29T02:09:53.574Z",
+      "delivery_login": {
+        "passed": true,
+        "prefilled": true,
+        "greeting_popup": false,
+        "frontend_html_sha256": "88a4ee3650238f1e6d7f77cd89b180eb7f3620a332dd101837e4fcccf2b04947",
+        "checked_at": "2026-10-29T02:28:11.080Z"
+      }
+    },
+    "bundle": {
+      "largestJavaScript": {
+        "file": "element-plus.d1d7b3bb.js",
+        "bytes": 662581
+      },
+      "totalJavaScript": 5990261,
+      "totalAssets": 6935858,
+      "limits": {
+        "largestJavaScript": 700000,
+        "totalJavaScript": 6000000,
+        "totalAssets": 7000000
+      }
+    },
+    "release_gate": "passed"
+  },
+  "raw_artifacts": {
+    ".local-preview/writing-backend-20261029.xml": {
+      "sha256": "f6379a3d22dd3ad344909326200f9928940e219dc280e608e63f15f543b98b06",
+      "bytes": 54840
+    },
+    ".local-preview/writing-backend-updated-20261029.xml": {
+      "sha256": "05497e3de9059d38549418fdf94034b43bdc1776c6ba60a53b883d27d140ad81",
+      "bytes": 1674
+    },
+    ".local-preview/writing-unit-delivery-20261029.log": {
+      "sha256": "06e31759f186c5a086191fa0361937a9571b50e921423973509231a4c6142fcd",
+      "bytes": 25682
+    },
+    ".local-preview/writing-e2e-acceptance-20261029.xml": {
+      "sha256": "0a2ff5752d1a4b74c4d0489b5e30a5560ef3bda9ec8dcc0735f5116f162b068e",
+      "bytes": 25607
+    },
+    ".local-preview/writing-e2e-copy-and-scope-20261029.log": {
+      "sha256": "e4e76aca2a747e82aa002675ca9c47276b33e5b1bbca4edb7cb9059069dbdf69",
+      "bytes": 2023
+    },
+    ".local-preview/writing-release-delivery-20261029.log": {
+      "sha256": "0294d6f0cef856bc8b34f5f036874321d5b01a2bf0e7aef6c1aaba976df445bd",
+      "bytes": 1085
+    },
+    ".local-preview/writing-preview-browser-20261029/verification.json": {
+      "sha256": "47d9e45d0bbfac2847af4f2ebc09ed95df138c2e04c9b6c6f58b75424ab0ae8b",
+      "bytes": 2452
+    }
+  },
+  "source_sha256": {
+    "fastapi_be/app/ai/catalog.py": "68e8589c0c4402cfd89536c60599e22fe26c09655ed542aa3749276b05a6eb09",
+    "fastapi_be/app/ai/context.py": "6b4b9488acc90db00eeb2f91940dd9a6772c03e73d28ce973a87123add6ee71d",
+    "fastapi_be/app/ai/readiness.py": "ce5283e786789bd555a57437185a4d6089d4fb41e612e94150c6d0fdc7852c90",
+    "fastapi_be/scripts/export_ai_catalog.py": "d4391da4649106244f01ba8c533c699db7cb49b7ce33813b5d7d0ba7b8d5f240",
+    "vue3-new-ui/src/components/AIAssistant/index.vue": "89c5dc19495891cbcb50c168d91b172a52da338be7e74794c4cc1512945e5ec3",
+    "vue3-new-ui/src/components/ai/DocumentChangeFindings.vue": "691d77c183f6fff9112ab8829a15cda63e9fe26a03c4a04ae5d90691eae0e160",
+    "vue3-new-ui/src/store/modules/user.js": "32c3e915f9c4efa777fa6464ff0f43872fd0a78e01e4beeadb8ef222419daa76",
+    "vue3-new-ui/src/utils/noticeText.cjs": "b152ad66a745a4510205a0ce3cb15eaf84aa17397bdcc8fbddf656279fd4457a",
+    "vue3-new-ui/src/views/equipment/index.vue": "ff478c662f16034854a20ceb584e454d87da1b88ae2316d7726ffcfd695f254a",
+    "vue3-new-ui/src/views/system/aiManagement.vue": "8901253630c3549fac80a908ff9f3b22edc39eb83a787714d9508994e230b676",
+    "vue3-new-ui/src/styles/vab.scss": "5a8a57e681445c8e68b0c7fa45ef22b54f707593274468ea29c82acb49561875",
+    "vue3-new-ui/src/elementPlusUsedStyles.js": "86c0bf2a91bb907482e93aebf07d6ce3d5c14b7b38e117f5bf82a8e111b4d4db"
+  }
+}

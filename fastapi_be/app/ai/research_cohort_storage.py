@@ -346,6 +346,9 @@ def load_artifact(db, user, run_id, *, audit_only=False, execution=False):
     if created is None or created.actor_id != artifact.requested_by or created.target != run_id or created.action != "research.task.artifact.create" or created.detail_json != detail:
         raise HTTPException(409, "科研创建回执不是原具体AuditPK或内容已变")
     if execution:
+        current_epoch = {"user_id": actor.user_id, "user_role": actor.user_role, "token_invalid_before": utc_text(actor.token_invalid_before)}
+        if current_epoch != frozen_execution["requester_epoch"]:
+            raise HTTPException(409, "科研任务的创建身份已变化，请重新创建任务")
         if not retry_snapshots_equal(_configuration(db, actor, preview=bool(run.preview)), (prompt, frozen_execution)):
             raise HTTPException(409, "科研当前配置、Provider或Prompt版本已变化，未继续旧冻结执行")
         model_wire(source, parsed["input_json"]["question"], prompt["task_prompt"])

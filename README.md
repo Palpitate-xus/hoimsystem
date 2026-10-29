@@ -524,6 +524,7 @@ python seed_default_accounts.py
 ## 运行与维护
 
 - 静态 RBAC 漂移检查、lint、业务测试、依赖审计和 bundle 预算检查，命令见 [测试指南](doc/testing.md)。
+- GitHub Actions 在 PR、master 推送和每周定时检查 18 份 Python 锁文件与 npm 依赖，保存完整审计报告。
 - 存活与就绪探针、Prometheus 指标、请求 ID 和操作审计，用于定位请求失败、依赖故障与配置变更。
 - API、AI worker 和调度器独立运行；业务集成支持有限重试、死信查询与人工重放。
 - PostgreSQL 迁移、数据备份、恢复与进程管理见 [部署手册](doc/installation-guide.md)。

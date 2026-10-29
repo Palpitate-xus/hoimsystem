@@ -22,11 +22,21 @@
 
 本项目使用以下工具检查依赖安全：
 
-- **npm audit**：前端生产与开发依赖，发布前在本地以 low 级别检查
-- **pip-audit**：后端 `requirements.txt`，发布前在本地检查已知漏洞
-- **GitHub Dependabot**：每周检查 npm、pip 和 Docker 依赖；它不执行 GitHub Actions
+- **npm audit**：前端锁文件的生产与开发依赖，任何严重级别的漏洞都会使检查失败
+- **pip-audit**：检查 18 份 Python 哈希锁文件，覆盖 API、构建、测试及独立模型环境
+- **GitHub Actions**：PR、`master` 推送、每周定时及手动执行锁文件校验与完整依赖审计，保留报告 14 天
+- **GitHub Dependabot**：每周检查 npm、pip、Docker 和 GitHub Actions 更新
 
-2026-09-03 已彻底移除无修复版本的 `mockjs` 运行时，用本地确定性数据生成器保留开发 mock 功能；同时更新 `qs` 及 `browserslist`、`nanoid`、`postcss-selector-parser` 等传递依赖。当前 lockfile 的 `npm audit` 为 0 告警。GitHub 默认分支上的旧 Dependabot 告警会在修复提交推送并由 GitHub 重新扫描后关闭。
+审计逐项核对包名和精确版本，报告缺失、损坏、漏包、跳过项、重复项或扫描工具失败都会使检查失败。Torch CPU 轮子保留安装版本，审计时使用对应的公开发行版本查询通告。
+
+本地复现：
+
+```bash
+python fastapi_be/scripts/lock_dependencies.py
+python fastapi_be/scripts/audit_dependencies.py --output dependency-audit
+```
+
+输出目录须为新目录。发现 GitHub 告警时，记录包名、依赖文件路径、GHSA/CVE 与受影响版本，再对照默认分支及当前锁文件定位。2026-10-29 的本地与远端依赖对照、PyPI/OSV/npm 结果见[审计记录](doc/validation/2026-10-29-dependabot.md)。
 
 ### 2. 安全配置检查清单
 

@@ -1,0 +1,214 @@
+{
+  "generated_at": "2026-10-29T04:45:42.962726+00:00",
+  "implementation_commit": "9099868b267fbc226826ea2eefa3734f032acace",
+  "github_alerts": {
+    "user_reported": {
+      "total": 12,
+      "high": 9,
+      "moderate": 3
+    },
+    "details_available": false,
+    "status": "awaiting_package_manifest_and_ghsa_details",
+    "authenticated_alert_access": false
+  },
+  "compared_origin": "5d7bc95a99c177545f302abeb78eef0373546aec",
+  "compared_local": "619268fbcca3dff54afdb2efdb5f4f2e34c3075c",
+  "dependency_files_equal_at_comparison": true,
+  "python": {
+    "completed_at": "2026-10-29T04:42:45.959442+00:00",
+    "auditor": "pip-audit 2.10.0",
+    "service": "PyPI",
+    "python_lock_count": 18,
+    "unique_lock_hashes": 9,
+    "unique_package_pins": 99,
+    "current_vulnerabilities": 0,
+    "current_skipped": [],
+    "origin_vulnerabilities": 0,
+    "origin_skipped": [],
+    "origin_ref": "5d7bc95a99c177545f302abeb78eef0373546aec",
+    "all_40_dependency_files_identical": true,
+    "origin_and_current_pins_identical": true,
+    "constraints_blocking_a_required_security_fix": [],
+    "applicable_cve_ghsa": [],
+    "dependency_upgrade_required_by_current_results": false,
+    "osv_crosscheck": "passed",
+    "osv_dependency_count": 99,
+    "osv_vulnerabilities": 0,
+    "osv_skipped": []
+  },
+  "npm": {
+    "local": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "origin": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "package_lock_sha256": "2237d1ecaa4cd2b91224fcdbe3f09ec261edf1a03ef80881f65903cd49536d6d"
+  },
+  "complete_audit": {
+    "status": "passed",
+    "python_locks": 18,
+    "python": [
+      {
+        "locks": [
+          "requirements-aki.lock",
+          "requirements-forecast.lock",
+          "requirements-news2.lock",
+          "requirements-qsofa.lock"
+        ],
+        "lock_sha256": "8644fa35b12df15d7af1e30f1734e4b04675c9b0c097e9c6b79835a3c37fd90a",
+        "packages": 19,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-bed.lock",
+          "requirements-inventory.lock",
+          "requirements-roster.lock",
+          "requirements-sofa.lock",
+          "requirements-supply.lock",
+          "requirements-surgery.lock"
+        ],
+        "lock_sha256": "495de2780055cc56679bda4412328bdc87c86410c1628a416f07fda66bf68eb3",
+        "packages": 16,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-build.lock"
+        ],
+        "lock_sha256": "a5156dc41a4a00784002d063a17d6fcdb3e6922dd650046fd907b80173a502a7",
+        "packages": 1,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-ecg-verification.lock"
+        ],
+        "lock_sha256": "51d513a4e3abdaa56f11019dadf7ff7b86a64c175fb3d1d7176b88784c3633e7",
+        "packages": 33,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-ecg.lock",
+          "requirements-imaging.lock"
+        ],
+        "lock_sha256": "3033ed39737fea72a0eb90d194c654efef35d8d1e407d1dc8acea3a2812d709b",
+        "packages": 12,
+        "advisory_aliases": [
+          {
+            "name": "torch",
+            "installed_version": "2.14.1+cpu",
+            "advisory_version": "2.14.1"
+          }
+        ],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-imaging-service.lock"
+        ],
+        "lock_sha256": "4bccab965849c72bc651202e5ce872d7968cd7e4f6ecbc13725e9828b4f267ed",
+        "packages": 37,
+        "advisory_aliases": [
+          {
+            "name": "torch",
+            "installed_version": "2.14.1+cpu",
+            "advisory_version": "2.14.1"
+          }
+        ],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-speech.lock"
+        ],
+        "lock_sha256": "0032754dda8b82832fcc2fa92cec501733deed4fc3577c8d1a16887512b442d3",
+        "packages": 23,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements-test.lock"
+        ],
+        "lock_sha256": "c9b760d8c7f5320b992e026d50818ae14bdcea10e94cfe556319a201845b86e4",
+        "packages": 55,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      },
+      {
+        "locks": [
+          "requirements.lock"
+        ],
+        "lock_sha256": "1d45b0e588961cebebb71fb5effadcfe1f17c96229781d86699247a363e530a0",
+        "packages": 53,
+        "advisory_aliases": [],
+        "exit_code": 0,
+        "skipped": [],
+        "report_errors": [],
+        "vulnerabilities": 0
+      }
+    ],
+    "npm_exit_code": 0,
+    "npm_report_errors": []
+  },
+  "audit_gate_tests": {
+    "passed": 40,
+    "failed": 0,
+    "skipped": 0,
+    "junit_sha256": "4f3a1dbafec668eb667111ee9156436c48c10b3a6a094e08a76de72d02ddf3a1"
+  },
+  "workflow_validation": {
+    "yaml": true,
+    "actionlint": true,
+    "remote_execution": false
+  },
+  "dependency_versions_changed": false,
+  "source_sha256": {
+    ".github/workflows/dependency-audit.yml": "1d501d5a7f1369deb0d2c496fd467b5487893c2ef8008970caa82b0e9ea2f750",
+    ".github/dependabot.yml": "ba81d8083139b5749a153d15c028d9802d0655874db3380d479af8ae5ab5df14",
+    "fastapi_be/scripts/audit_dependencies.py": "a2df77474ea6b7ecb9efc8912f042e938f534923f4d392eb08020cd9554a00e0",
+    "fastapi_be/scripts/lock_dependencies.py": "dd51bf6a5d2b5c33456b141fd9572c405c2c68a05752baca4b89687728e0caa0",
+    "fastapi_be/tests/test_dependency_audit.py": "f4816126f530f0d783c78eaed77c0decddd1ab1efe0c7aadd460cdf2dcaf56b4"
+  }
+}

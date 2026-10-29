@@ -4,6 +4,17 @@
 
 最近一次完整执行记录见 [2026-10-27 系统验证](validation/2026-10-27/README.md)。原始基线、失败、修复后的完整文件复验和性能测量分别保存，重复运行不累加为独立通过项。
 
+## 依赖安全
+
+GitHub Actions 在 PR、`master` 推送、每周及手动触发时校验 18 份 Python 锁文件并运行 Python/npm 审计。依赖包无需安装，独立模型权重也不参与下载。报告缺失、包版本不匹配或跳过包会使检查失败。
+
+```bash
+python fastapi_be/scripts/audit_dependencies.py --output dependency-audit
+python -m pytest fastapi_be/tests/test_dependency_audit.py
+```
+
+审计输出目录使用新目录。`summary.json` 记录各环境的包数、漏洞、跳过项、报告完整性与工具退出码；具体通告位于对应环境的 JSON 报告中。GitHub 告警的定位需要包名、依赖文件路径和 GHSA/CVE，逐条核对后更新清单并重建哈希锁文件。
+
 ## 后端
 
 后端依赖包含 pytest、pytest-asyncio 和 httpx：

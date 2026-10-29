@@ -353,6 +353,7 @@ Every Locust request validates both the HTTP status and response-body `code == 2
 ## Operations and Maintenance
 
 - RBAC drift checks, lint, business tests, dependency audits and bundle budgets: see the [testing guide](doc/testing.md).
+- GitHub Actions audits all 18 Python locks and npm dependencies on pull requests, master pushes and a weekly schedule, retaining the audit reports.
 - Liveness/readiness probes, Prometheus metrics, request IDs and audit logs help trace request failures, unavailable dependencies and configuration changes.
 - The API, AI worker and scheduler run separately. Integration delivery supports bounded retries, dead-letter inspection and manual replay.
 - Database migrations, backups, restoration and process supervision are described in the [installation guide](doc/installation-guide.md).

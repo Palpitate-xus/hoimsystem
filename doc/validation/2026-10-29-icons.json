@@ -1,0 +1,185 @@
+{
+  "date": "2026-10-29",
+  "scope": "icons_and_navigation",
+  "source_audit": {
+    "vue_components": 359,
+    "titled_routes": 144,
+    "top_level_icon_identities": 17,
+    "explicit_shared_icons": 125,
+    "original_svg_glyphs": 293
+  },
+  "frontend_unit": {
+    "passed": 269,
+    "failed": 0
+  },
+  "live_preview": {
+    "passed": true,
+    "roles": [
+      "doctor",
+      "patient",
+      "super_admin"
+    ],
+    "pages": 9,
+    "page_errors": 0,
+    "http_failures": 0,
+    "missing_icons": 0,
+    "bind": "0.0.0.0:51891",
+    "lan_url": "http://172.20.137.133:51891",
+    "served_dist_identity": [
+      {
+        "url": "http://127.0.0.1:51891",
+        "status": 200,
+        "sha256": "c244e65b76d077ea43277180578d23948a0f4949de4c4c04db5a3d34cf05dd8c",
+        "matches_dist": true
+      },
+      {
+        "url": "http://172.20.137.133:51891",
+        "status": 200,
+        "sha256": "c244e65b76d077ea43277180578d23948a0f4949de4c4c04db5a3d34cf05dd8c",
+        "matches_dist": true
+      }
+    ]
+  },
+  "production_bundle": {
+    "largest_javascript_bytes": 662581,
+    "total_javascript_bytes": 5994894,
+    "total_assets_bytes": 6939488,
+    "limits": {
+      "largest_javascript_bytes": 700000,
+      "total_javascript_bytes": 6000000,
+      "total_assets_bytes": 7000000
+    }
+  },
+  "implementation_commits": [
+    "7d86ae9 fix(build): resolve extracted stylesheet assets from the production CSS directory",
+    "f244af4 feat(navigation): assign semantic module icons and cover production menu states",
+    "184ae31 fix(icons): render configured SVG components across navigation and business pages"
+  ],
+  "local_evidence": [
+    {
+      "path": ".local-preview/icons-unit-acceptance-20261029.log",
+      "sha256": "c3132780389dfa2badd3629bb3e4d3d393b102bf874d1a0b26cb0d435c7327a4"
+    },
+    {
+      "path": ".local-preview/icons-build-assets-final-20261029.log",
+      "sha256": "e4335b8991d994d94c7ad55efe8d68f06a8c3eae4f2f409bb5766ab9e3651ae5"
+    },
+    {
+      "path": ".local-preview/icons-release-final-20261029.log",
+      "sha256": "48c9651f82285a849b4c0dda14db364bc010c8a54c01de623f68fccbb2035fa4"
+    },
+    {
+      "path": ".local-preview/icons-live-audit-final-20261029.log",
+      "sha256": "57bb98735ec16505c51f118ba393ab551d9bfbcea28ec7d5b771ac46c0bd4805"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/verification.json",
+      "sha256": "4fdda5b95401b29c98e6507201b874f34d06b9d17ca5f9489f333ff740db91e4"
+    },
+    {
+      "path": ".local-preview/icons-preview-delivery-20261029.json",
+      "sha256": "8023ee65e0cc220fab51567d38f3b252a6852d164883f7cdc1dc755269e7bdb3"
+    },
+    {
+      "path": ".local-preview/icons-e2e-verified-20261029.xml",
+      "sha256": "0cf9b37e9ce42917192abdf6084483b256502674941965a29a510fb2db318bba"
+    },
+    {
+      "path": ".local-preview/icons-e2e-verified-20261029.log",
+      "sha256": "99d998c381d33a2871caa18e2937568c1b08027dc83ba354cc9425345bee3959"
+    }
+  ],
+  "source_files": {
+    "vue3-new-ui/src/utils/icons.js": "f5ece0e45f91087c811a0273454b5f502298c8d5caa098567b8438b374ba8348",
+    "vue3-new-ui/src/router/index.js": "6fd9dd5dc1df8b4526be6b141386d08ee1986919ecf8a03fd76368dbf454be90",
+    "vue3-new-ui/rspack.config.js": "4ed86fee28e4875883e8dc14929e8104850c11f92c6bc571fc62c97a9bec7fc2",
+    "vue3-new-ui/e2e/icon-navigation.spec.js": "a0a8df581947f41f1d826e66cb027ed1d6b763a18b8ca38d6429df8678754ceb",
+    "vue3-new-ui/e2e/icon-patient-pages.spec.js": "644b33fc9694ef87b819cee507c3f2e33e456e9d2d2e99b81a4da7cc9b4559b5",
+    "vue3-new-ui/e2e/login-assets.spec.js": "577a71fdd3b55e216ba522e93cba20cfe7852738ed4f0d547827203f173a37e0",
+    "vue3-new-ui/tests/iconResolution.test.cjs": "7cf7f4fe9e90f48d9379de179b962644cbc4beb5548722150a73f804c995b2a5"
+  },
+  "browser_regression": {
+    "passed": 32,
+    "failed": 0,
+    "skipped": 0,
+    "single_run": true,
+    "production_dist": true,
+    "junit_path": ".local-preview/icons-e2e-verified-20261029.xml",
+    "tests": [
+      "copying clinical text requires review and copies only explicitly selected sections",
+      "changing role clears the old document and prevents reopening its copy scope",
+      "changing token clears the old document and prevents reopening its copy scope",
+      "changing username clears the old document and prevents reopening its copy scope",
+      "a summary without clinical sections cannot be copied as a completed document",
+      "changing the patient clears the open copy scope before any clipboard operation",
+      "an available dedicated task has no contradictory unavailable-feature empty state",
+      "canonical public vector preserves all 293 installed original paths and exact rasterized geometry",
+      "生产超级管理员侧栏逐项显示业务图标，展开后的叶子项和首页卡片均绘制真实 SVG",
+      "生产侧栏支持键盘收起展开，收起后首页图标保留且与页签图标一致",
+      "生产导航工具保留约 20px 的真实图标，键盘可打开主题和全屏并刷新首页",
+      "生产横向布局菜单与工具图标实际绘制，20px 工具在深色背景保持清楚可见",
+      "生产患者导航的科室位置和电话绘制实际 SVG，页面仅调用只读导航 API",
+      "生产患者导诊标题和查询按钮绘制急救箱与搜索 SVG，未提交导诊请求",
+      "生产超级管理员病区搜索框绘制真实 Search 前缀 SVG，仅读取空病区与科室目录",
+      "production login stylesheet resolves its background image and local assets without 404 responses",
+      "favorites persist per account and stay separate across role changes",
+      "the task picker groups tasks and stored corruption does not break the workspace",
+      "the avatar identifies super_admin and exposes only its settings entry",
+      "the avatar identifies admin and exposes only its settings entry",
+      "the avatar identifies director and exposes only its settings entry",
+      "the avatar identifies doctor and exposes only its settings entry",
+      "the avatar identifies nurse and exposes only its settings entry",
+      "the avatar identifies pharmacist and exposes only its settings entry",
+      "the avatar identifies cashier and exposes only its settings entry",
+      "the avatar identifies guide and exposes only its settings entry",
+      "the avatar identifies lab_technician and exposes only its settings entry",
+      "the avatar identifies registrar and exposes only its settings entry",
+      "the avatar identifies patient and exposes only its settings entry",
+      "an unavailable avatar falls back to a local initial",
+      "status 401 keeps readable navigation on a small screen",
+      "status 404 keeps readable navigation on a small screen"
+    ]
+  },
+  "screenshots": [
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/doctor-_doctor_medicalRecord.png",
+      "sha256": "cd33e614abbfbd3781514b315a105323a7a8aa626219b3dce8b0b954cd0d9e7d"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/doctor-_index.png",
+      "sha256": "012caaf2c9aba8f91361bf6f0949c956935d76df469410df52b0469e7728182e"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/patient-_patient_navigation.png",
+      "sha256": "b4f36027f14ea650a62fc1186c956c3fd39e978c6caf256e933bdd8f94dc9860"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/patient-_patient_triage.png",
+      "sha256": "79277b42e2c65e66682f792f9d5ed1e37d6423f4502701ae8b7630091d547a0c"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/super-collapsed.png",
+      "sha256": "5a1ba3a1c77af95b6e7e34e3e48c2813b3435a68b6be12cbfb12fe7a4f248f7e"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/super_admin-_admin_patientManagement.png",
+      "sha256": "ef22036b9bb5b21a41396cafea37bae00d070b8d3ba59c9783d8f30abdb2cb5c"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/super_admin-_ai_manage.png",
+      "sha256": "62e95d9df7495f3f453740368038fc7e989007494ff1d6e82cf72eb2548cf3d2"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/super_admin-_equipment_index.png",
+      "sha256": "7734e77880c94d08bfe64ec7246358a00a19d2bfad9337b452aaa80840d3cc6d"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/super_admin-_index.png",
+      "sha256": "d7954577e611769fc6e9f394498fcc162c0bdc10538bc8094d3f5fa6008664c5"
+    },
+    {
+      "path": ".local-preview/icons-preview-browser-20261029/super_admin-_inpatient_wardManagement.png",
+      "sha256": "7213dd3bd6ad4f38087a6dc1d50bf412583da0a26bbae391df43aa72b252d338"
+    }
+  ]
+}

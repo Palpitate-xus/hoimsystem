@@ -6,6 +6,7 @@ import json
 import logging
 import time
 import uuid
+from contextlib import contextmanager
 
 from fastapi import HTTPException
 from pydantic import ValidationError
@@ -1336,6 +1337,60 @@ def _record_text_retry_usage(db, run, details):
         )
 
 
+def _settle_generic_storage_failure(factory, run_id, lease, feature_key, inputs, outputs, started, retry_details):
+    """Settle technical metadata under the original lease in a fresh transaction."""
+    from sqlalchemy.orm import load_only
+
+    try:
+        with factory() as db:
+            run = (
+                db.query(AIRun)
+                .options(load_only(AIRun.run_id, AIRun.requested_by, AIRun.status, AIRun.lease_token, AIRun.latency_ms))
+                .filter(AIRun.run_id == run_id, AIRun.lease_token == lease, AIRun.status.in_(["running", "cancelled"]))
+                .with_for_update()
+                .one_or_none()
+            )
+            if run is None or run.status == "cancelled" and run.latency_ms is not None:
+                return
+            run.status = "cancelled" if run.status == "cancelled" else "failed"
+            run.error_code = "RESULT_STORAGE_ERROR"
+            run.error_message = "结果保存失败，请联系管理员检查任务记录"
+            run.result_json = "{}"
+            run.input_tokens, run.output_tokens = inputs, outputs
+            run.latency_ms = max(0, int((time.monotonic() - started) * 1000))
+            run.finish_time = utcnow()
+            audit(
+                db,
+                run.requested_by,
+                "run.result_storage.failed",
+                run_id,
+                {
+                    "status": run.status,
+                    "error_code": run.error_code,
+                    "lease_token": lease,
+                    "input_tokens": inputs,
+                    "output_tokens": outputs,
+                },
+            )
+            _record_text_retry_usage(db, run, retry_details)
+            db.commit()
+    except Exception as exc:
+        # The stale lease recovery owns reconciliation if SQL is still down.
+        _log_execution_failure(run_id, feature_key, "store_failure", exc)
+
+
+@contextmanager
+def _recover_generic_storage(factory, run_id, lease, feature_key, inputs, outputs, started, retry_details, *, specialized):
+    """Include lock acquisition and cancellation settlement in the same recovery."""
+    try:
+        yield
+    except Exception as exc:
+        if specialized:
+            raise
+        _log_execution_failure(run_id, feature_key, "store_transaction", exc)
+        _settle_generic_storage_failure(factory, run_id, lease, feature_key, inputs, outputs, started, retry_details)
+
+
 @task_retry_scope
 async def execute_claimed(run_id: str, lease: str, *, transport=None, research_claim_event_id=None, deidentification_claim_event_id=None) -> None:
     """Release SQL connections during inference; recheck authorization before storing results."""
@@ -1632,14 +1687,24 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         except HTTPException as exc:
             raise AIExecutionError("RESULT_STORAGE_LIMIT", "完整结果超过UTF-8文本存储能力，未接收或截断结果；可核对资料范围及适配器输出") from exc
     except AIExecutionError as exc:
-        if getattr(exc, "attempts", 0):
+        if getattr(exc, "retry_details", None) is not None:
+            retry_details = dict(exc.retry_details)
+        elif getattr(exc, "attempts", 0):
             retry_details = dict(attempts=exc.attempts, max_attempts=exc.max_attempts, earlier_usage_unknown=exc.input_tokens is None or exc.output_tokens is None)
         if getattr(exc, "model_call_attempted", False) or exc.input_tokens is not None or exc.output_tokens is not None:
             inputs, outputs = exc.input_tokens, exc.output_tokens
         error = (exc.code, exc.message)
     except HTTPException as exc:
+        if getattr(exc, "retry_details", None) is not None:
+            retry_details = dict(exc.retry_details)
+        if getattr(exc, "model_call_attempted", False):
+            inputs, outputs = getattr(exc, "input_tokens", None), getattr(exc, "output_tokens", None)
         error = ("TASK_NO_LONGER_AUTHORIZED", str(exc.detail))
     except Exception as exc:
+        if getattr(exc, "retry_details", None) is not None:
+            retry_details = dict(exc.retry_details)
+        if getattr(exc, "model_call_attempted", False):
+            inputs, outputs = getattr(exc, "input_tokens", None), getattr(exc, "output_tokens", None)
         _log_execution_failure(run_id, feature_key, phase, exc)
         error = ("TASK_EXECUTION_ERROR", "任务处理失败，请联系管理员查看执行状态")
     finally:
@@ -1651,7 +1716,20 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
         if ecg_files is not None:
             for stream in ecg_files:
                 stream.close()
-    with database.SessionLocal() as db:
+    with (
+        _recover_generic_storage(
+            database.SessionLocal,
+            run_id,
+            lease,
+            feature_key,
+            inputs,
+            outputs,
+            started,
+            retry_details,
+            specialized=any((sofa_run, roster_run, bed_run, surgery_run, supply_run, inventory_run, document_run, coding_run)),
+        ),
+        database.SessionLocal() as db,
+    ):
         # Read frozen markers before any AIRun/User row lock. A corrupted
         # feature discriminator must not bypass the surgery first-lock order.
         original = db.query(AIRun.feature_key, AIRun.input_json).filter_by(run_id=run_id).one_or_none()
@@ -1850,7 +1928,8 @@ async def execute_claimed(run_id: str, lease: str, *, transport=None, research_c
             _log_execution_failure(run_id, feature_key, "store_result", exc)
             db.rollback()
             if not sofa_run and not roster_run and not bed_run and not surgery_run and not supply_run and not inventory_run and not document_run and not coding_run:
-                raise
+                _settle_generic_storage_failure(database.SessionLocal, run_id, lease, feature_key, inputs, outputs, started, retry_details)
+                return
             # A rejected blob or audit transaction must never leave an accepted pointer.
             if coding_feature:
                 with db.no_autoflush:
@@ -1951,7 +2030,7 @@ def expire_interrupted_runs(db: Session) -> int:
         .exists()
     )
     interrupted = db.query(AIRun).filter(
-        AIRun.status == "running",
+        AIRun.status.in_(["running", "cancelled"]),
         AIRun.start_time < deadline,
         AIRun.feature_key != "research_extraction",
         ~AIRun.run_id.in_(db.query(AIResearchVariableRunArtifact.run_id)),
@@ -1975,8 +2054,19 @@ def expire_interrupted_runs(db: Session) -> int:
     )
     # Set the pair together before changing status, in this same transaction.
     # Avoid per-column CASE expressions: MySQL evaluates SET left-to-right.
-    interrupted.filter(AIRun.input_tokens == 0, AIRun.output_tokens == 0, ~has_receipt).update({"input_tokens": None, "output_tokens": None}, synchronize_session=False)
-    count = interrupted.update(
+    # A received cancellation cannot establish whether an in-flight call cost
+    # tokens; unclaimed cancellations have no start_time and are excluded above.
+    cancelled = interrupted.filter(
+        AIRun.status == "cancelled",
+        AIRun.lease_token.is_not(None),
+        AIRun.latency_ms.is_(None),
+        AIRun.input_tokens == 0,
+        AIRun.output_tokens == 0,
+        ~has_receipt,
+    ).update({"input_tokens": None, "output_tokens": None}, synchronize_session=False)
+    running = interrupted.filter(AIRun.status == "running")
+    running.filter(AIRun.input_tokens == 0, AIRun.output_tokens == 0, ~has_receipt).update({"input_tokens": None, "output_tokens": None}, synchronize_session=False)
+    count = running.update(
         {
             "status": "failed",
             "error_code": "WORKER_INTERRUPTED",
@@ -1986,4 +2076,4 @@ def expire_interrupted_runs(db: Session) -> int:
         synchronize_session=False,
     )
     db.commit()
-    return count + recovered
+    return count + cancelled + recovered

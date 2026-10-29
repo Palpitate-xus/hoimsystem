@@ -78,7 +78,11 @@ def main() -> None:
     args = parser.parse_args()
     if not 0.1 <= args.interval <= 60:
         parser.error("interval must be between 0.1 and 60 seconds")
-    asyncio.run(process_one() if args.once else worker_loop(args.interval))
+    try:
+        asyncio.run(process_one() if args.once else worker_loop(args.interval))
+    except Exception as exc:
+        _log_execution_failure(None, None, "worker_exit", exc, event_logger=logger)
+        raise SystemExit(1) from None
 
 
 if __name__ == "__main__":

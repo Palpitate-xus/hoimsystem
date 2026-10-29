@@ -9932,6 +9932,53 @@
   "path": "/api/performance/audit"
  },
  {
+  "auth": "ANY",
+  "function": "get_my_access",
+  "method": "GET",
+  "module": "permission_management.py",
+  "path": "/api/access/me"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_access_catalog",
+  "method": "GET",
+  "module": "permission_management.py",
+  "path": "/api/access/catalog"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_access_policy",
+  "method": "GET",
+  "module": "permission_management.py",
+  "path": "/api/access/policies/{kind}/{key}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "update_access_policy",
+  "method": "PUT",
+  "module": "permission_management.py",
+  "path": "/api/access/policies/{kind}/{key}"
+ },
+ {
+  "auth": [
+   "admin",
+   "super_admin"
+  ],
+  "function": "get_access_audit",
+  "method": "GET",
+  "module": "permission_management.py",
+  "path": "/api/access/audit"
+ },
+ {
   "auth": [
    "admin",
    "pharmacist",

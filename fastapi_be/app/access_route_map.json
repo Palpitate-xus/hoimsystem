@@ -1,0 +1,449 @@
+{
+  "AIPlatform": [],
+  "AIWorkbench": [
+    "GET /api/ai/features"
+  ],
+  "AIManagement": [
+    "GET /api/ai/admin/features"
+  ],
+  "Account": [],
+  "Index": [],
+  "Admin": [],
+  "DoctorManagement": [
+    "GET /api/doctorManagement/getList"
+  ],
+  "PatientManagement": [
+    "GET /api/patientManagement/getList"
+  ],
+  "DepartmentManagement": [
+    "GET /api/departmentManagement/getList"
+  ],
+  "CampusManagement": [
+    "GET /api/campusManagement/getList"
+  ],
+  "NavigationManagement": [
+    "GET /api/navigation/admin/nodes",
+    "GET /api/navigation/admin/edges"
+  ],
+  "NoticeManagement": [
+    "GET /api/notice/getList"
+  ],
+  "ChargeRecords": [
+    "GET /api/chargeManagement/getList"
+  ],
+  "SlotPool": [
+    "GET /api/slotPool/getList"
+  ],
+  "DataImportExport": [
+    "GET /api/dataImportExport/export/{entity}",
+    "GET /api/dataImportExport/template/{entity}",
+    "POST /api/dataImportExport/import/{entity}"
+  ],
+  "Patient": [],
+  "Triage": [
+    "POST /api/triage/suggest"
+  ],
+  "Navigation": [
+    "GET /api/navigation/route/departments"
+  ],
+  "Appointment": [
+    "GET /api/appointmentManagement/getList"
+  ],
+  "Registration": [
+    "GET /api/registrationManagement/getList"
+  ],
+  "FamilyMember": [
+    "GET /api/familyMember/list"
+  ],
+  "PatientCharge": [
+    "GET /api/chargeManagement/getList"
+  ],
+  "PatientMedicalRecord": [
+    "GET /api/medicalRecord/getList"
+  ],
+  "PatientPrescription": [
+    "GET /api/prescriptionManagement/getList"
+  ],
+  "HealthRecord": [
+    "GET /api/healthRecord/getProfile",
+    "GET /api/healthRecord/getVisits"
+  ],
+  "QueueProgress": [
+    "GET /api/queue/progress"
+  ],
+  "Review": [
+    "POST /api/review/create"
+  ],
+  "Prepaid": [
+    "GET /api/prepaid/getBalance",
+    "GET /api/prepaid/getTransactions"
+  ],
+  "Referral": [
+    "GET /api/referral/getList"
+  ],
+  "Doctor": [],
+  "DoctorSchedule": [
+    "GET /api/doctorScheduleManagement/getList"
+  ],
+  "ScheduleChange": [
+    "GET /api/scheduleChange/list"
+  ],
+  "DoctorMedicalRecord": [
+    "GET /api/medicalRecord/getList"
+  ],
+  "DoctorPrescription": [
+    "GET /api/prescriptionManagement/getList"
+  ],
+  "PrescriptionTemplate": [
+    "GET /api/prescriptionTemplate/list"
+  ],
+  "DiagnosisTemplate": [
+    "GET /api/diagnosisTemplate/list"
+  ],
+  "LabOrder": [
+    "GET /api/labOrder/getList"
+  ],
+  "Attendance": [
+    "GET /api/attendance/getList"
+  ],
+  "Mdt": [
+    "GET /api/mdt/getList"
+  ],
+  "ReferralApproval": [
+    "GET /api/mdt/approvalList",
+    "GET /api/referral/approvalList"
+  ],
+  "ClinicalPathway": [
+    "GET /api/clinicalPathway/getList"
+  ],
+  "Pharmacy": [],
+  "Pharmaceutical": [
+    "GET /api/pharmaceuticalManagement/getList"
+  ],
+  "Antibiotic": [
+    "GET /api/antibiotic/grade/list",
+    "GET /api/antibiotic/approval/list",
+    "GET /api/antibiotic/ddds",
+    "GET /api/antibiotic/submissionRate"
+  ],
+  "RxReviewRule": [
+    "GET /api/rxReviewRule/getList"
+  ],
+  "Dispense": [
+    "GET /api/pharmacy/dispenseList"
+  ],
+  "StockAlert": [
+    "GET /api/pharmaceuticalManagement/lowStock",
+    "GET /api/pharmaceuticalManagement/nearExpiry"
+  ],
+  "StockCheck": [
+    "GET /api/pharmaceuticalManagement/getList"
+  ],
+  "InventoryAdjustment": [
+    "GET /api/pharmacy/inventoryAdjustment/list"
+  ],
+  "DrugDamage": [
+    "GET /api/pharmacy/drugDamage/list"
+  ],
+  "DispenseStats": [
+    "GET /api/pharmacy/dispenseStats"
+  ],
+  "SpecialDrug": [
+    "GET /api/specialDrug/list"
+  ],
+  "PrescriptionReview": [
+    "GET /api/pharmacy/reviewList"
+  ],
+  "Consumable": [
+    "GET /api/consumable/getList"
+  ],
+  "Purchase": [
+    "GET /api/purchase/getList"
+  ],
+  "AdverseReaction": [
+    "GET /api/adverseReaction/getList"
+  ],
+  "Charge": [],
+  "ChargeList": [
+    "GET /api/chargeManagement/getList"
+  ],
+  "ChargeItem": [
+    "GET /api/chargeItem/list"
+  ],
+  "InsuranceCatalog": [
+    "GET /api/insuranceCatalog/getList"
+  ],
+  "Invoice": [
+    "GET /api/invoice/getList"
+  ],
+  "WindowRegistration": [
+    "GET /api/windowRegistration/schedules"
+  ],
+  "RegistrarService": [
+    "GET /api/windowRegistration/schedules"
+  ],
+  "WindowAppointment": [
+    "GET /api/windowRegistration/appointments"
+  ],
+  "PatientCard": [
+    "GET /api/patientCard/list"
+  ],
+  "Insurance": [
+    "GET /api/insurance/catalog/list",
+    "GET /api/insurance/settlement/list",
+    "GET /api/insurance/chronic/list",
+    "GET /api/insurance/drg/analysis",
+    "GET /api/insurance/control/warnings",
+    "GET /api/insurance/drg/rules"
+  ],
+  "DailySettlement": [
+    "POST /api/dailySettlement/report",
+    "POST /api/dailySettlement/byPayDate"
+  ],
+  "Queue": [],
+  "TriageDesk": [
+    "GET /api/triageDesk/getList"
+  ],
+  "QueueList": [
+    "GET /api/queue/getList"
+  ],
+  "PatrolRecord": [
+    "GET /api/patrol/getList"
+  ],
+  "EmergencyTriage": [
+    "GET /api/emergency/triage/list"
+  ],
+  "EmergencyRescue": [
+    "GET /api/emergency/rescue/list"
+  ],
+  "EmergencyObservation": [
+    "GET /api/emergency/observation/list"
+  ],
+  "EmergencyGreenChannel": [
+    "GET /api/emergency/greenChannel/list"
+  ],
+  "EmergencyMedicalRecord": [
+    "GET /api/emergency/medicalRecord/list"
+  ],
+  "CheckIn": [],
+  "CheckInPage": [
+    "GET /api/checkIn/getAppointments"
+  ],
+  "BreachRecord": [
+    "GET /api/breach/getList"
+  ],
+  "VitalSign": [],
+  "VitalSignPage": [
+    "GET /api/vitalSign/getList"
+  ],
+  "NursingAssessment": [
+    "GET /api/nursingAssessment/list"
+  ],
+  "NursingPlan": [
+    "GET /api/nursingPlan/list"
+  ],
+  "CriticalCareRecord": [
+    "GET /api/criticalCareRecord/list"
+  ],
+  "SurgeryNursingRecord": [
+    "GET /api/surgeryNursingRecord/list"
+  ],
+  "Infection": [
+    "GET /api/infection/case/list",
+    "GET /api/infection/disinfection/list",
+    "GET /api/infection/exposure/list",
+    "GET /api/infection/outbreakAlert"
+  ],
+  "Blood": [
+    "GET /api/blood/request/list",
+    "GET /api/blood/reaction/list"
+  ],
+  "Equipment": [],
+  "EquipmentIndex": [
+    "GET /api/equipment/list",
+    "GET /api/equipment/maintenance/list",
+    "GET /api/equipment/inspection/list",
+    "GET /api/equipment/trace/list"
+  ],
+  "Lab": [],
+  "LabResult": [
+    "GET /api/labResult/getPending",
+    "GET /api/labResult/getList",
+    "GET /api/labResult/getCritical",
+    "GET /api/lab/sampleTracking"
+  ],
+  "LabPackage": [
+    "GET /api/labPackage/list"
+  ],
+  "LabQc": [
+    "GET /api/labQc/list",
+    "GET /api/labQc/summary"
+  ],
+  "Imaging": [
+    "GET /api/imaging/order/list",
+    "GET /api/imaging/report/list",
+    "GET /api/imaging/template/list",
+    "GET /api/imaging/film/list"
+  ],
+  "FollowUp": [],
+  "FollowUpPage": [
+    "GET /api/followUp/getList"
+  ],
+  "Report": [],
+  "Reports": [
+    "POST /api/report/outpatientVolume",
+    "POST /api/report/finance",
+    "POST /api/report/pharmaceutical",
+    "POST /api/report/doctorWorkload",
+    "POST /api/report/departmentStats"
+  ],
+  "DepartmentPerformance": [
+    "GET /api/performance/getList"
+  ],
+  "OperationalAnalytics": [
+    "GET /api/analytics/operations"
+  ],
+  "System": [],
+  "Logs": [
+    "POST /api/log/getList"
+  ],
+  "Monitor": [
+    "GET /api/monitor/summary"
+  ],
+  "Scheduler": [
+    "GET /api/scheduler/status"
+  ],
+  "IntegrationOutbox": [
+    "GET /api/integration/outbox",
+    "GET /api/integration/reconciliation"
+  ],
+  "Dict": [
+    "POST /api/dict/getList"
+  ],
+  "Config": [
+    "GET /api/config/getList"
+  ],
+  "MessageCenter": [
+    "GET /api/message/getList"
+  ],
+  "Backup": [
+    "GET /api/backup/getList"
+  ],
+  "Permission": [
+    "GET /api/access/catalog"
+  ],
+  "AdverseEvent": [
+    "GET /api/adverseEvent/getList"
+  ],
+  "MdroIsolation": [
+    "GET /api/mdro/getList"
+  ],
+  "NotifiableDisease": [
+    "GET /api/notifiableDisease/getList"
+  ],
+  "QualityManagement": [
+    "GET /api/rca/getList",
+    "GET /api/hqms/getList",
+    "GET /api/surgery/antibioticCompliance"
+  ],
+  "Research": [
+    "GET /api/research/export/tables"
+  ],
+  "DigitalSignature": [
+    "POST /api/digitalSignature/sign",
+    "POST /api/digitalSignature/verify"
+  ],
+  "HtmlEditor": [],
+  "Inpatient": [],
+  "OpsExtension": [
+    "GET /api/cssd/getList",
+    "GET /api/pivas/getList",
+    "GET /api/icuScore/getList",
+    "GET /api/pathwayEnrollment/getList"
+  ],
+  "HomeIcdWorkbench": [
+    "GET /api/homeIcd/getList",
+    "GET /api/homeIcd/uncoded",
+    "GET /api/homeIcd/statistics"
+  ],
+  "WardManagement": [
+    "GET /api/ward/getList",
+    "GET /api/bed/getList"
+  ],
+  "Admission": [
+    "GET /api/admission/getList"
+  ],
+  "InpatientOrderPage": [
+    "GET /api/inpatientOrder/getList"
+  ],
+  "NursingStation": [
+    "GET /api/inpatientOrder/getExecutionList",
+    "GET /api/nursingRecord/getList",
+    "GET /api/temperatureRecord/getList"
+  ],
+  "Emar": [
+    "GET /api/emar/list"
+  ],
+  "Infusion": [
+    "GET /api/infusion/list"
+  ],
+  "Injection": [
+    "GET /api/injection/list"
+  ],
+  "SkinTest": [
+    "GET /api/skinTest/list"
+  ],
+  "PatientAllergy": [
+    "GET /api/allergy/list"
+  ],
+  "ShiftHandover": [
+    "GET /api/shiftHandover/list"
+  ],
+  "DispenseVerification": [
+    "GET /api/pharmacy/verificationList"
+  ],
+  "InpatientChargePage": [
+    "GET /api/inpatientCharge/getList",
+    "GET /api/inpatientCharge/getDailyBill"
+  ],
+  "DischargePage": [
+    "GET /api/inpatientCharge/getDailyBill"
+  ],
+  "Emr": [
+    "GET /api/structuredMedicalRecord/getList",
+    "GET /api/progressNote/getList",
+    "GET /api/wardRound/getList"
+  ],
+  "MedicalRecordHome": [
+    "GET /api/medicalRecordHome/list"
+  ],
+  "MedicalRecordArchive": [
+    "GET /api/medicalRecordArchive/list",
+    "GET /api/medicalRecordArchive/borrowRequests"
+  ],
+  "Icd10": [
+    "GET /api/icd10/diagnosis/list",
+    "GET /api/icd10/operation/list"
+  ],
+  "MedicalRecordHomeQuality": [
+    "GET /api/medicalRecordHomeQuality/list",
+    "GET /api/medicalRecordHomeQuality/summary"
+  ],
+  "Surgery": [
+    "GET /api/surgeryApplication/getList",
+    "GET /api/surgerySchedule/getList",
+    "GET /api/surgery/perioperative/list"
+  ],
+  "Exam": [],
+  "ExamManagement": [
+    "GET /api/examPackage/getList",
+    "GET /api/examItem/getList",
+    "GET /api/examAppointment/getList",
+    "GET /api/examRecord/getList",
+    "GET /api/examResult/getList",
+    "GET /api/examReport/getDetail"
+  ],
+  "Error": [],
+  "Error401": [],
+  "Error404": []
+}

@@ -1,9 +1,10 @@
 import uuid
 
-from sqlalchemy import CheckConstraint, Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import CheckConstraint, Column, Date, DateTime, Float, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint, inspect
 from sqlalchemy.dialects import mysql
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 
+from app import access_models as _access_models  # noqa: F401
 from app import inpatient_infection_models as _infection_models  # noqa: F401
 from app import inpatient_respiratory_models as _respiratory_models  # noqa: F401
 from app import inpatient_vasoactive_models as _vasoactive_models  # noqa: F401
@@ -57,10 +58,12 @@ class User(Base):
     __tablename__ = "hoimsystem_users"
     __table_args__ = (
         Index("uq_users_username", "username", unique=True),
+        Index("uq_users_auth_subject", "auth_subject", unique=True),
         Index("idx_users_role", "user_role"),
     )
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
+    auth_subject = Column(String(32), nullable=False, default=lambda: uuid.uuid4().hex)
     username = Column(String(20))
     password = Column(String(128))
     user_role = Column(String(20))
@@ -71,6 +74,14 @@ class User(Base):
     doctors = relationship("Doctor", back_populates="user")
     operation_logs = relationship("OperationLog", back_populates="user")
     prepaid_transactions = relationship("PrepaidTransaction", back_populates="operator", foreign_keys="PrepaidTransaction.operator_id")
+
+    @validates("auth_subject")
+    def _validate_auth_subject(self, _key, value):
+        if type(value) is not str or len(value) != 32 or any(character not in "0123456789abcdef" for character in value):
+            raise ValueError("账号认证标识必须为32位小写十六进制字符串")
+        if inspect(self).persistent and self.auth_subject != value:
+            raise ValueError("账号认证标识创建后不能修改")
+        return value
 
 
 class Patient(Base):

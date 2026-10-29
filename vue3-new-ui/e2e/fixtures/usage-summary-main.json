@@ -11,7 +11,7 @@
     "fastapi_be/app/ai/admin_usage_summary.py": "a5447fd08ec8eefb62b316db24fb9ec6f090dc5f918c7ad2d400e0163abae503",
     "fastapi_be/app/ai/models.py": "590f786f02ab6744b9bb9678d0246aded840edff5ecc73b3f49e2c35abbe1467",
     "fastapi_be/app/ai/native_task_routing.py": "b3f3558d3ecff503b856020f062e9fef9de7755431249dbbf2d6334a8109ed02",
-    "fastapi_be/app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
+    "fastapi_be/app/dependencies.py": "f9a999076c7fd2b8c97d4c3c6e02fb794f37668d2aceed4ad9b51b36b8740ebc",
     "fastapi_be/tests/test_ai_admin_usage_main.py": "e069e7e1d8902482880b5a944f443335255624ad34171f1bfe4d5dd0c0b30648",
     "fastapi_be/tests/ai_admin_usage_assertions.py": "694482b2e9b3373ba442aef47ab1cb1af00f2ffde9ee772da58054c56d96feeb"
   },

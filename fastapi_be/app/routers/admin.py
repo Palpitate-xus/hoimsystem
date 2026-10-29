@@ -3,6 +3,7 @@ import datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, joinedload
 
+from app.account_authority import lock_account_management
 from app.database import get_db
 from app.dependencies import ADMIN_ROLES, NOTICE_ROLES, ROLE_PATIENT, User, get_current_user, require_roles
 from app.models import Department, Doctor, HospitalCampus, Notice, Patient
@@ -160,7 +161,7 @@ def delete_doctor(req: DoctorDeleteRequest, current_user: User = Depends(require
     if reg_cnt:
         return {"code": 500, "msg": f"该医生存在 {reg_cnt} 条历史挂号记录，不允许物理删除（会破坏审计链）"}
     if doctor.user_id:
-        user = db.query(User).filter(User.user_id == doctor.user_id).first()
+        current_user, user = lock_account_management(db, current_user, doctor.user_id, operation="delete")
         if user:
             db.delete(user)
     db.delete(doctor)
@@ -178,7 +179,10 @@ def get_patient_list(keyword: str | None = None, page: int | None = None, page_s
         like = f"%{keyword.strip()}%"
         query = query.filter((Patient.name.ilike(like)) | Patient.identity.ilike(like) | Patient.phone.ilike(like))
     patient_data, total = paginate(query, page, page_size)
-    reveal_sensitive = current_user.user_role == ROLE_PATIENT or can_view_full_patient_identity(current_user.user_role)
+    from app.access_control import effective_permissions
+
+    field_permissions = effective_permissions(db, current_user)
+    reveal_sensitive = (current_user.user_role == ROLE_PATIENT or can_view_full_patient_identity(current_user.user_role)) and "FIELD patient_list.identity" in field_permissions
     data = []
     for item in patient_data:
         sex = "女" if item.sex == 0 else "男"
@@ -190,9 +194,9 @@ def get_patient_list(keyword: str | None = None, page: int | None = None, page_s
                 "birthday": (item.birthday.strftime("%Y-%m-%d") if item.birthday else None),
                 "phone": item.phone if reveal_sensitive else mask_phone(item.phone),
                 "permission": item.permission,
-                "address": item.address,
+                "address": item.address if "FIELD patient_list.address" in field_permissions else "",
                 "identity": item.identity if reveal_sensitive else mask_identity(item.identity),
-                "allergy_history": item.allergy_history or "",
+                "allergy_history": (item.allergy_history or "") if "FIELD patient_list.allergy" in field_permissions else "",
             }
         )
     result = {"code": 200, "msg": "success", "data": data}

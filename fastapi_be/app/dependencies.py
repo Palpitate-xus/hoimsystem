@@ -1,4 +1,6 @@
 import datetime
+import math
+import re
 
 import jwt
 from fastapi import Depends, Header, HTTPException, Request
@@ -45,44 +47,49 @@ LAB_ROLES = {ROLE_ADMIN, ROLE_SUPER_ADMIN, ROLE_LAB_TECHNICIAN}
 REGISTRAR_ROLES = {ROLE_ADMIN, ROLE_SUPER_ADMIN, ROLE_REGISTRAR}
 
 
-def decode_access_token(token: str) -> str:
+def _decode_access_payload(token: str) -> dict | None:
     try:
-        # 强制要求 exp 与 sub 声明：无 exp 的令牌直接拒绝（防止伪造缺失声明的绕过）
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"], options={"require": ["exp", "sub"]})
-        return payload.get("sub")
-    except jwt.ExpiredSignatureError:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"], options={"require": ["exp", "sub", "iat", "uid", "sid"]})
+        if type(payload["uid"]) is not int or not 0 < payload["uid"] < 2**31:
+            return None
+        if type(payload["sid"]) is not str or re.fullmatch(r"[0-9a-f]{32}", payload["sid"]) is None:
+            return None
+        if type(payload["sub"]) is not str or not payload["sub"]:
+            return None
+        for claim in ("iat", "exp"):
+            if type(payload[claim]) not in (int, float) or not math.isfinite(payload[claim]):
+                return None
+        if payload["iat"] < 0 or payload["iat"] > datetime.datetime.now(datetime.UTC).timestamp() or payload["exp"] <= payload["iat"]:
+            return None
+        return payload
+    except (jwt.InvalidTokenError, TypeError, ValueError, OverflowError):
         return None
-    except jwt.InvalidTokenError:
-        return None
+
+
+def decode_access_token(token: str) -> str | None:
+    payload = _decode_access_payload(token)
+    return payload["sub"] if payload else None
 
 
 def resolve_access_token(access_token: str | None, db: Session) -> User:
     if not access_token:
         raise HTTPException(status_code=401, detail="Missing accesstoken")
-    username = decode_access_token(access_token)
-    if not username:
+    payload = _decode_access_payload(access_token)
+    if payload is None:
         raise HTTPException(status_code=401, detail="Invalid or expired accesstoken")
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(User.user_id == payload["uid"], User.username == payload["sub"], User.auth_subject == payload["sid"]).populate_existing().first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid accesstoken")
     # 吊销检查：token 签发时间早于 token_invalid_before 则拒绝（logout/改密后生效）
     if user.token_invalid_before:
-        try:
-            import jwt as pyjwt
+        invalid_before = user.token_invalid_before
+        if invalid_before.tzinfo is None:
+            invalid_before = invalid_before.replace(tzinfo=datetime.UTC)
+        if payload["iat"] < invalid_before.timestamp():
+            raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
+    from app.access_control import assert_account_enabled
 
-            payload = pyjwt.decode(
-                access_token,
-                settings.SECRET_KEY,
-                algorithms=["HS256"],
-                options={"verify_exp": False, "require": ["iat", "sub"]},
-            )
-            issued_at = payload.get("iat")
-            if issued_at is not None:
-                issued_dt = datetime.datetime.fromtimestamp(issued_at, datetime.UTC).replace(tzinfo=None)
-                if issued_dt < user.token_invalid_before:
-                    raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
-        except pyjwt.InvalidTokenError:
-            raise HTTPException(status_code=401, detail="Invalid accesstoken")
+    assert_account_enabled(db, user)
     return user
 
 
@@ -92,9 +99,12 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     user = resolve_access_token(access_token, db)
+    from app.access_control import enforce_request_permissions
+
     request.state.current_user = user
     # 中间件在请求级 Session 关闭后仍会运行，只保存不可变标量供审计与指标读取。
     request.state.auth_identity = (user.user_id, user.username, user.user_role)
+    enforce_request_permissions(db, user, request)
     return user
 
 

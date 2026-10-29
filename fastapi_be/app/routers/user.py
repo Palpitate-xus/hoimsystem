@@ -7,17 +7,20 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app import database
+from app.access_control import assert_account_enabled, authorization_snapshot
+from app.account_authority import lock_account_management
 from app.config import settings
 from app.database import get_db
 from app.dependencies import (
     ADMIN_ROLES,
     ROLE_CASHIER,
     ROLE_PATIENT,
-    ROLE_SUPER_ADMIN,
     VALID_USER_ROLES,
     get_current_user,
     is_admin,
     require_roles,
+    resolve_access_token,
 )
 from app.models import Patient, PrepaidTransaction, User
 from app.pagination import paginate
@@ -84,21 +87,19 @@ def _clear_login_failures(key: str, db: Session):
     db.commit()
 
 
-def create_access_token(username: str) -> str:
+def create_access_token(username: str, user: User | None = None) -> str:
     issued_at = datetime.datetime.now(datetime.UTC)
     expire = issued_at + datetime.timedelta(hours=24)
-    payload = {"sub": username, "exp": expire, "iat": issued_at}
+    if user is None:
+        with database.SessionLocal() as db:
+            identity = db.query(User.user_id, User.auth_subject).filter(User.username == username).first()
+        user_id, subject = identity if identity else (0, "")
+    else:
+        if user.username != username:
+            raise ValueError("认证账号与用户名不一致")
+        user_id, subject = user.user_id, user.auth_subject
+    payload = {"sub": username, "uid": user_id, "sid": subject, "exp": expire, "iat": issued_at.timestamp()}
     return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-
-
-def decode_access_token(token: str) -> str:
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        return payload.get("sub")
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
-        return None
 
 
 @router.post("/test")
@@ -129,11 +130,12 @@ def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):
     if not password or not user or not verify_password(password, user.password):
         _record_login_failure(key, db)
         return {"code": 500, "msg": "账户或密码不正确"}
+    assert_account_enabled(db, user)
     _clear_login_failures(key, db)
     if not is_bcrypt_hash(user.password):
-        user.password = hash_password(req.password)
+        user.password = hash_password(password)
         db.commit()
-    token = create_access_token(user.username)
+    token = create_access_token(user.username, user=user)
     return {"code": 200, "msg": "success", "data": {"accesstoken": token}}
 
 
@@ -181,31 +183,8 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/userInfo")
 def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
-    username = decode_access_token(req.accesstoken)
-    if not username:
-        raise HTTPException(status_code=401, detail="token无效或已过期")
-    user = db.query(User).filter(User.username == username).order_by(User.user_id.desc()).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="用户不存在")
-    # 吊销检查与标准鉴权路径保持一致（token-in-body 是历史兼容入口）
-    if user.token_invalid_before:
-        try:
-            payload = jwt.decode(
-                req.accesstoken,
-                settings.SECRET_KEY,
-                algorithms=["HS256"],
-                options={"verify_exp": False, "require": ["iat", "sub"]},
-            )
-            issued_at = payload.get("iat")
-            issued_dt = (
-                datetime.datetime.fromtimestamp(issued_at, datetime.UTC).replace(tzinfo=None)
-                if issued_at is not None
-                else None
-            )
-            if issued_dt is not None and issued_dt < user.token_invalid_before:
-                raise HTTPException(status_code=401, detail="Token 已被吊销，请重新登录")
-        except jwt.InvalidTokenError:
-            raise HTTPException(status_code=401, detail="token无效或已过期")
+    user = resolve_access_token(req.accesstoken, db)
+    assert_account_enabled(db, user)
     if user.user_role == "super_admin":
         permissions = ["super_admin", "admin"]
     elif user.user_role == "admin":
@@ -219,7 +198,7 @@ def get_user_info(req: UserInfoRequest, db: Session = Depends(get_db)):
     return {
         "code": 200,
         "msg": "success",
-        "data": {"permissions": permissions, "username": user.username, "avatar": ""},
+        "data": {"permissions": permissions, "username": user.username, "avatar": "", **authorization_snapshot(db, user)},
     }
 
 
@@ -270,18 +249,18 @@ def update_user_role(req: dict, db: Session = Depends(get_db), current_user: Use
     new_role = req.get("user_role")
     if not user_id or not new_role:
         return {"code": 500, "msg": "参数错误"}
-    if new_role not in VALID_USER_ROLES:
+    if not isinstance(new_role, str) or new_role not in VALID_USER_ROLES:
         return {"code": 500, "msg": "无效的角色"}
-    user = db.query(User).filter(User.user_id == user_id).first()
+    if user_id == current_user.user_id:
+        return {"code": 500, "msg": "不能修改当前登录用户角色"}
+    try:
+        current_user, user = lock_account_management(db, current_user, user_id, operation="role", new_role=new_role)
+    except HTTPException as exc:
+        return {"code": exc.status_code, "msg": exc.detail}
     if not user:
         return {"code": 500, "msg": "用户不存在"}
-    if user.user_id == current_user.user_id or user.username == current_user.username:
-        return {"code": 500, "msg": "不能修改当前登录用户角色"}
-    if current_user.user_role != ROLE_SUPER_ADMIN and (
-        new_role == ROLE_SUPER_ADMIN or user.user_role == ROLE_SUPER_ADMIN
-    ):
-        return {"code": 403, "msg": "只有超级管理员可以管理超级管理员角色"}
     user.user_role = new_role
+    user.token_invalid_before = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
     db.commit()
     return {"code": 200, "msg": "success"}
 
@@ -297,7 +276,7 @@ def reset_user_password(req: dict, db: Session = Depends(get_db), current_user: 
         return {"code": 500, "msg": "参数错误"}
     if not isinstance(new_password, str) or not 6 <= len(new_password) <= 128:
         return {"code": 500, "msg": "密码长度必须为6至128位"}
-    user = db.query(User).filter(User.user_id == user_id).first()
+    current_user, user = lock_account_management(db, current_user, user_id, operation="reset_password")
     if not user:
         return {"code": 500, "msg": "用户不存在"}
     user.password = hash_password(new_password)
@@ -317,7 +296,7 @@ def delete_user(req: dict, db: Session = Depends(get_db), current_user: User = D
         return {"code": 500, "msg": "参数错误"}
     if user_id == current_user.user_id:
         return {"code": 500, "msg": "不能删除当前登录用户"}
-    user = db.query(User).filter(User.user_id == user_id).first()
+    current_user, user = lock_account_management(db, current_user, user_id, operation="delete")
     if not user:
         return {"code": 500, "msg": "用户不存在"}
     db.delete(user)

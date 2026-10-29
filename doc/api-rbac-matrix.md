@@ -3,7 +3,7 @@
 > 由 `fastapi_be/scripts/generate_rbac_matrix.py` 从源码自动生成，请勿手改。
 > `✓`=可访问 | `PUBLIC`=无需登录 | 留空=不可访问
 
-共 **1087** 个接口（PUBLIC 18 个 / 需登录 1069 个）。
+共 **1092** 个接口（PUBLIC 18 个 / 需登录 1074 个）。
 
 
 ### `admin.py`
@@ -1505,6 +1505,16 @@
 | POST | `/api/performance/update` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/performance/submit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 | POST | `/api/performance/audit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+
+### `permission_management.py`
+
+| 方法 | 路径 | admin | super_admin | director | doctor | nurse | cashier | pharmacist | guide | patient | lab_technician | registrar | PUBLIC |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| GET | `/api/access/me` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |  |
+| GET | `/api/access/catalog` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/access/policies/{kind}/{key}` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| PUT | `/api/access/policies/{kind}/{key}` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
+| GET | `/api/access/audit` | ✓ | ✓ |  |  |  |  |  |  |  |  |  |  |
 
 ### `pharmacy.py`
 

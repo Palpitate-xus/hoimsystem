@@ -12,7 +12,7 @@
     "fastapi_be/app/routers/ai_admin.py": "433e7c154688037a8fb61d2a51692cfec979953775b76b800005c52a2f866c77",
     "fastapi_be/app/ai/models.py": "590f786f02ab6744b9bb9678d0246aded840edff5ecc73b3f49e2c35abbe1467",
     "fastapi_be/app/ai/native_task_routing.py": "b3f3558d3ecff503b856020f062e9fef9de7755431249dbbf2d6334a8109ed02",
-    "fastapi_be/app/dependencies.py": "2f0340337885f96d833635f00727cc4beb900e1d44ae38fdcd2fd3981c8092f2",
+    "fastapi_be/app/dependencies.py": "f9a999076c7fd2b8c97d4c3c6e02fb794f37668d2aceed4ad9b51b36b8740ebc",
     "fastapi_be/tests/test_ai_admin_task_directory.py": "ff517fddc09718e6612025050d896b07f6716aee3b280d064573e4a92a0033d1"
   },
   "packets": [

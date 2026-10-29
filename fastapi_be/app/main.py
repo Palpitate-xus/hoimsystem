@@ -682,6 +682,9 @@ app.include_router(icd10.router, prefix="/api")
 app.include_router(surgery.router, prefix="/api")
 app.include_router(exam.router, prefix="/api")
 app.include_router(research.router, prefix="/api")
+from app.routers import permission_management
+
+app.include_router(permission_management.router, prefix="/api")
 
 import os
 

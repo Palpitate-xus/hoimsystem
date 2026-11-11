@@ -1,5 +1,5 @@
 # 第一阶段：构建前端
-FROM public.ecr.aws/docker/library/node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c AS builder
+FROM public.ecr.aws/docker/library/node:26-bookworm-slim@sha256:add5c17c14752c54d2f3d519ec46a3815684d41c33f198bcb09fb998f7dcbf68 AS builder
 
 WORKDIR /app
 ARG VUE_APP_LOCAL_PREVIEW=false
@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # 第二阶段：使用 nginx  serve 静态文件
-FROM public.ecr.aws/docker/library/nginx:1.30.6-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949
+FROM public.ecr.aws/docker/library/nginx:1.31.8-alpine@sha256:713fc2ebfd92e8217db451477182ee91944b123d2b1ee9fd5a8c6e91ca6c3a11
 RUN apk upgrade --no-cache
 
 # 复制构建产物

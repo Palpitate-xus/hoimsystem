@@ -1,6 +1,6 @@
 # Build an audio-only toolchain from the verified upstream release. Build tools
 # and unused GUI, image, network and media-device libraries stay outside runtime.
-FROM public.ecr.aws/docker/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159 AS audio-build
+FROM public.ecr.aws/docker/library/python:3.15-slim@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS audio-build
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential nasm pkg-config zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 ADD --checksum=sha256:8c3850283eb25fa026482078a04051e0be17347b09ef81a0849bec15a96e002e https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz /tmp/ffmpeg.tar.xz
@@ -15,7 +15,7 @@ RUN mkdir /tmp/ffmpeg && tar -xJf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg --strip-comp
     && mkdir -p /opt/audio/share/licenses/ffmpeg \
     && cp LICENSE.md COPYING.LGPLv2.1 /opt/audio/share/licenses/ffmpeg/
 
-FROM public.ecr.aws/docker/library/python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159
+FROM public.ecr.aws/docker/library/python:3.15-slim@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928
 
 WORKDIR /app
 COPY --from=audio-build /opt/audio/bin/ffmpeg /opt/audio/bin/ffprobe /usr/local/bin/
